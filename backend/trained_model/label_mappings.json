@@ -1,0 +1,42 @@
+{
+  "label2id": {
+    "balance_inquiry": 0,
+    "transaction_history": 1,
+    "transfer_money": 2,
+    "account_statement": 3,
+    "password_reset": 4,
+    "update_profile": 5,
+    "loan_inquiry": 6,
+    "bill_payment": 7,
+    "mobile_money": 8,
+    "transaction_dispute": 9,
+    "account_closure": 10,
+    "new_account": 11,
+    "card_request": 12,
+    "atm_location": 13,
+    "general_inquiry": 14,
+    "greeting": 15,
+    "goodbye": 16,
+    "complaint": 17
+  },
+  "id2label": {
+    "0": "balance_inquiry",
+    "1": "transaction_history",
+    "2": "transfer_money",
+    "3": "account_statement",
+    "4": "password_reset",
+    "5": "update_profile",
+    "6": "loan_inquiry",
+    "7": "bill_payment",
+    "8": "mobile_money",
+    "9": "transaction_dispute",
+    "10": "account_closure",
+    "11": "new_account",
+    "12": "card_request",
+    "13": "atm_location",
+    "14": "general_inquiry",
+    "15": "greeting",
+    "16": "goodbye",
+    "17": "complaint"
+  }
+}

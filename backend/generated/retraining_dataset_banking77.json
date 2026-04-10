@@ -1,0 +1,4952 @@
+[
+  {
+    "text": "What is my account balance?",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "How much money do I have?",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Check my balance please",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Can you tell me my current balance?",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "I want to know my account balance",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Show me my balance",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "What's my available balance?",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Balance inquiry",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "How much is in my account?",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "What's my current balance?",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Show balance",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Check balance",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Account balance",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "What funds do I have available?",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Tell me my balance",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "How much is left in my account?",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "I need to check my balance",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "What is the balance in my account?",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Can I see my account balance?",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "View my balance",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Mari yangu yakamira sei?",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndine mari yakawanda sei?",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndinoda kuziva mari yangu",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Tarisa mari yangu",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Balance yangu ndeipi?",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndine mari ingani?",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Mari yangu yakasara ingani?",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndiratidze balance yangu",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoda kuona mari yangu",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndeipi mari yandine?",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Imali yami ingakanani?",
+    "intent": "balance_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Ngifuna ukwazi imali yami",
+    "intent": "balance_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Khangela imali yami",
+    "intent": "balance_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Nginemali engakanani?",
+    "intent": "balance_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Ngitshengise imali yami",
+    "intent": "balance_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Imali esele yami ingakanani?",
+    "intent": "balance_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Balance yami ingakanani?",
+    "intent": "balance_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Ngicela ukubona imali yami",
+    "intent": "balance_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Show me my recent transactions",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "What are my last transactions?",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Transaction history please",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "I want to see my transactions",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "List my recent payments",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Show me what I spent this month",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Show transaction history",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Recent transactions",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "What did I spend recently?",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Last 5 transactions",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "My payment history",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Show all my transactions",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "What payments have I made?",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Can I see my transaction history?",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "View my transactions",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Show me my spending",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Ndipewo zvandakamboita",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "Ndinoda kuona transactions dzangu",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "Zvandakabhadhara ndezvipi?",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "Ndiratidze zvandakapedza",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "History yemari yangu",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "Zvandakashandisa mari",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoda kuona transactions dzangu",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "Ngitshengise imisebenzi yami",
+    "intent": "transaction_history",
+    "language": "nd"
+  },
+  {
+    "text": "Ngifuna ukubona i-transactions zami",
+    "intent": "transaction_history",
+    "language": "nd"
+  },
+  {
+    "text": "Imisebenzi yami yangasese",
+    "intent": "transaction_history",
+    "language": "nd"
+  },
+  {
+    "text": "Ngicela history yemali",
+    "intent": "transaction_history",
+    "language": "nd"
+  },
+  {
+    "text": "Yini engiyikhokhele?",
+    "intent": "transaction_history",
+    "language": "nd"
+  },
+  {
+    "text": "I want to transfer money",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "Send money to another account",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "How do I transfer funds?",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "Transfer $100 to John",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "I need to send money to my friend",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "Make a transfer please",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "Send money",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "Transfer funds",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "I want to send $50",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "Wire money to another bank",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "Can I transfer to another person?",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "Move money to savings",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "Transfer between accounts",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "Send USD to my relative",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "How can I send money?",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "Ndinoda kutumira mari",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Tumira mari kuna John",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Ndingatumira mari sei?",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoda kutumira mari kuaccout yeshamwari",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Transfer mari yangu",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Tuma mari kuimwe account",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Ndinoda kusenda mari",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Ngifuna ukuthumela imali",
+    "intent": "transfer_money",
+    "language": "nd"
+  },
+  {
+    "text": "Thumela imali ku-John",
+    "intent": "transfer_money",
+    "language": "nd"
+  },
+  {
+    "text": "Ngigathumela njani imali?",
+    "intent": "transfer_money",
+    "language": "nd"
+  },
+  {
+    "text": "Transfer imali yami",
+    "intent": "transfer_money",
+    "language": "nd"
+  },
+  {
+    "text": "Ngicela ukuthumela imali kumngani wami",
+    "intent": "transfer_money",
+    "language": "nd"
+  },
+  {
+    "text": "I forgot my password",
+    "intent": "password_reset",
+    "language": "en"
+  },
+  {
+    "text": "Reset my password please",
+    "intent": "password_reset",
+    "language": "en"
+  },
+  {
+    "text": "I can't remember my password",
+    "intent": "password_reset",
+    "language": "en"
+  },
+  {
+    "text": "Help me reset my password",
+    "intent": "password_reset",
+    "language": "en"
+  },
+  {
+    "text": "Change my password",
+    "intent": "password_reset",
+    "language": "en"
+  },
+  {
+    "text": "I need a new password",
+    "intent": "password_reset",
+    "language": "en"
+  },
+  {
+    "text": "Password reset",
+    "intent": "password_reset",
+    "language": "en"
+  },
+  {
+    "text": "Forgot password",
+    "intent": "password_reset",
+    "language": "en"
+  },
+  {
+    "text": "How do I reset my password?",
+    "intent": "password_reset",
+    "language": "en"
+  },
+  {
+    "text": "My password is not working",
+    "intent": "password_reset",
+    "language": "en"
+  },
+  {
+    "text": "I want to change my password",
+    "intent": "password_reset",
+    "language": "en"
+  },
+  {
+    "text": "Lost my password",
+    "intent": "password_reset",
+    "language": "en"
+  },
+  {
+    "text": "Can't login, forgot password",
+    "intent": "password_reset",
+    "language": "en"
+  },
+  {
+    "text": "Password change request",
+    "intent": "password_reset",
+    "language": "en"
+  },
+  {
+    "text": "New password please",
+    "intent": "password_reset",
+    "language": "en"
+  },
+  {
+    "text": "I don't remember my login password",
+    "intent": "password_reset",
+    "language": "en"
+  },
+  {
+    "text": "Ndakanganwa password yangu",
+    "intent": "password_reset",
+    "language": "sn"
+  },
+  {
+    "text": "Ndibatsireiwo kuchinja password",
+    "intent": "password_reset",
+    "language": "sn"
+  },
+  {
+    "text": "Ndinoda password itsva",
+    "intent": "password_reset",
+    "language": "sn"
+  },
+  {
+    "text": "Reset password yangu",
+    "intent": "password_reset",
+    "language": "sn"
+  },
+  {
+    "text": "Handichayeuka password yangu",
+    "intent": "password_reset",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoda kuchinja password",
+    "intent": "password_reset",
+    "language": "sn"
+  },
+  {
+    "text": "Ngilibele i-password yami",
+    "intent": "password_reset",
+    "language": "nd"
+  },
+  {
+    "text": "Ngicela ukutshintsha i-password",
+    "intent": "password_reset",
+    "language": "nd"
+  },
+  {
+    "text": "Ngifuna i-password entsha",
+    "intent": "password_reset",
+    "language": "nd"
+  },
+  {
+    "text": "I-password yami ayisebenzi",
+    "intent": "password_reset",
+    "language": "nd"
+  },
+  {
+    "text": "Ngicela ukureset i-password",
+    "intent": "password_reset",
+    "language": "nd"
+  },
+  {
+    "text": "I want to apply for a loan",
+    "intent": "loan_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "What loans do you offer?",
+    "intent": "loan_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Can I get a personal loan?",
+    "intent": "loan_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Tell me about your loan products",
+    "intent": "loan_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "I need to borrow money",
+    "intent": "loan_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "What are your interest rates for loans?",
+    "intent": "loan_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Loan application",
+    "intent": "loan_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Apply for loan",
+    "intent": "loan_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "How much can I borrow?",
+    "intent": "loan_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Personal loan inquiry",
+    "intent": "loan_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "I need a loan",
+    "intent": "loan_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "What are the loan requirements?",
+    "intent": "loan_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Home loan information",
+    "intent": "loan_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Car loan application",
+    "intent": "loan_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Loan repayment terms",
+    "intent": "loan_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "How do I qualify for a loan?",
+    "intent": "loan_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Ndinoda kukwereta mari",
+    "intent": "loan_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Mune maloan api?",
+    "intent": "loan_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndingawana chikwereti here?",
+    "intent": "loan_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Loan application ndaite sei?",
+    "intent": "loan_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndinoda kuborra mari",
+    "intent": "loan_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Interest rate ye loan ndeipi?",
+    "intent": "loan_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ngifuna ukuboleka imali",
+    "intent": "loan_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Liliphi imalimboleko elikhona?",
+    "intent": "loan_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Ngingathola i-loan yini?",
+    "intent": "loan_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Ngifuna i-loan",
+    "intent": "loan_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Yiziphi izidingo ze-loan?",
+    "intent": "loan_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "I want to pay my bills",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Pay electricity bill",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "How do I pay for utilities?",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Pay my water bill please",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "I need to pay ZESA",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Bill payment",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Pay utility bills",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Pay airtime",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Buy electricity tokens",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Pay my DSTV subscription",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "How can I pay my bills online?",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Pay internet bill",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Pay council rates",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Make a bill payment",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Pay school fees",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Ndinoda kubhadhara mabhiri",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Bhadhara magetsi",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Ndibatsireiwo kubhadhara mvura",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Ndinoda kutenga magetsi",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Pay ZESA bill",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Kubhadhara utility bills",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Ngifuna ukukhokhela izindleko",
+    "intent": "bill_payment",
+    "language": "nd"
+  },
+  {
+    "text": "Khokhela ugesi",
+    "intent": "bill_payment",
+    "language": "nd"
+  },
+  {
+    "text": "Ngicela ukukhokhela amanzi",
+    "intent": "bill_payment",
+    "language": "nd"
+  },
+  {
+    "text": "Thenga ugesi",
+    "intent": "bill_payment",
+    "language": "nd"
+  },
+  {
+    "text": "Khokhela i-DSTV",
+    "intent": "bill_payment",
+    "language": "nd"
+  },
+  {
+    "text": "Send to EcoCash",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "Transfer to mobile money",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "I want to cash out",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "Send money to my EcoCash wallet",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "OneMoney transfer",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "EcoCash withdrawal",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "Send to mobile wallet",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "Transfer to EcoCash number",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "Cash out to EcoCash",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "InnBucks transfer",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "Mobile money cash out",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "Send to my phone number",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "Tumira kuEcoCash",
+    "intent": "mobile_money",
+    "language": "sn"
+  },
+  {
+    "text": "Ndinoda kutumira mari kuEcoCash",
+    "intent": "mobile_money",
+    "language": "sn"
+  },
+  {
+    "text": "Cash out kuEcoCash",
+    "intent": "mobile_money",
+    "language": "sn"
+  },
+  {
+    "text": "Transfer kuphone number",
+    "intent": "mobile_money",
+    "language": "sn"
+  },
+  {
+    "text": "EcoCash withdrawal",
+    "intent": "mobile_money",
+    "language": "sn"
+  },
+  {
+    "text": "Thumela ku-EcoCash",
+    "intent": "mobile_money",
+    "language": "nd"
+  },
+  {
+    "text": "Ngifuna ukuthumela imali ku-EcoCash",
+    "intent": "mobile_money",
+    "language": "nd"
+  },
+  {
+    "text": "Mobile money transfer",
+    "intent": "mobile_money",
+    "language": "nd"
+  },
+  {
+    "text": "I need my bank statement",
+    "intent": "account_statement",
+    "language": "en"
+  },
+  {
+    "text": "Send me my statement",
+    "intent": "account_statement",
+    "language": "en"
+  },
+  {
+    "text": "Can I get a mini statement?",
+    "intent": "account_statement",
+    "language": "en"
+  },
+  {
+    "text": "Email my bank statement",
+    "intent": "account_statement",
+    "language": "en"
+  },
+  {
+    "text": "Bank statement request",
+    "intent": "account_statement",
+    "language": "en"
+  },
+  {
+    "text": "Statement of account",
+    "intent": "account_statement",
+    "language": "en"
+  },
+  {
+    "text": "Get my statement",
+    "intent": "account_statement",
+    "language": "en"
+  },
+  {
+    "text": "Print my bank statement",
+    "intent": "account_statement",
+    "language": "en"
+  },
+  {
+    "text": "Monthly statement",
+    "intent": "account_statement",
+    "language": "en"
+  },
+  {
+    "text": "Account statement for last 3 months",
+    "intent": "account_statement",
+    "language": "en"
+  },
+  {
+    "text": "I need a statement for visa application",
+    "intent": "account_statement",
+    "language": "en"
+  },
+  {
+    "text": "Send statement to my email",
+    "intent": "account_statement",
+    "language": "en"
+  },
+  {
+    "text": "Ndinoda statement yangu",
+    "intent": "account_statement",
+    "language": "sn"
+  },
+  {
+    "text": "Ndipeiwo bank statement",
+    "intent": "account_statement",
+    "language": "sn"
+  },
+  {
+    "text": "Send statement kuemail yangu",
+    "intent": "account_statement",
+    "language": "sn"
+  },
+  {
+    "text": "Mini statement please",
+    "intent": "account_statement",
+    "language": "sn"
+  },
+  {
+    "text": "Ngifuna i-statement yami",
+    "intent": "account_statement",
+    "language": "nd"
+  },
+  {
+    "text": "Ngicela i-bank statement",
+    "intent": "account_statement",
+    "language": "nd"
+  },
+  {
+    "text": "Thumela i-statement ku-email",
+    "intent": "account_statement",
+    "language": "nd"
+  },
+  {
+    "text": "I see a wrong transaction",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "There's an unauthorized charge",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "I didn't make this transaction",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "I want to dispute a charge",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Someone stole money from my account",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Fraudulent transaction",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Dispute a payment",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Wrong debit on my account",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Unauthorized withdrawal",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "I didn't authorize this payment",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Report fraudulent activity",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Money deducted without my consent",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Pane transaction isiri yangu",
+    "intent": "transaction_dispute",
+    "language": "sn"
+  },
+  {
+    "text": "Mari yangu yabiwa",
+    "intent": "complaint",
+    "language": "sn"
+  },
+  {
+    "text": "Pane mari iri missing",
+    "intent": "transaction_dispute",
+    "language": "sn"
+  },
+  {
+    "text": "Handina kubvumira transaction iyi",
+    "intent": "transaction_dispute",
+    "language": "sn"
+  },
+  {
+    "text": "Kukhona i-transaction engayenzi",
+    "intent": "transaction_dispute",
+    "language": "nd"
+  },
+  {
+    "text": "Imali yami yebiwe",
+    "intent": "transaction_dispute",
+    "language": "nd"
+  },
+  {
+    "text": "Angiyivumelanga le payment",
+    "intent": "transaction_dispute",
+    "language": "nd"
+  },
+  {
+    "text": "I want to open a new account",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "How do I create an account?",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "Open a savings account for me",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "What documents do I need for a new account?",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "Account opening",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "Open new account",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "I want to open a current account",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "Requirements for new account",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "Create a bank account",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "I'm a new customer, I want to open account",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "What accounts do you offer?",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "Student account opening",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "Ndinoda kuvhura account",
+    "intent": "account_opening",
+    "language": "sn"
+  },
+  {
+    "text": "Ndingavhura account sei?",
+    "intent": "account_opening",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoda kuvhura savings account",
+    "intent": "account_opening",
+    "language": "sn"
+  },
+  {
+    "text": "Zvinoda chii kuvhura account?",
+    "intent": "account_opening",
+    "language": "sn"
+  },
+  {
+    "text": "Ngifuna ukuvula i-account",
+    "intent": "account_opening",
+    "language": "nd"
+  },
+  {
+    "text": "Ngingavula njani i-account?",
+    "intent": "account_opening",
+    "language": "nd"
+  },
+  {
+    "text": "Yini edingekayo ukuvula i-account?",
+    "intent": "account_opening",
+    "language": "nd"
+  },
+  {
+    "text": "I need a new debit card",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "My card is lost",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "Request a replacement card",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "I want to apply for a credit card",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "Block my card",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "Card replacement",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "New card request",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "My card was stolen",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "Card not working",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "Report lost card",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "Activate my new card",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "Apply for Visa card",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "My card expired, need new one",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "Ndinoda kadhi idzva",
+    "intent": "card_request",
+    "language": "sn"
+  },
+  {
+    "text": "Kadhi yangu yarasika",
+    "intent": "card_request",
+    "language": "sn"
+  },
+  {
+    "text": "Block kadhi yangu",
+    "intent": "card_request",
+    "language": "sn"
+  },
+  {
+    "text": "Kadhi yangu yabiwa",
+    "intent": "card_request",
+    "language": "sn"
+  },
+  {
+    "text": "Ngifuna ikhadi elitsha",
+    "intent": "card_request",
+    "language": "nd"
+  },
+  {
+    "text": "Ikhadi lami lilahlekile",
+    "intent": "card_request",
+    "language": "nd"
+  },
+  {
+    "text": "Vala ikhadi lami",
+    "intent": "card_request",
+    "language": "nd"
+  },
+  {
+    "text": "Where is the nearest ATM?",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "Find ATM near me",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "ATM locations in Harare",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "Where can I withdraw cash?",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "Nearest ATM location",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "ATM finder",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "Where is your branch?",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "Bank branch near me",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "ATM in Bulawayo",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "Locate ATM",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "ATM iri pedyo ndeipi?",
+    "intent": "atm_location",
+    "language": "sn"
+  },
+  {
+    "text": "Ndingawana ATM kupi?",
+    "intent": "atm_location",
+    "language": "sn"
+  },
+  {
+    "text": "ATM iri kupi muHarare?",
+    "intent": "atm_location",
+    "language": "sn"
+  },
+  {
+    "text": "Iphi i-ATM eseduze?",
+    "intent": "atm_location",
+    "language": "nd"
+  },
+  {
+    "text": "Ngingayithola ngaphi i-ATM?",
+    "intent": "atm_location",
+    "language": "nd"
+  },
+  {
+    "text": "Hello",
+    "intent": "greeting",
+    "language": "en"
+  },
+  {
+    "text": "Hi there",
+    "intent": "greeting",
+    "language": "en"
+  },
+  {
+    "text": "Good morning",
+    "intent": "greeting",
+    "language": "en"
+  },
+  {
+    "text": "Hey",
+    "intent": "greeting",
+    "language": "en"
+  },
+  {
+    "text": "Hi",
+    "intent": "greeting",
+    "language": "en"
+  },
+  {
+    "text": "Good afternoon",
+    "intent": "greeting",
+    "language": "en"
+  },
+  {
+    "text": "Good evening",
+    "intent": "greeting",
+    "language": "en"
+  },
+  {
+    "text": "Hello there",
+    "intent": "greeting",
+    "language": "en"
+  },
+  {
+    "text": "Hey there",
+    "intent": "greeting",
+    "language": "en"
+  },
+  {
+    "text": "Howdy",
+    "intent": "greeting",
+    "language": "en"
+  },
+  {
+    "text": "What's up",
+    "intent": "greeting",
+    "language": "en"
+  },
+  {
+    "text": "Good day",
+    "intent": "greeting",
+    "language": "en"
+  },
+  {
+    "text": "Mhoro",
+    "intent": "greeting",
+    "language": "sn"
+  },
+  {
+    "text": "Makadii",
+    "intent": "greeting",
+    "language": "sn"
+  },
+  {
+    "text": "Masikati",
+    "intent": "greeting",
+    "language": "sn"
+  },
+  {
+    "text": "Manheru",
+    "intent": "greeting",
+    "language": "sn"
+  },
+  {
+    "text": "Ndeipi",
+    "intent": "greeting",
+    "language": "sn"
+  },
+  {
+    "text": "Wakadii",
+    "intent": "greeting",
+    "language": "sn"
+  },
+  {
+    "text": "Sawubona",
+    "intent": "greeting",
+    "language": "nd"
+  },
+  {
+    "text": "Salibonani",
+    "intent": "greeting",
+    "language": "nd"
+  },
+  {
+    "text": "Yebo",
+    "intent": "greeting",
+    "language": "nd"
+  },
+  {
+    "text": "Kunjani",
+    "intent": "greeting",
+    "language": "nd"
+  },
+  {
+    "text": "Unjani",
+    "intent": "greeting",
+    "language": "nd"
+  },
+  {
+    "text": "Goodbye",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "Thank you, bye",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "That's all, thanks",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "See you later",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "Bye",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "Thanks, goodbye",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "Bye bye",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "Have a good day",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "Take care",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "That will be all",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "Thanks for your help, bye",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "Cheers",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "Chisarai zvakanaka",
+    "intent": "goodbye",
+    "language": "sn"
+  },
+  {
+    "text": "Maita basa",
+    "intent": "goodbye",
+    "language": "sn"
+  },
+  {
+    "text": "Ndatenda",
+    "intent": "goodbye",
+    "language": "sn"
+  },
+  {
+    "text": "Fambai zvakanaka",
+    "intent": "goodbye",
+    "language": "sn"
+  },
+  {
+    "text": "Ndinotenda, bye",
+    "intent": "goodbye",
+    "language": "sn"
+  },
+  {
+    "text": "Sala kahle",
+    "intent": "goodbye",
+    "language": "nd"
+  },
+  {
+    "text": "Ngiyabonga",
+    "intent": "goodbye",
+    "language": "nd"
+  },
+  {
+    "text": "Hamba kahle",
+    "intent": "goodbye",
+    "language": "nd"
+  },
+  {
+    "text": "Siyabonga",
+    "intent": "goodbye",
+    "language": "nd"
+  },
+  {
+    "text": "I want to make a complaint",
+    "intent": "complaint",
+    "language": "en"
+  },
+  {
+    "text": "Your service is terrible",
+    "intent": "complaint",
+    "language": "en"
+  },
+  {
+    "text": "I'm not happy with the service",
+    "intent": "complaint",
+    "language": "en"
+  },
+  {
+    "text": "I need to speak to a manager",
+    "intent": "complaint",
+    "language": "en"
+  },
+  {
+    "text": "This is unacceptable",
+    "intent": "complaint",
+    "language": "en"
+  },
+  {
+    "text": "File a complaint",
+    "intent": "complaint",
+    "language": "en"
+  },
+  {
+    "text": "I want to report a problem",
+    "intent": "complaint",
+    "language": "en"
+  },
+  {
+    "text": "Poor customer service",
+    "intent": "complaint",
+    "language": "en"
+  },
+  {
+    "text": "I'm very disappointed",
+    "intent": "complaint",
+    "language": "en"
+  },
+  {
+    "text": "This is frustrating",
+    "intent": "complaint",
+    "language": "en"
+  },
+  {
+    "text": "I've been waiting too long",
+    "intent": "complaint",
+    "language": "en"
+  },
+  {
+    "text": "Your app is not working",
+    "intent": "complaint",
+    "language": "en"
+  },
+  {
+    "text": "Terrible experience",
+    "intent": "complaint",
+    "language": "en"
+  },
+  {
+    "text": "Handina kufara neservice yenyu",
+    "intent": "complaint",
+    "language": "sn"
+  },
+  {
+    "text": "Ndinoda kutaura namanager",
+    "intent": "complaint",
+    "language": "sn"
+  },
+  {
+    "text": "Service yenyu haina kunaka",
+    "intent": "complaint",
+    "language": "sn"
+  },
+  {
+    "text": "Ndine complaint",
+    "intent": "complaint",
+    "language": "sn"
+  },
+  {
+    "text": "Angithokozanga nge-service yenu",
+    "intent": "complaint",
+    "language": "nd"
+  },
+  {
+    "text": "Ngifuna ukukhuluma lo-manager",
+    "intent": "escalation_request",
+    "language": "nd"
+  },
+  {
+    "text": "Ngifuna ukubika inkinga",
+    "intent": "complaint",
+    "language": "nd"
+  },
+  {
+    "text": "I have a question",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Can you help me?",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "I need some information",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "What services do you offer?",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Help",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "I need help",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Question",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Information please",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "What can you do?",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Tell me about your bank",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "What are your banking hours?",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Contact information",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Customer service",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "How does this work?",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Ndinoda rubatsiro",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndine mubvunzo",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndibatsirei",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Munoita sei?",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoda kunzwisisa",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ngicela usizo",
+    "intent": "general_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Ngilombuzo",
+    "intent": "general_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Ngicela ukusizakala",
+    "intent": "general_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Lenzani?",
+    "intent": "general_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Update my profile",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "Change my phone number",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "Update my email address",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "Change my address",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "Edit my details",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "Update my information",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "Change my name",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "Modify my account details",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "Update contact information",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "Change my mobile number",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "Chinja phone number yangu",
+    "intent": "update_profile",
+    "language": "sn"
+  },
+  {
+    "text": "Update details dzangu",
+    "intent": "update_profile",
+    "language": "sn"
+  },
+  {
+    "text": "Ndinoda kuchinja email",
+    "intent": "update_profile",
+    "language": "sn"
+  },
+  {
+    "text": "Tshintsha inombolo yami",
+    "intent": "update_profile",
+    "language": "nd"
+  },
+  {
+    "text": "Update i-profile yami",
+    "intent": "update_profile",
+    "language": "nd"
+  },
+  {
+    "text": "I want to close my account",
+    "intent": "account_closure",
+    "language": "en"
+  },
+  {
+    "text": "Close my bank account",
+    "intent": "account_closure",
+    "language": "en"
+  },
+  {
+    "text": "How do I close my account?",
+    "intent": "account_closure",
+    "language": "en"
+  },
+  {
+    "text": "Account closure request",
+    "intent": "account_closure",
+    "language": "en"
+  },
+  {
+    "text": "Delete my account",
+    "intent": "account_closure",
+    "language": "en"
+  },
+  {
+    "text": "Terminate my account",
+    "intent": "account_closure",
+    "language": "en"
+  },
+  {
+    "text": "I want to stop banking with you",
+    "intent": "account_closure",
+    "language": "en"
+  },
+  {
+    "text": "Cancel my account",
+    "intent": "account_closure",
+    "language": "en"
+  },
+  {
+    "text": "Ndinoda kuvhara account yangu",
+    "intent": "account_closure",
+    "language": "sn"
+  },
+  {
+    "text": "Close account yangu",
+    "intent": "account_closure",
+    "language": "sn"
+  },
+  {
+    "text": "Ngifuna ukuvala i-account yami",
+    "intent": "account_closure",
+    "language": "nd"
+  },
+  {
+    "text": "Vala i-account yami",
+    "intent": "account_closure",
+    "language": "nd"
+  },
+  {
+    "text": "Ndikuda kuona mari yangu",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndirikuda kuona balance yangu",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndionesewo mari",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Mari iripo",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Zvakamira sei",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndirikuda kuziva mari yangu",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndine mari here",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "EcoCash balance yangu ndeipi",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndiratidze mari ye EcoCash",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Mari yangu ye Econet yakamira sei",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Balance ye eco yangu",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndine mari ingani mu EcoCash",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "OneMoney balance yangu",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Mari yangu ye NetOne",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndine mari yakawanda sei mu OneMoney",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Tarisa OneMoney yangu",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "One money yangu yakamira sei",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Telecash balance yangu",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Mari yangu ye Telecel",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndine mari ingani mu Telecash",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "InnBucks balance yangu",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Mari yangu ye InnBucks yakamira sei",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndine mari yakawanda sei mu InnBucks",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Balance yangu ye cbz",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Mari yangu ye bank yakamira sei",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndine mari ingani mu account yangu ye bank",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Steward bank balance yangu",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Stanbic balance",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "NMB mari yangu",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndikuda kutumira mari",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Ndirikuda kusenda mari",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Tumira mari ku",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Senda mari ku EcoCash",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Ndikuda kupa munhu mari",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Ndirikuda kusenda mari ne EcoCash",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Tumira mari ne OneMoney",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Senda mari ne InnBucks",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Ndipe mari kune",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Transfer mari ku account",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Ndikuda kutenga airtime",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Ndikuda airtime",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Tenga airtime",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Ndirikuda data",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Tenga data bundles",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Ndipe airtime ye Econet",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Airtime ye NetOne",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Ndirikuda kutenga bundle",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Data bundle ye Telecel",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Ndikuda kubhadhara ZESA",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Bhadhara ZESA",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Bhadhara DSTV",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Ndirikuda kubhadhara bill yangu",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Pay ZINWA",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Bhadhara bill ye mvura",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoda kubhadhara school fees",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Pay bill ne EcoCash",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Ndibatsireiwo",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndikuda rubatsiro",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Handisi kunzwisisa",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Hameno",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Zvinoshanda sei",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndidzidzisei kushandisa",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoda kunzwa nezvemari",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndikuda kubuda ne mari",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Cash out mari yangu",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Ndirikuda kutora mari",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Ndipe mari cash",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Withdraw mari ye EcoCash",
+    "intent": "transfer_money",
+    "language": "sn"
+  },
+  {
+    "text": "Mari yangu yasvika here",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "Transaction yangu yakafamba sei",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "Ndirikuda kuziva kana mari yasvika",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "Check transaction status",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "Ndine dambudziko",
+    "intent": "complaint",
+    "language": "sn"
+  },
+  {
+    "text": "Transaction yangu haisi kuoneka",
+    "intent": "complaint",
+    "language": "sn"
+  },
+  {
+    "text": "Pane problem ne account yangu",
+    "intent": "complaint",
+    "language": "sn"
+  },
+  {
+    "text": "Mari yangu haina kusvika",
+    "intent": "complaint",
+    "language": "sn"
+  },
+  {
+    "text": "Ndakabatwa mari isiri yangu",
+    "intent": "complaint",
+    "language": "sn"
+  },
+  {
+    "text": "Reversal request",
+    "intent": "complaint",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoda mari yangu back",
+    "intent": "complaint",
+    "language": "sn"
+  },
+  {
+    "text": "What is my current account balance?",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "How much money is in my EcoCash?",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Check my OneMoney balance",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "InnBucks balance please",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "What's left in my wallet?",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Show me my mobile money balance",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "How much do I have in savings?",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Current balance",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Available funds",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Why is my balance showing as zero?",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "My balance seems wrong",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Why is my balance incorrect?",
+    "intent": "balance_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Mari iri mu account mangu isvikei?",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndine mari yakawanda sei mu EcoCash?",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Tarisa balance ye OneMoney yangu",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "InnBucks yangu ine mari yakawanda sei?",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Seisei mari yangu iri kuratidza zero?",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Mari yangu yakanaka here?",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoda kuziva balance ye wallet yangu",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Pane mari here mu account?",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndine marii mu EcoCash?",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Balance ye savings yangu?",
+    "intent": "balance_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Imali eseku account yami ingakanani?",
+    "intent": "balance_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Nginemali engakanani ku-EcoCash?",
+    "intent": "balance_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Khangela i-balance ye OneMoney yami",
+    "intent": "balance_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Imali yami itshengisa zero, kungani?",
+    "intent": "balance_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Ngicela i-balance ye-wallet yami",
+    "intent": "balance_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Imali engiyilondolozileyo ingakanani?",
+    "intent": "balance_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "I need to see my last five transactions",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Show me transactions from yesterday",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "How much did I spend on airtime yesterday?",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "What did I buy last week?",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Send my statement to my email address",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Email me my bank statement",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "I need a mini statement",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Monthly statement please",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Why is my transaction history not showing my last payment?",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Download my statement",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Print my transaction history",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "What payments did I make today?",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Show me my EcoCash history",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Recent transfers",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Last 10 transactions",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "last 7 days",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "last 30 days",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "last 60 days",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "last 90 days",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "7 days",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "30 days",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "this week",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "this month",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "previous month",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Statement for last week",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Statement for this month",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Transactions from last 7 days",
+    "intent": "transaction_history",
+    "language": "en"
+  },
+  {
+    "text": "Ndoda kuona zvinhu zvishanu zvapedzisira kuitwa nemari yangu",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "Ndakatenga mhepo (airtime) yemarii nezuro?",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "Tumirai statement rangu kune email yangu",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoda mini statement",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "Seisei history yangu isiri kuratidza zvandabhadhara kwekupedzisira?",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "Ndipeiwo statement yemwedzi uno",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "Ndakashandisa mari yakawanda sei svondo rino?",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoda kuona transactions dze EcoCash",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "Ndiratidze zvandakatumira",
+    "intent": "transaction_history",
+    "language": "sn"
+  },
+  {
+    "text": "Ngifuna ukubona izinto ezinhlanu eziyisicaba ezenziwe ngemali yami",
+    "intent": "transaction_history",
+    "language": "nd"
+  },
+  {
+    "text": "Ngithenge i-airtime engakanani izolo?",
+    "intent": "transaction_history",
+    "language": "nd"
+  },
+  {
+    "text": "Thumela i-statement yami ku-email yami",
+    "intent": "transaction_history",
+    "language": "nd"
+  },
+  {
+    "text": "Ngicela i-mini statement",
+    "intent": "transaction_history",
+    "language": "nd"
+  },
+  {
+    "text": "Ngibone i-history ye-EcoCash yami",
+    "intent": "transaction_history",
+    "language": "nd"
+  },
+  {
+    "text": "I sent money to the wrong number, please reverse it",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "My EcoCash was debited but the merchant didn't receive it",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "The transaction failed but my money was not returned",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "I was overcharged for this bill payment",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Help! Someone withdrew money from my account without my permission",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Reverse this ZIPIT transaction immediately",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Why was I charged a double 2% IMTT tax?",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "I need a refund for this transaction",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Money deducted but not received",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Transaction reversal request",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Please reverse my last transaction",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "I was charged twice for the same transaction",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Wrong amount was deducted",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "I didn't authorize this transaction",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Fraudulent transaction on my account",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Dispute this charge",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "I tried to cash out but the agent said there is no float",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Agent didn't give me my money",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "cash out failed but money was taken",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Ndakatumira mari kunhamba isiyo, ndapota idzoserei",
+    "intent": "transaction_dispute",
+    "language": "sn"
+  },
+  {
+    "text": "Mari yakabviswa paEcoCash yangu asi muzvitoro havana kuiona",
+    "intent": "transaction_dispute",
+    "language": "sn"
+  },
+  {
+    "text": "Transaction yaramba asi mari yangu haina kudzoka",
+    "intent": "transaction_dispute",
+    "language": "sn"
+  },
+  {
+    "text": "Ndakabhadhariswa mari yakawandisa pa bill iri",
+    "intent": "transaction_dispute",
+    "language": "sn"
+  },
+  {
+    "text": "Rubatsiro! Pane munhu aburitsa mari mangu ndisipo",
+    "intent": "transaction_dispute",
+    "language": "sn"
+  },
+  {
+    "text": "Dzoserai mari ye ZIPIT iyi izvozvi",
+    "intent": "transaction_dispute",
+    "language": "sn"
+  },
+  {
+    "text": "Seisei ndakabhadhariswa mutero we 2% kaviri?",
+    "intent": "transaction_dispute",
+    "language": "sn"
+  },
+  {
+    "text": "Ndada kuburitsa mari asi agent ati haana float",
+    "intent": "transaction_dispute",
+    "language": "sn"
+  },
+  {
+    "text": "Agent haana kundipa mari yangu",
+    "intent": "transaction_dispute",
+    "language": "sn"
+  },
+  {
+    "text": "Mari yangu yakabviswa asi handina kuiwana",
+    "intent": "transaction_dispute",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoda refund",
+    "intent": "transaction_dispute",
+    "language": "sn"
+  },
+  {
+    "text": "Reverse transaction yangu",
+    "intent": "transaction_dispute",
+    "language": "sn"
+  },
+  {
+    "text": "Ndakatumira kune wrong number",
+    "intent": "transaction_dispute",
+    "language": "sn"
+  },
+  {
+    "text": "Pane akaba mari yangu",
+    "intent": "transaction_dispute",
+    "language": "sn"
+  },
+  {
+    "text": "Ngathumela imali enombolweni ephosidileyo, lingayibuyisela emuva?",
+    "intent": "transaction_dispute",
+    "language": "nd"
+  },
+  {
+    "text": "Imali yami ayizange ibuye loba i-transaction yalele",
+    "intent": "transaction_dispute",
+    "language": "nd"
+  },
+  {
+    "text": "Ngikhokhiswe kabili nge-IMTT tax",
+    "intent": "transaction_dispute",
+    "language": "nd"
+  },
+  {
+    "text": "Ngicela ukubuyisela i-transaction le",
+    "intent": "transaction_dispute",
+    "language": "nd"
+  },
+  {
+    "text": "Kukhona okhiphe imali yami ngaphandle kwemvumo yami",
+    "intent": "transaction_dispute",
+    "language": "nd"
+  },
+  {
+    "text": "I-agent ayizange inginike imali yami",
+    "intent": "transaction_dispute",
+    "language": "nd"
+  },
+  {
+    "text": "Ngifuna i-refund",
+    "intent": "transaction_dispute",
+    "language": "nd"
+  },
+  {
+    "text": "I forgot my secret PIN, how do I reset it?",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "My account is blocked after three wrong attempts",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "Change my daily withdrawal limit",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "Block my line, I lost my phone",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "I received a suspicious SMS asking for my OTP",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "How do I update my KYC documents?",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "I want to link my bank account to my mobile wallet",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "Is it safe to share my PIN with a customer agent?",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "My app is saying Unauthorized Access, what do I do?",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "Reset my PIN",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "Change my EcoCash PIN",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "I forgot my OneMoney PIN",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "My account has been hacked",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "Someone knows my PIN",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "I want to change my security questions",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "Enable two-factor authentication",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "Disable biometric login",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "My phone was stolen, block my account",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "I think someone is trying to access my account",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "Increase my transaction limit",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "What is my withdrawal limit?",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "Unblock my account",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "My account is locked",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "Ndakakanganwa PIN yangu, ndoigadzirisa sei?",
+    "intent": "security_pin",
+    "language": "sn"
+  },
+  {
+    "text": "Account yangu yavharwa nekuti ndaisa PIN isiyo katatu",
+    "intent": "security_pin",
+    "language": "sn"
+  },
+  {
+    "text": "Chinjai muganhu wemari yandinoburitsa pazuva",
+    "intent": "security_pin",
+    "language": "sn"
+  },
+  {
+    "text": "Vharai line rangu, ndarasikirwa nefoni",
+    "intent": "security_pin",
+    "language": "sn"
+  },
+  {
+    "text": "Ndagamuchira message inofungidzirwa seyehumbavha inoda OTP yangu",
+    "intent": "security_pin",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoisa sei mapepa angu e KYC?",
+    "intent": "security_pin",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoda kubatanidza bank rangu ne wallet yefoni",
+    "intent": "security_pin",
+    "language": "sn"
+  },
+  {
+    "text": "Zvakachengeteka here kupa agent PIN yangu?",
+    "intent": "security_pin",
+    "language": "sn"
+  },
+  {
+    "text": "App iri kuti Unauthorized Access, ndoita sei?",
+    "intent": "security_pin",
+    "language": "sn"
+  },
+  {
+    "text": "Chinja PIN ye EcoCash yangu",
+    "intent": "security_pin",
+    "language": "sn"
+  },
+  {
+    "text": "Ndakakanganwa PIN ye OneMoney",
+    "intent": "security_pin",
+    "language": "sn"
+  },
+  {
+    "text": "Account yangu yakabatwa nehacker",
+    "intent": "security_pin",
+    "language": "sn"
+  },
+  {
+    "text": "Pane anoziva PIN yangu",
+    "intent": "security_pin",
+    "language": "sn"
+  },
+  {
+    "text": "Foni yangu yakabiwa, vharai account",
+    "intent": "security_pin",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoda kuwedzera limit yemari yandinotumira",
+    "intent": "security_pin",
+    "language": "sn"
+  },
+  {
+    "text": "Vhurai account yangu",
+    "intent": "security_pin",
+    "language": "sn"
+  },
+  {
+    "text": "Ngakhohlwa i-PIN yami, ngingayilungisa njani?",
+    "intent": "security_pin",
+    "language": "nd"
+  },
+  {
+    "text": "I-account yami ivalwe ngoba ngifake i-PIN ephosidileyo kathathu",
+    "intent": "security_pin",
+    "language": "nd"
+  },
+  {
+    "text": "Valani inombolo yami, ngilahlekelwe lufone lwami",
+    "intent": "security_pin",
+    "language": "nd"
+  },
+  {
+    "text": "Ngamukele i-SMS emangalisayo efuna i-OTP yami",
+    "intent": "security_pin",
+    "language": "nd"
+  },
+  {
+    "text": "Ngifuna ukuhlanganisa i-bank yami le-wallet ye-mobile",
+    "intent": "security_pin",
+    "language": "nd"
+  },
+  {
+    "text": "Kuvikelekile ukupha i-agent i-PIN yami?",
+    "intent": "security_pin",
+    "language": "nd"
+  },
+  {
+    "text": "Tshintsha i-PIN ye-EcoCash yami",
+    "intent": "security_pin",
+    "language": "nd"
+  },
+  {
+    "text": "Ufone wami webiwe, vala i-account",
+    "intent": "security_pin",
+    "language": "nd"
+  },
+  {
+    "text": "Vula i-account yami",
+    "intent": "security_pin",
+    "language": "nd"
+  },
+  {
+    "text": "Why is the USSD code *151# not working?",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "I have no signal in the CBD area",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "My data is being used up too fast",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "How do I activate 4G/LTE on my line?",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "I bought a bundle but I can't browse the internet",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "Is the NetOne system down today?",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "I am not receiving transaction confirmation SMS",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "My SIM card is not being detected by my phone",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "How do I check my data balance?",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "My EcoCash app is crashing every time I open it",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "The app is very slow",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "USSD not responding",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "Network error when sending money",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "Connection timeout",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "Is Econet network down?",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "EcoCash is offline",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "I can't access my mobile banking app",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "App keeps logging me out",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "Server error message",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "The system is saying try again later",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "Seisei code ye *151# isiri kushanda?",
+    "intent": "network_connectivity",
+    "language": "sn"
+  },
+  {
+    "text": "Handina network mu CBD",
+    "intent": "network_connectivity",
+    "language": "sn"
+  },
+  {
+    "text": "Data rangu riri kupera nekukurumidza",
+    "intent": "network_connectivity",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoita sei kuti 4G ishande pa line rangu?",
+    "intent": "network_connectivity",
+    "language": "sn"
+  },
+  {
+    "text": "Ndakatenga bundle asi handikwanise kuita browse",
+    "intent": "network_connectivity",
+    "language": "sn"
+  },
+  {
+    "text": "Network ye NetOne yafa here nhasi?",
+    "intent": "network_connectivity",
+    "language": "sn"
+  },
+  {
+    "text": "Handisi kuwana message (SMS) inosimbisa transaction",
+    "intent": "network_connectivity",
+    "language": "sn"
+  },
+  {
+    "text": "Foni yangu haisi kuona SIM card",
+    "intent": "network_connectivity",
+    "language": "sn"
+  },
+  {
+    "text": "Ndotarisa sei data rasara?",
+    "intent": "network_connectivity",
+    "language": "sn"
+  },
+  {
+    "text": "App ye EcoCash iri kungozvivhara yega",
+    "intent": "network_connectivity",
+    "language": "sn"
+  },
+  {
+    "text": "App iri kunonoka",
+    "intent": "network_connectivity",
+    "language": "sn"
+  },
+  {
+    "text": "USSD haisi kushanda",
+    "intent": "network_connectivity",
+    "language": "sn"
+  },
+  {
+    "text": "Pane network error",
+    "intent": "network_connectivity",
+    "language": "sn"
+  },
+  {
+    "text": "EcoCash iri offline",
+    "intent": "network_connectivity",
+    "language": "sn"
+  },
+  {
+    "text": "I-data yami iphela masinyane",
+    "intent": "network_connectivity",
+    "language": "nd"
+  },
+  {
+    "text": "I-network ye NetOne ifile yini lamuhla?",
+    "intent": "network_connectivity",
+    "language": "nd"
+  },
+  {
+    "text": "Angitholi i-SMS ye-transaction confirmation",
+    "intent": "network_connectivity",
+    "language": "nd"
+  },
+  {
+    "text": "Ufone wami awuboni i-SIM card",
+    "intent": "network_connectivity",
+    "language": "nd"
+  },
+  {
+    "text": "Ngingakhangela njani i-data eseleyo?",
+    "intent": "network_connectivity",
+    "language": "nd"
+  },
+  {
+    "text": "I-app ye-EcoCash iyazivala yodwa",
+    "intent": "network_connectivity",
+    "language": "nd"
+  },
+  {
+    "text": "I-USSD ayisebenzi",
+    "intent": "network_connectivity",
+    "language": "nd"
+  },
+  {
+    "text": "Is there a monthly fee for this mobile wallet?",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "How much is the fee to send $100?",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "What are EcoCash transaction charges?",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "How much does it cost to cash out?",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "What is the IMTT tax rate?",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "Are there any hidden charges?",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "How much is the withdrawal fee?",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "Transfer fees to bank account",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "What are the charges for ZIPIT?",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "Bill payment fees",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "Why are the fees so high?",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "Is there a fee for checking balance?",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "Airtime purchase charges",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "Cross-network transfer fees",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "Pane mari inobviswa mwedzi wega wega pakushandisa wallet iyi?",
+    "intent": "mobile_wallet_fees",
+    "language": "sn"
+  },
+  {
+    "text": "Mari yekutumira $100 isvikei?",
+    "intent": "mobile_wallet_fees",
+    "language": "sn"
+  },
+  {
+    "text": "Ma charges e EcoCash akamira sei?",
+    "intent": "mobile_wallet_fees",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoripira marii kuburitsa mari?",
+    "intent": "mobile_wallet_fees",
+    "language": "sn"
+  },
+  {
+    "text": "IMTT tax ingani?",
+    "intent": "mobile_wallet_fees",
+    "language": "sn"
+  },
+  {
+    "text": "Pane ma charges akavanzika here?",
+    "intent": "mobile_wallet_fees",
+    "language": "sn"
+  },
+  {
+    "text": "Fee yekuburitsa mari ingani?",
+    "intent": "mobile_wallet_fees",
+    "language": "sn"
+  },
+  {
+    "text": "Ma fees ekutumira ku bank account",
+    "intent": "mobile_wallet_fees",
+    "language": "sn"
+  },
+  {
+    "text": "Ma charges e ZIPIT ndeepi?",
+    "intent": "mobile_wallet_fees",
+    "language": "sn"
+  },
+  {
+    "text": "Kukhona imali edonswayo ngenyanga nxa ngisebenzisa i-wallet le?",
+    "intent": "mobile_wallet_fees",
+    "language": "nd"
+  },
+  {
+    "text": "Imali yokuthumela u-$100 ingakanani?",
+    "intent": "mobile_wallet_fees",
+    "language": "nd"
+  },
+  {
+    "text": "Ama-charges e-EcoCash anjani?",
+    "intent": "mobile_wallet_fees",
+    "language": "nd"
+  },
+  {
+    "text": "Kubiza malini ukukhipha imali?",
+    "intent": "mobile_wallet_fees",
+    "language": "nd"
+  },
+  {
+    "text": "I-IMTT tax ingakanani?",
+    "intent": "mobile_wallet_fees",
+    "language": "nd"
+  },
+  {
+    "text": "How do I pay my ZESA tokens using this app?",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Buy ZESA electricity",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "I want to pay my water bill",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Pay NetFlix subscription",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "How do I buy airtime?",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Buy Econet airtime",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Send airtime to another number",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Pay rent using mobile money",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Buy data bundles",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Pay for parking",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Municipal rates payment",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Pay TelOne bill",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "ZOL internet subscription",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Pay insurance premium",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Medical aid payment",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Ndobhadhara sei ZESA ne app iyi?",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Tenga ZESA magetsi",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Bhadhara DSTV yangu",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoda kubhadhara bill yemvura",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Ndotenga sei airtime?",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Tenga Econet airtime",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Tumira airtime kune imwe number",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Bhadhara school fees",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Bhadhara rent ne EcoCash",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Bhadhara parking",
+    "intent": "bill_payment",
+    "language": "sn"
+  },
+  {
+    "text": "Ngibhadala njani i-ZESA nge-app le?",
+    "intent": "bill_payment",
+    "language": "nd"
+  },
+  {
+    "text": "Thenga ugesi we-ZESA",
+    "intent": "bill_payment",
+    "language": "nd"
+  },
+  {
+    "text": "Bhadala i-DSTV yami",
+    "intent": "bill_payment",
+    "language": "nd"
+  },
+  {
+    "text": "Ngifuna ukubhadala i-bill yamanzi",
+    "intent": "bill_payment",
+    "language": "nd"
+  },
+  {
+    "text": "Ngithenga njani i-airtime?",
+    "intent": "bill_payment",
+    "language": "nd"
+  },
+  {
+    "text": "Thumela i-airtime kwenye inombolo",
+    "intent": "bill_payment",
+    "language": "nd"
+  },
+  {
+    "text": "Bhadala i-school fees",
+    "intent": "bill_payment",
+    "language": "nd"
+  },
+  {
+    "text": "Thenga ama-data bundles",
+    "intent": "bill_payment",
+    "language": "nd"
+  },
+  {
+    "text": "Where is the nearest branch in Gweru?",
+    "intent": "branch_location",
+    "language": "en"
+  },
+  {
+    "text": "What are the requirements for a SIM replacement?",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "How do I register for a business account?",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "Can I use my mobile wallet while roaming in South Africa?",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "What are the current interest rates on fixed deposits?",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Do you offer student loans?",
+    "intent": "loan_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "How do I talk to a human agent?",
+    "intent": "escalation_request",
+    "language": "en"
+  },
+  {
+    "text": "agent",
+    "intent": "escalation_request",
+    "language": "en"
+  },
+  {
+    "text": "escalate",
+    "intent": "escalation_request",
+    "language": "en"
+  },
+  {
+    "text": "human",
+    "intent": "escalation_request",
+    "language": "en"
+  },
+  {
+    "text": "talk to agent",
+    "intent": "escalation_request",
+    "language": "en"
+  },
+  {
+    "text": "human agent",
+    "intent": "escalation_request",
+    "language": "en"
+  },
+  {
+    "text": "real person",
+    "intent": "escalation_request",
+    "language": "en"
+  },
+  {
+    "text": "connect me to someone",
+    "intent": "escalation_request",
+    "language": "en"
+  },
+  {
+    "text": "I need a human",
+    "intent": "escalation_request",
+    "language": "en"
+  },
+  {
+    "text": "Thank you for the help",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "Branch hours in Harare",
+    "intent": "branch_location",
+    "language": "en"
+  },
+  {
+    "text": "Agent locations near me",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "Where can I cash out in Bulawayo?",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "Banking hours today",
+    "intent": "branch_location",
+    "language": "en"
+  },
+  {
+    "text": "Is the bank open on Saturday?",
+    "intent": "branch_location",
+    "language": "en"
+  },
+  {
+    "text": "Customer care number",
+    "intent": "escalation_request",
+    "language": "en"
+  },
+  {
+    "text": "Speak to a manager",
+    "intent": "escalation_request",
+    "language": "en"
+  },
+  {
+    "text": "I want to talk to someone",
+    "intent": "escalation_request",
+    "language": "en"
+  },
+  {
+    "text": "Transfer me to a human",
+    "intent": "escalation_request",
+    "language": "en"
+  },
+  {
+    "text": "Branch riri pedyo riri kupi muGweru?",
+    "intent": "branch_location",
+    "language": "sn"
+  },
+  {
+    "text": "Chii chinodiwa kuti nditsive SIM card?",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndonyoresa sei account yebhizimusi?",
+    "intent": "account_opening",
+    "language": "sn"
+  },
+  {
+    "text": "Ndingashandise wallet yangu ndiri ku South Africa here?",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Interest rate yakamira sei nhasi?",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Munopa zvikwereti zvevadzidzi (student loans) here?",
+    "intent": "loan_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndotaura sei nemunhu chaiye (agent)?",
+    "intent": "escalation_request",
+    "language": "sn"
+  },
+  {
+    "text": "Mazvita nerubatsiro rwenyu",
+    "intent": "goodbye",
+    "language": "sn"
+  },
+  {
+    "text": "ATM iri pedyo iri kupi?",
+    "intent": "atm_location",
+    "language": "sn"
+  },
+  {
+    "text": "Agent ari kupi padyo neni?",
+    "intent": "atm_location",
+    "language": "sn"
+  },
+  {
+    "text": "Ma hours ekuvhura kwe bank",
+    "intent": "branch_location",
+    "language": "sn"
+  },
+  {
+    "text": "Bank inovhura here pa Saturday?",
+    "intent": "branch_location",
+    "language": "sn"
+  },
+  {
+    "text": "Number ye customer care",
+    "intent": "escalation_request",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoda kutaura ne manager",
+    "intent": "escalation_request",
+    "language": "sn"
+  },
+  {
+    "text": "I-branch eseduze ikuphi eGweru?",
+    "intent": "branch_location",
+    "language": "nd"
+  },
+  {
+    "text": "Yini edingekayo ukutshintsha i-SIM card?",
+    "intent": "general_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Ngingabhalisa njani i-account yebhizinisi?",
+    "intent": "account_opening",
+    "language": "nd"
+  },
+  {
+    "text": "Ngingasebenzisa i-wallet yami ngiyi-roaming eSouth Africa?",
+    "intent": "general_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Linika ama-student loans?",
+    "intent": "loan_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Ngingakhuluma njani lomuntu oyi-agent?",
+    "intent": "escalation_request",
+    "language": "nd"
+  },
+  {
+    "text": "Ngiyabonga ngosizo lwenu",
+    "intent": "goodbye",
+    "language": "nd"
+  },
+  {
+    "text": "I-ATM eseduze ikuphi?",
+    "intent": "atm_location",
+    "language": "nd"
+  },
+  {
+    "text": "Ama-hours e-bank",
+    "intent": "branch_location",
+    "language": "nd"
+  },
+  {
+    "text": "Greetings",
+    "intent": "greeting",
+    "language": "en"
+  },
+  {
+    "text": "Yo",
+    "intent": "greeting",
+    "language": "en"
+  },
+  {
+    "text": "Hiya",
+    "intent": "greeting",
+    "language": "en"
+  },
+  {
+    "text": "Mangwanani",
+    "intent": "greeting",
+    "language": "sn"
+  },
+  {
+    "text": "Mhoroi",
+    "intent": "greeting",
+    "language": "sn"
+  },
+  {
+    "text": "Ko makadii?",
+    "intent": "greeting",
+    "language": "sn"
+  },
+  {
+    "text": "Tirikufarasei?",
+    "intent": "greeting",
+    "language": "sn"
+  },
+  {
+    "text": "Livukile",
+    "intent": "greeting",
+    "language": "nd"
+  },
+  {
+    "text": "Linjani",
+    "intent": "greeting",
+    "language": "nd"
+  },
+  {
+    "text": "Sanibonani",
+    "intent": "greeting",
+    "language": "nd"
+  },
+  {
+    "text": "Thanks, bye",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "Thank you, goodbye",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "I'm done",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "Exit",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "End chat",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "Thanks for your help",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "Have a nice day",
+    "intent": "goodbye",
+    "language": "en"
+  },
+  {
+    "text": "Mazvita",
+    "intent": "goodbye",
+    "language": "sn"
+  },
+  {
+    "text": "Ndapedza",
+    "intent": "goodbye",
+    "language": "sn"
+  },
+  {
+    "text": "Tizonoonana",
+    "intent": "goodbye",
+    "language": "sn"
+  },
+  {
+    "text": "Bye bye",
+    "intent": "goodbye",
+    "language": "sn"
+  },
+  {
+    "text": "Sobonana",
+    "intent": "goodbye",
+    "language": "nd"
+  },
+  {
+    "text": "Usale kahle",
+    "intent": "goodbye",
+    "language": "nd"
+  },
+  {
+    "text": "How do I open a new account?",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "I want to register for EcoCash",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "Create a new account",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "Sign up for mobile banking",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "Open a savings account",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "Register for OneMoney",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "New customer registration",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "What documents do I need to open an account?",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "Open a USD account",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "I want a business account",
+    "intent": "account_opening",
+    "language": "en"
+  },
+  {
+    "text": "Ndovhura sei account itsva?",
+    "intent": "account_opening",
+    "language": "sn"
+  },
+  {
+    "text": "Ndoda kuregistera EcoCash",
+    "intent": "account_opening",
+    "language": "sn"
+  },
+  {
+    "text": "Ndivhurire account",
+    "intent": "account_opening",
+    "language": "sn"
+  },
+  {
+    "text": "Sign up ye mobile banking",
+    "intent": "account_opening",
+    "language": "sn"
+  },
+  {
+    "text": "Mapepa api andinoda kuvhura account?",
+    "intent": "account_opening",
+    "language": "sn"
+  },
+  {
+    "text": "Requirements dzekuvhura account",
+    "intent": "account_opening",
+    "language": "sn"
+  },
+  {
+    "text": "Ngivula njani i-account entsha?",
+    "intent": "account_opening",
+    "language": "nd"
+  },
+  {
+    "text": "Ngifuna ukubhalisa i-EcoCash",
+    "intent": "account_opening",
+    "language": "nd"
+  },
+  {
+    "text": "Ngivulele i-account",
+    "intent": "account_opening",
+    "language": "nd"
+  },
+  {
+    "text": "Amadokhumenti adingekayo ukuvula i-account?",
+    "intent": "account_opening",
+    "language": "nd"
+  },
+  {
+    "text": "Ngifuna i-account ye-savings",
+    "intent": "account_opening",
+    "language": "nd"
+  },
+  {
+    "text": "I sent money to a wrong number would you help me recover my money",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "I sent money to the wrong number and I need help recovering it",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "I forgot my simcard pin and puk",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "I forgot my SIM PIN and PUK code",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "I received funds from an unknown number",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "I got money from a number I don't know",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "My line is failing to activate 5G",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "5G is not activating on my line",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "My EcoCash Mastercard is not working",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "My EcoCash Mastercard keeps failing",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "My data is being depleted fast",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "My data bundles are finishing too quickly",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "Where is the nearest EcoCash agent or shop",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "Find the nearest EcoCash agent",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "I want a sim replacement",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "How do I replace my SIM card",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "Someone is trying to access my line I am seeing OTP I am not sure of",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "I am receiving OTPs I did not request",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "Help me block the number I don't want it to have access to my line",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "Please block this number from accessing my line",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "I am failing to buy data it's saying error",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "I can't buy data bundle it keeps failing",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "Can you guide me step by step",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "I need help understanding your services",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "What can you help me with right now",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "I am not sure where to start",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Can you explain this in simple terms",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Please assist me like a support agent",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "I need help with my account services",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "What are the available options for me",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Can you help me fix this issue quickly",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Please point me in the right direction",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "I need customer support now",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Can someone help me with this request",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "What should I do next",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Help me understand why this happened",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "I need advice on the best option",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Ndapota nditungamirire nhanho nenhanho",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndinoda rubatsiro rwekunzwisisa masevhisi enyu",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndotangira papi",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Munganditsanangurira zviri nyore",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ndibatsireiwo semunhu ari pa customer support",
+    "intent": "general_inquiry",
+    "language": "sn"
+  },
+  {
+    "text": "Ngicela ungikhokhele inyathelo ngenyathelo",
+    "intent": "general_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Ngidinga usizo lokuqonda izinsizakalo zenu",
+    "intent": "general_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Ngiqale ngaphi",
+    "intent": "general_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Ungangichazela ngendlela elula",
+    "intent": "general_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "Ngicela usizo njengomuntu we customer support",
+    "intent": "general_inquiry",
+    "language": "nd"
+  },
+  {
+    "text": "i want to talk to a human agent",
+    "intent": "escalation_request",
+    "language": "en"
+  },
+  {
+    "text": "how much is the fee to send 100 dollars",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "my account is locked after wrong pin attempts",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "where is the nearest atm in harare",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "I am still waiting on my card?",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "What can I do if my card still hasn't arrived after 2 weeks?",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "I have been waiting over a week. Is the card still coming?",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "Can I track my card while it is in the process of delivery?",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "How do I know if I will get my card, or if it is lost?",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "When did you send me my new card?",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "Do you have info about the card on delivery?",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "What do I do if I still have not received my new card?",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "Does the package with my card have tracking?",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "I ordered my card but it still isn't here",
+    "intent": "card_request",
+    "language": "en"
+  },
+  {
+    "text": "What is my money worth in other countries?",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Will my money be of equal value when I travel abroad?",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Do you know the rate of exchange?",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "What foreign exchange rate will I get on weekdays and on the weekends?",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "What is the exchange looking like?",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "How is the exchange rate doing?",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "I would like to know how exchange rates are calculated when transferring funds.",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "I would like to know what exchange rates you use?",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "If I need to cash foreign transfers, how does that work?",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Do you know what your exchange rates are?",
+    "intent": "general_inquiry",
+    "language": "en"
+  },
+  {
+    "text": "Why is there an extra fee on my statement?",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Why did they charge me an extra $1?",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Why is there a 1 euro fee on my statement?",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Why do I see an extra £1 charge on my statement?",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "I am inquiring about a $1 charge on my statement.",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "What is the $1 transaction on my account?",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "What is this extra pound charge for?",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "I was charged $1 in a transaction.",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "What is the reason for the extra fee on my statement?",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "There is a pending 1£ charge on my statement. I haven't purchased anything for 1£. Why is it on my statement?",
+    "intent": "transaction_dispute",
+    "language": "en"
+  },
+  {
+    "text": "Should i uninstall the app before i try it again?",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "How come when I tried to pay contactless at the bus it didnt work?",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "Why is my contactless not working?",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "My contactless payments don't work.",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "how many days processing new card?",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "I'm confused. My contactless is suddenly not working anywhere that I try to use it. How do I fix it?",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "Would reinstalling the app solve the problem?",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "I've tried using my contactless in several locations today and it's not working anywhere. It seemed fine before. How do I get it to work again?",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "What do I have to do to get the contactless to work?",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "The terminal I paid at wouldn't take my card. Is something wrong?",
+    "intent": "network_connectivity",
+    "language": "en"
+  },
+  {
+    "text": "There was a fee charged when I paid with my card.",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "I received a fee I should not have.",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "Why am I being a charged for using my card?",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "Tell me why there is a fee for a card payment.",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "I don't understand why I'm being charged for using my card.",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "I paid with my card so so why was I charged a transaction fee?",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "I shouldn't have been charged but I see a fee, why?",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "i made a payment with my card and was charged a fee, why would you do that",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "A fee came along with me paying with card",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "I had to pay a fee when buying items with my card.",
+    "intent": "mobile_wallet_fees",
+    "language": "en"
+  },
+  {
+    "text": "I am interested in changing my personal details.",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "I am here to change my adress.",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "I'd like to make some changes to my personal information.",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "I would like to change my name after marriage.",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "I would like to change my adress",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "My address is incorrect on my file.",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "My address details have changed and I want to update them",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "Where do I go to edit my personal details on my account?",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "I need to change my name, since i just got married",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "I moved to a new city and need to change my address",
+    "intent": "update_profile",
+    "language": "en"
+  },
+  {
+    "text": "Why do you have an identity check?",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "I do not feel comfortable verifying my identity.",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "Why on earth do you need so much personal id info from me?",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "DO you know the reason for the identity check?",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "I answered so many questions about my identity. Why do you need this info?",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "Why do you have the identity check",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "Is getting my identity verified required before I can use my account?",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "why are all my identity details required",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "I would like to know why so much identity information is required?",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "Why do you need verification for my identity?",
+    "intent": "security_pin",
+    "language": "en"
+  },
+  {
+    "text": "I can use this card at which ATMs?",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "Can I use the card at any cash machine?",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "What locations can I get money from?",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "What ATMs take this card?",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "Which ATM's can I use to make a withdrawal?",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "Do all ATMs accept this card?",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "Will this card work at any ATM?",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "Which ATMs am I allowed to get money from?",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "Where is the closest ATM to me?",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "Which ATMs accept this bill of fare ?",
+    "intent": "atm_location",
+    "language": "en"
+  },
+  {
+    "text": "Transfer unable to be completed, states 'declined'",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "Why was my transfer request decline?",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "My transfer was rejected",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "I tried to buy something online yesterday and got a message saying declined. I tried again today and got the same message. What's the problem?",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "I am having trouble doing a transfer. A \"Decline \" message appears after making the transfer.",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "the bank transfer was declined",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "Why do you keep declining my transfers? It's been working well so far, but when I just tried to buy something, the card got declined. I tried it a few times, but same thing happened every try.",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "why was a transfer declined",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "While doing a transfer, it says declined.",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "I have transfered to my account before but it is being declined now?",
+    "intent": "transfer_money",
+    "language": "en"
+  },
+  {
+    "text": "I'm not sure why my card didn't work",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "My card is not working at stores.",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Do you know why my card payment has been declined?",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Why isn't my card working? I was pumped to use my new card but it keeps getting declined. Help please.",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "I could not use my card in a store.",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "If my card payment isn't working what do I do?",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "I'm not sure why the card payment didn't work.",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Tell me why my card payment has been declined.",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "I was just shopping online for some tickets and the payment was declined by you. Why has this happened? I am certain I have the right amount of funds in my account.",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "I am very upset that i went to use my new card today and it kept getting declined. Why is this happening and what do I do to not have it declined?",
+    "intent": "bill_payment",
+    "language": "en"
+  },
+  {
+    "text": "Hi, I have an apple watch. How do I use it to top up my card?",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "Can I use google pay to top up?",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "why top up is not working even if I got my American Express in Apple Bay?",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "Can I deposit money using Apple Pay?",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "Can I use google pay for topping -up",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "I do I top up from my Apple Watch?",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "I need to top up, can I use google pay?",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "How do I go about topping up with Google Pay?",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "google pay top up did not work",
+    "intent": "mobile_money",
+    "language": "en"
+  },
+  {
+    "text": "Google play top up help?",
+    "intent": "mobile_money",
+    "language": "en"
+  }
+]

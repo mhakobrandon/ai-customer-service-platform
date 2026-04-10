@@ -1,0 +1,18 @@
+{
+  "last_updated": "2026-03-05T00:00:00Z",
+  "source": "admin-managed",
+  "transaction_fees": [
+    {"provider": "EcoCash", "send_fee_percent": 2.5, "cashout_fee_percent": 2.0, "zipit_fee_usd": 2.0},
+    {"provider": "OneMoney", "send_fee_percent": 2.2, "cashout_fee_percent": 1.9, "zipit_fee_usd": 2.0},
+    {"provider": "InnBucks", "send_fee_percent": 2.0, "cashout_fee_percent": 1.8, "zipit_fee_usd": 1.8},
+    {"provider": "CBZ", "send_fee_percent": 1.9, "cashout_fee_percent": 1.6, "zipit_fee_usd": 1.5},
+    {"provider": "Steward Bank", "send_fee_percent": 2.1, "cashout_fee_percent": 1.7, "zipit_fee_usd": 1.5},
+    {"provider": "NMB", "send_fee_percent": 1.8, "cashout_fee_percent": 1.5, "zipit_fee_usd": 1.4},
+    {"provider": "Stanbic", "send_fee_percent": 1.7, "cashout_fee_percent": 1.4, "zipit_fee_usd": 1.4}
+  ],
+  "bundle_prices": [
+    {"provider": "Econet", "voice_10min_usd": 0.70, "data_1gb_usd": 2.00, "data_5gb_usd": 7.50},
+    {"provider": "NetOne", "voice_10min_usd": 0.60, "data_1gb_usd": 1.80, "data_5gb_usd": 7.00},
+    {"provider": "Telecel", "voice_10min_usd": 0.55, "data_1gb_usd": 1.70, "data_5gb_usd": 6.80}
+  ]
+}
