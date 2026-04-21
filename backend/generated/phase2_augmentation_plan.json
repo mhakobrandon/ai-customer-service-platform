@@ -1,0 +1,623 @@
+{
+  "metadata": {
+    "generated_at_utc": "2026-04-21T19:44:55.831799+00:00",
+    "analysis_version": "phase2_v1",
+    "source_cleaned_dataset": "generated\\retraining_dataset_phase2_cleaned.json"
+  },
+  "plan": {
+    "targets": {
+      "min_examples_per_intent": 120,
+      "min_shona_examples": 500,
+      "min_ndebele_examples": 500
+    },
+    "current_distribution": {
+      "intent_counts": [
+        {
+          "intent": "transaction_dispute",
+          "count": 182
+        },
+        {
+          "intent": "security_pin",
+          "count": 177
+        },
+        {
+          "intent": "transfer_money",
+          "count": 162
+        },
+        {
+          "intent": "mobile_wallet_fees",
+          "count": 149
+        },
+        {
+          "intent": "card_request",
+          "count": 142
+        },
+        {
+          "intent": "mobile_money",
+          "count": 140
+        },
+        {
+          "intent": "balance_inquiry",
+          "count": 95
+        },
+        {
+          "intent": "network_connectivity",
+          "count": 82
+        },
+        {
+          "intent": "bill_payment",
+          "count": 76
+        },
+        {
+          "intent": "transaction_history",
+          "count": 71
+        },
+        {
+          "intent": "general_inquiry",
+          "count": 61
+        },
+        {
+          "intent": "account_opening",
+          "count": 43
+        },
+        {
+          "intent": "goodbye",
+          "count": 36
+        },
+        {
+          "intent": "loan_inquiry",
+          "count": 30
+        },
+        {
+          "intent": "greeting",
+          "count": 30
+        },
+        {
+          "intent": "password_reset",
+          "count": 27
+        },
+        {
+          "intent": "complaint",
+          "count": 26
+        },
+        {
+          "intent": "atm_location",
+          "count": 23
+        },
+        {
+          "intent": "escalation_request",
+          "count": 18
+        },
+        {
+          "intent": "account_statement",
+          "count": 17
+        },
+        {
+          "intent": "update_profile",
+          "count": 15
+        },
+        {
+          "intent": "account_closure",
+          "count": 12
+        },
+        {
+          "intent": "branch_location",
+          "count": 9
+        }
+      ],
+      "language_counts": [
+        {
+          "language": "en",
+          "count": 1199
+        },
+        {
+          "language": "sn",
+          "count": 285
+        },
+        {
+          "language": "nd",
+          "count": 139
+        }
+      ]
+    },
+    "deficits": {
+      "intent_deficits": [
+        {
+          "intent": "branch_location",
+          "deficit": 111
+        },
+        {
+          "intent": "account_closure",
+          "deficit": 108
+        },
+        {
+          "intent": "update_profile",
+          "deficit": 105
+        },
+        {
+          "intent": "account_statement",
+          "deficit": 103
+        },
+        {
+          "intent": "escalation_request",
+          "deficit": 102
+        },
+        {
+          "intent": "atm_location",
+          "deficit": 97
+        },
+        {
+          "intent": "complaint",
+          "deficit": 94
+        },
+        {
+          "intent": "password_reset",
+          "deficit": 93
+        },
+        {
+          "intent": "greeting",
+          "deficit": 90
+        },
+        {
+          "intent": "loan_inquiry",
+          "deficit": 90
+        },
+        {
+          "intent": "goodbye",
+          "deficit": 84
+        },
+        {
+          "intent": "account_opening",
+          "deficit": 77
+        },
+        {
+          "intent": "general_inquiry",
+          "deficit": 59
+        },
+        {
+          "intent": "transaction_history",
+          "deficit": 49
+        },
+        {
+          "intent": "bill_payment",
+          "deficit": 44
+        },
+        {
+          "intent": "network_connectivity",
+          "deficit": 38
+        },
+        {
+          "intent": "balance_inquiry",
+          "deficit": 25
+        }
+      ],
+      "language_deficits": [
+        {
+          "language": "sn",
+          "deficit": 215
+        },
+        {
+          "language": "nd",
+          "deficit": 361
+        }
+      ]
+    },
+    "recommended_additions_summary": {
+      "total_intent_additions_needed": 1369,
+      "minority_language_budget_applied": 576,
+      "remaining_budget_to_en": 793
+    },
+    "recommended_additions_by_intent": [
+      {
+        "intent": "branch_location",
+        "current_count": 9,
+        "target_count": 120,
+        "deficit": 111,
+        "recommended_sn": 18,
+        "recommended_nd": 29,
+        "recommended_en": 64
+      },
+      {
+        "intent": "account_closure",
+        "current_count": 12,
+        "target_count": 120,
+        "deficit": 108,
+        "recommended_sn": 17,
+        "recommended_nd": 28,
+        "recommended_en": 63
+      },
+      {
+        "intent": "update_profile",
+        "current_count": 15,
+        "target_count": 120,
+        "deficit": 105,
+        "recommended_sn": 16,
+        "recommended_nd": 28,
+        "recommended_en": 61
+      },
+      {
+        "intent": "account_statement",
+        "current_count": 17,
+        "target_count": 120,
+        "deficit": 103,
+        "recommended_sn": 16,
+        "recommended_nd": 27,
+        "recommended_en": 60
+      },
+      {
+        "intent": "escalation_request",
+        "current_count": 18,
+        "target_count": 120,
+        "deficit": 102,
+        "recommended_sn": 16,
+        "recommended_nd": 27,
+        "recommended_en": 59
+      },
+      {
+        "intent": "atm_location",
+        "current_count": 23,
+        "target_count": 120,
+        "deficit": 97,
+        "recommended_sn": 15,
+        "recommended_nd": 26,
+        "recommended_en": 56
+      },
+      {
+        "intent": "complaint",
+        "current_count": 26,
+        "target_count": 120,
+        "deficit": 94,
+        "recommended_sn": 15,
+        "recommended_nd": 25,
+        "recommended_en": 54
+      },
+      {
+        "intent": "password_reset",
+        "current_count": 27,
+        "target_count": 120,
+        "deficit": 93,
+        "recommended_sn": 15,
+        "recommended_nd": 24,
+        "recommended_en": 54
+      },
+      {
+        "intent": "greeting",
+        "current_count": 30,
+        "target_count": 120,
+        "deficit": 90,
+        "recommended_sn": 14,
+        "recommended_nd": 24,
+        "recommended_en": 52
+      },
+      {
+        "intent": "loan_inquiry",
+        "current_count": 30,
+        "target_count": 120,
+        "deficit": 90,
+        "recommended_sn": 14,
+        "recommended_nd": 24,
+        "recommended_en": 52
+      },
+      {
+        "intent": "goodbye",
+        "current_count": 36,
+        "target_count": 120,
+        "deficit": 84,
+        "recommended_sn": 13,
+        "recommended_nd": 22,
+        "recommended_en": 49
+      },
+      {
+        "intent": "account_opening",
+        "current_count": 43,
+        "target_count": 120,
+        "deficit": 77,
+        "recommended_sn": 12,
+        "recommended_nd": 20,
+        "recommended_en": 45
+      },
+      {
+        "intent": "general_inquiry",
+        "current_count": 61,
+        "target_count": 120,
+        "deficit": 59,
+        "recommended_sn": 9,
+        "recommended_nd": 16,
+        "recommended_en": 34
+      },
+      {
+        "intent": "transaction_history",
+        "current_count": 71,
+        "target_count": 120,
+        "deficit": 49,
+        "recommended_sn": 8,
+        "recommended_nd": 13,
+        "recommended_en": 28
+      },
+      {
+        "intent": "bill_payment",
+        "current_count": 76,
+        "target_count": 120,
+        "deficit": 44,
+        "recommended_sn": 7,
+        "recommended_nd": 11,
+        "recommended_en": 26
+      },
+      {
+        "intent": "network_connectivity",
+        "current_count": 82,
+        "target_count": 120,
+        "deficit": 38,
+        "recommended_sn": 6,
+        "recommended_nd": 10,
+        "recommended_en": 22
+      },
+      {
+        "intent": "balance_inquiry",
+        "current_count": 95,
+        "target_count": 120,
+        "deficit": 25,
+        "recommended_sn": 4,
+        "recommended_nd": 7,
+        "recommended_en": 14
+      }
+    ],
+    "recommended_additions_by_intent_language": [
+      {
+        "intent": "branch_location",
+        "language": "en",
+        "recommended_additions": 64
+      },
+      {
+        "intent": "account_closure",
+        "language": "en",
+        "recommended_additions": 63
+      },
+      {
+        "intent": "update_profile",
+        "language": "en",
+        "recommended_additions": 61
+      },
+      {
+        "intent": "account_statement",
+        "language": "en",
+        "recommended_additions": 60
+      },
+      {
+        "intent": "escalation_request",
+        "language": "en",
+        "recommended_additions": 59
+      },
+      {
+        "intent": "atm_location",
+        "language": "en",
+        "recommended_additions": 56
+      },
+      {
+        "intent": "complaint",
+        "language": "en",
+        "recommended_additions": 54
+      },
+      {
+        "intent": "password_reset",
+        "language": "en",
+        "recommended_additions": 54
+      },
+      {
+        "intent": "greeting",
+        "language": "en",
+        "recommended_additions": 52
+      },
+      {
+        "intent": "loan_inquiry",
+        "language": "en",
+        "recommended_additions": 52
+      },
+      {
+        "intent": "goodbye",
+        "language": "en",
+        "recommended_additions": 49
+      },
+      {
+        "intent": "account_opening",
+        "language": "en",
+        "recommended_additions": 45
+      },
+      {
+        "intent": "general_inquiry",
+        "language": "en",
+        "recommended_additions": 34
+      },
+      {
+        "intent": "branch_location",
+        "language": "nd",
+        "recommended_additions": 29
+      },
+      {
+        "intent": "account_closure",
+        "language": "nd",
+        "recommended_additions": 28
+      },
+      {
+        "intent": "update_profile",
+        "language": "nd",
+        "recommended_additions": 28
+      },
+      {
+        "intent": "transaction_history",
+        "language": "en",
+        "recommended_additions": 28
+      },
+      {
+        "intent": "account_statement",
+        "language": "nd",
+        "recommended_additions": 27
+      },
+      {
+        "intent": "escalation_request",
+        "language": "nd",
+        "recommended_additions": 27
+      },
+      {
+        "intent": "atm_location",
+        "language": "nd",
+        "recommended_additions": 26
+      },
+      {
+        "intent": "bill_payment",
+        "language": "en",
+        "recommended_additions": 26
+      },
+      {
+        "intent": "complaint",
+        "language": "nd",
+        "recommended_additions": 25
+      },
+      {
+        "intent": "password_reset",
+        "language": "nd",
+        "recommended_additions": 24
+      },
+      {
+        "intent": "greeting",
+        "language": "nd",
+        "recommended_additions": 24
+      },
+      {
+        "intent": "loan_inquiry",
+        "language": "nd",
+        "recommended_additions": 24
+      },
+      {
+        "intent": "goodbye",
+        "language": "nd",
+        "recommended_additions": 22
+      },
+      {
+        "intent": "network_connectivity",
+        "language": "en",
+        "recommended_additions": 22
+      },
+      {
+        "intent": "account_opening",
+        "language": "nd",
+        "recommended_additions": 20
+      },
+      {
+        "intent": "branch_location",
+        "language": "sn",
+        "recommended_additions": 18
+      },
+      {
+        "intent": "account_closure",
+        "language": "sn",
+        "recommended_additions": 17
+      },
+      {
+        "intent": "update_profile",
+        "language": "sn",
+        "recommended_additions": 16
+      },
+      {
+        "intent": "account_statement",
+        "language": "sn",
+        "recommended_additions": 16
+      },
+      {
+        "intent": "escalation_request",
+        "language": "sn",
+        "recommended_additions": 16
+      },
+      {
+        "intent": "general_inquiry",
+        "language": "nd",
+        "recommended_additions": 16
+      },
+      {
+        "intent": "atm_location",
+        "language": "sn",
+        "recommended_additions": 15
+      },
+      {
+        "intent": "complaint",
+        "language": "sn",
+        "recommended_additions": 15
+      },
+      {
+        "intent": "password_reset",
+        "language": "sn",
+        "recommended_additions": 15
+      },
+      {
+        "intent": "greeting",
+        "language": "sn",
+        "recommended_additions": 14
+      },
+      {
+        "intent": "loan_inquiry",
+        "language": "sn",
+        "recommended_additions": 14
+      },
+      {
+        "intent": "balance_inquiry",
+        "language": "en",
+        "recommended_additions": 14
+      },
+      {
+        "intent": "goodbye",
+        "language": "sn",
+        "recommended_additions": 13
+      },
+      {
+        "intent": "transaction_history",
+        "language": "nd",
+        "recommended_additions": 13
+      },
+      {
+        "intent": "account_opening",
+        "language": "sn",
+        "recommended_additions": 12
+      },
+      {
+        "intent": "bill_payment",
+        "language": "nd",
+        "recommended_additions": 11
+      },
+      {
+        "intent": "network_connectivity",
+        "language": "nd",
+        "recommended_additions": 10
+      },
+      {
+        "intent": "general_inquiry",
+        "language": "sn",
+        "recommended_additions": 9
+      },
+      {
+        "intent": "transaction_history",
+        "language": "sn",
+        "recommended_additions": 8
+      },
+      {
+        "intent": "bill_payment",
+        "language": "sn",
+        "recommended_additions": 7
+      },
+      {
+        "intent": "balance_inquiry",
+        "language": "nd",
+        "recommended_additions": 7
+      },
+      {
+        "intent": "network_connectivity",
+        "language": "sn",
+        "recommended_additions": 6
+      },
+      {
+        "intent": "balance_inquiry",
+        "language": "sn",
+        "recommended_additions": 4
+      }
+    ]
+  }
+}

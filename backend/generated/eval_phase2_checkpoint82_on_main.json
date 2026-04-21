@@ -1,0 +1,48 @@
+{
+  "tag": "phase2_checkpoint82_main",
+  "model_path": "trained_model_phase2_20260421\\checkpoint-82",
+  "tokenizer_path": "trained_model_retrained_20260302",
+  "dataset": "generated\\retraining_dataset.json",
+  "test_size": 0.2,
+  "random_state": 42,
+  "split_stats": {
+    "usable_rows": 1635,
+    "filtered_out_rows": 0,
+    "val_rows": 327
+  },
+  "label_space_size": 23,
+  "label_distribution_val": {
+    "14": 9,
+    "9": 36,
+    "8": 28,
+    "12": 30,
+    "7": 15,
+    "19": 13,
+    "2": 32,
+    "15": 28,
+    "10": 36,
+    "11": 16,
+    "1": 15,
+    "0": 19,
+    "21": 7,
+    "20": 7,
+    "6": 6,
+    "18": 4,
+    "22": 5,
+    "3": 4,
+    "16": 5,
+    "17": 2,
+    "4": 5,
+    "5": 3,
+    "13": 2
+  },
+  "metrics": {
+    "accuracy": 0.813456,
+    "precision_weighted": 0.825584,
+    "recall_weighted": 0.813456,
+    "f1_weighted": 0.805125,
+    "precision_macro": 0.781038,
+    "recall_macro": 0.734283,
+    "f1_macro": 0.733749
+  }
+}

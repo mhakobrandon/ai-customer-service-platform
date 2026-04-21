@@ -1,0 +1,993 @@
+{
+  "metadata": {
+    "generated_at_utc": "2026-04-21T19:35:00.642330+00:00",
+    "analysis_version": "phase1_v1",
+    "source_dataset": "generated\\retraining_dataset.json",
+    "near_duplicate_threshold": 0.9
+  },
+  "summary": {
+    "total_records": 1635,
+    "unique_intents": 23,
+    "duplicate_extra_records": 0,
+    "near_duplicate_pairs": 36,
+    "low_quality_records_lt4": 6,
+    "recommended_candidate_removals": {
+      "exact_duplicate_extras": 0,
+      "low_quality_lt4": 6
+    }
+  },
+  "class_and_language_analysis": {
+    "total_records": 1635,
+    "unique_intents": 23,
+    "intent_distribution": [
+      {
+        "intent": "transaction_dispute",
+        "count": 182,
+        "percentage": 11.13
+      },
+      {
+        "intent": "security_pin",
+        "count": 177,
+        "percentage": 10.83
+      },
+      {
+        "intent": "transfer_money",
+        "count": 162,
+        "percentage": 9.91
+      },
+      {
+        "intent": "mobile_wallet_fees",
+        "count": 149,
+        "percentage": 9.11
+      },
+      {
+        "intent": "card_request",
+        "count": 142,
+        "percentage": 8.69
+      },
+      {
+        "intent": "mobile_money",
+        "count": 140,
+        "percentage": 8.56
+      },
+      {
+        "intent": "balance_inquiry",
+        "count": 95,
+        "percentage": 5.81
+      },
+      {
+        "intent": "network_connectivity",
+        "count": 82,
+        "percentage": 5.02
+      },
+      {
+        "intent": "bill_payment",
+        "count": 76,
+        "percentage": 4.65
+      },
+      {
+        "intent": "transaction_history",
+        "count": 73,
+        "percentage": 4.46
+      },
+      {
+        "intent": "general_inquiry",
+        "count": 63,
+        "percentage": 3.85
+      },
+      {
+        "intent": "account_opening",
+        "count": 43,
+        "percentage": 2.63
+      },
+      {
+        "intent": "goodbye",
+        "count": 37,
+        "percentage": 2.26
+      },
+      {
+        "intent": "greeting",
+        "count": 33,
+        "percentage": 2.02
+      },
+      {
+        "intent": "loan_inquiry",
+        "count": 30,
+        "percentage": 1.83
+      },
+      {
+        "intent": "password_reset",
+        "count": 27,
+        "percentage": 1.65
+      },
+      {
+        "intent": "complaint",
+        "count": 27,
+        "percentage": 1.65
+      },
+      {
+        "intent": "atm_location",
+        "count": 23,
+        "percentage": 1.41
+      },
+      {
+        "intent": "account_statement",
+        "count": 19,
+        "percentage": 1.16
+      },
+      {
+        "intent": "escalation_request",
+        "count": 19,
+        "percentage": 1.16
+      },
+      {
+        "intent": "update_profile",
+        "count": 15,
+        "percentage": 0.92
+      },
+      {
+        "intent": "account_closure",
+        "count": 12,
+        "percentage": 0.73
+      },
+      {
+        "intent": "branch_location",
+        "count": 9,
+        "percentage": 0.55
+      }
+    ],
+    "language_distribution": [
+      {
+        "language": "en",
+        "count": 1209,
+        "percentage": 73.94
+      },
+      {
+        "language": "sn",
+        "count": 285,
+        "percentage": 17.43
+      },
+      {
+        "language": "nd",
+        "count": 141,
+        "percentage": 8.62
+      }
+    ],
+    "imbalance": {
+      "min_class_count": 9,
+      "max_class_count": 182,
+      "imbalance_ratio_max_over_min": 20.22,
+      "classes_under_120": [
+        {
+          "intent": "branch_location",
+          "count": 9,
+          "deficit_to_120": 111
+        },
+        {
+          "intent": "account_closure",
+          "count": 12,
+          "deficit_to_120": 108
+        },
+        {
+          "intent": "update_profile",
+          "count": 15,
+          "deficit_to_120": 105
+        },
+        {
+          "intent": "account_statement",
+          "count": 19,
+          "deficit_to_120": 101
+        },
+        {
+          "intent": "escalation_request",
+          "count": 19,
+          "deficit_to_120": 101
+        },
+        {
+          "intent": "atm_location",
+          "count": 23,
+          "deficit_to_120": 97
+        },
+        {
+          "intent": "password_reset",
+          "count": 27,
+          "deficit_to_120": 93
+        },
+        {
+          "intent": "complaint",
+          "count": 27,
+          "deficit_to_120": 93
+        },
+        {
+          "intent": "loan_inquiry",
+          "count": 30,
+          "deficit_to_120": 90
+        },
+        {
+          "intent": "greeting",
+          "count": 33,
+          "deficit_to_120": 87
+        },
+        {
+          "intent": "goodbye",
+          "count": 37,
+          "deficit_to_120": 83
+        },
+        {
+          "intent": "account_opening",
+          "count": 43,
+          "deficit_to_120": 77
+        },
+        {
+          "intent": "general_inquiry",
+          "count": 63,
+          "deficit_to_120": 57
+        },
+        {
+          "intent": "transaction_history",
+          "count": 73,
+          "deficit_to_120": 47
+        },
+        {
+          "intent": "bill_payment",
+          "count": 76,
+          "deficit_to_120": 44
+        },
+        {
+          "intent": "network_connectivity",
+          "count": 82,
+          "deficit_to_120": 38
+        },
+        {
+          "intent": "balance_inquiry",
+          "count": 95,
+          "deficit_to_120": 25
+        }
+      ],
+      "classes_under_120_count": 17
+    },
+    "language_gaps": {
+      "target_minority_language_count": 500,
+      "per_language_target_even_split": 545.0,
+      "gaps": [
+        {
+          "language": "en",
+          "count": 1209,
+          "percentage": 73.94,
+          "deficit_to_500": 0,
+          "deficit_to_even_split": 0
+        },
+        {
+          "language": "sn",
+          "count": 285,
+          "percentage": 17.43,
+          "deficit_to_500": 215,
+          "deficit_to_even_split": 260
+        },
+        {
+          "language": "nd",
+          "count": 141,
+          "percentage": 8.62,
+          "deficit_to_500": 359,
+          "deficit_to_even_split": 404
+        }
+      ]
+    }
+  },
+  "exact_duplicate_analysis": {
+    "duplicate_group_count": 0,
+    "duplicate_extra_records": 0,
+    "label_conflict_group_count": 0,
+    "sample_duplicate_groups": [],
+    "sample_label_conflicts": []
+  },
+  "near_duplicate_analysis": {
+    "similarity_threshold": 0.9,
+    "near_duplicate_pair_count": 36,
+    "near_duplicate_conflict_pair_count": 3,
+    "sample_pairs": [
+      {
+        "row_id_a": 313,
+        "row_id_b": 315,
+        "language": "en",
+        "similarity": 1.0,
+        "same_intent": true,
+        "intent_a": "goodbye",
+        "intent_b": "goodbye",
+        "text_a": "Bye",
+        "text_b": "Bye bye"
+      },
+      {
+        "row_id_a": 94,
+        "row_id_b": 101,
+        "language": "en",
+        "similarity": 0.9933,
+        "same_intent": true,
+        "intent_a": "password_reset",
+        "intent_b": "password_reset",
+        "text_a": "I forgot my password",
+        "text_b": "Forgot password"
+      },
+      {
+        "row_id_a": 197,
+        "row_id_b": 512,
+        "language": "en",
+        "similarity": 0.9836,
+        "same_intent": false,
+        "intent_a": "account_statement",
+        "intent_b": "transaction_history",
+        "text_a": "Email my bank statement",
+        "text_b": "Email me my bank statement"
+      },
+      {
+        "row_id_a": 234,
+        "row_id_b": 813,
+        "language": "en",
+        "similarity": 0.9618,
+        "same_intent": true,
+        "intent_a": "account_opening",
+        "intent_b": "account_opening",
+        "text_a": "Open a savings account for me",
+        "text_b": "Open a savings account"
+      },
+      {
+        "row_id_a": 6,
+        "row_id_b": 11,
+        "language": "en",
+        "similarity": 0.9616,
+        "same_intent": true,
+        "intent_a": "balance_inquiry",
+        "intent_b": "balance_inquiry",
+        "text_a": "Show me my balance",
+        "text_b": "Show balance"
+      },
+      {
+        "row_id_a": 1160,
+        "row_id_b": 1268,
+        "language": "en",
+        "similarity": 0.9614,
+        "same_intent": true,
+        "intent_a": "card_request",
+        "intent_b": "card_request",
+        "text_a": "Can I use my American Express card to add money into my account?",
+        "text_b": "How can I use my American Express to add money into my account?"
+      },
+      {
+        "row_id_a": 1403,
+        "row_id_b": 1457,
+        "language": "en",
+        "similarity": 0.9564,
+        "same_intent": true,
+        "intent_a": "transfer_money",
+        "intent_b": "transfer_money",
+        "text_a": "why was a transfer declined",
+        "text_b": "I was declined a transfer"
+      },
+      {
+        "row_id_a": 1408,
+        "row_id_b": 1469,
+        "language": "en",
+        "similarity": 0.9546,
+        "same_intent": true,
+        "intent_a": "transfer_money",
+        "intent_b": "transfer_money",
+        "text_a": "Tell me why my transfer is declined.",
+        "text_b": "Tell me why my transfer was declined."
+      },
+      {
+        "row_id_a": 1103,
+        "row_id_b": 1116,
+        "language": "en",
+        "similarity": 0.9544,
+        "same_intent": true,
+        "intent_a": "mobile_money",
+        "intent_b": "mobile_money",
+        "text_a": "my cash withdrawal is pending, why?",
+        "text_b": "My withdrawal is pending, why?"
+      },
+      {
+        "row_id_a": 450,
+        "row_id_b": 722,
+        "language": "sn",
+        "similarity": 0.9504,
+        "same_intent": true,
+        "intent_a": "bill_payment",
+        "intent_b": "bill_payment",
+        "text_a": "Bhadhara DSTV",
+        "text_b": "Bhadhara DSTV yangu"
+      },
+      {
+        "row_id_a": 1530,
+        "row_id_b": 1535,
+        "language": "en",
+        "similarity": 0.9498,
+        "same_intent": true,
+        "intent_a": "mobile_wallet_fees",
+        "intent_b": "mobile_wallet_fees",
+        "text_a": "Why was there a fee for my cash withdrawal?",
+        "text_b": "Why was there a fee on my cash withdrawal?"
+      },
+      {
+        "row_id_a": 1406,
+        "row_id_b": 1416,
+        "language": "en",
+        "similarity": 0.9496,
+        "same_intent": true,
+        "intent_a": "transfer_money",
+        "intent_b": "transfer_money",
+        "text_a": "Transfer was declined.",
+        "text_b": "Transfer declined."
+      },
+      {
+        "row_id_a": 333,
+        "row_id_b": 760,
+        "language": "en",
+        "similarity": 0.9373,
+        "same_intent": false,
+        "intent_a": "complaint",
+        "intent_b": "escalation_request",
+        "text_a": "I need to speak to a manager",
+        "text_b": "Speak to a manager"
+      },
+      {
+        "row_id_a": 127,
+        "row_id_b": 134,
+        "language": "en",
+        "similarity": 0.9336,
+        "same_intent": true,
+        "intent_a": "loan_inquiry",
+        "intent_b": "loan_inquiry",
+        "text_a": "Loan application",
+        "text_b": "Car loan application"
+      },
+      {
+        "row_id_a": 1447,
+        "row_id_b": 1475,
+        "language": "en",
+        "similarity": 0.9322,
+        "same_intent": true,
+        "intent_a": "transfer_money",
+        "intent_b": "transfer_money",
+        "text_a": "How come my transfer got declined",
+        "text_b": "how come my transfer declined"
+      },
+      {
+        "row_id_a": 1140,
+        "row_id_b": 1146,
+        "language": "en",
+        "similarity": 0.9321,
+        "same_intent": true,
+        "intent_a": "network_connectivity",
+        "intent_b": "network_connectivity",
+        "text_a": "how to get new card?",
+        "text_b": "How can i get new card?"
+      },
+      {
+        "row_id_a": 1047,
+        "row_id_b": 1056,
+        "language": "en",
+        "similarity": 0.9299,
+        "same_intent": true,
+        "intent_a": "mobile_money",
+        "intent_b": "mobile_money",
+        "text_a": "What does pending mean on a cash withdrawal?",
+        "text_b": "What does it mean to have a pending cash withdrawal?"
+      },
+      {
+        "row_id_a": 212,
+        "row_id_b": 545,
+        "language": "nd",
+        "similarity": 0.9294,
+        "same_intent": false,
+        "intent_a": "account_statement",
+        "intent_b": "transaction_history",
+        "text_a": "Thumela i-statement ku-email",
+        "text_b": "Thumela i-statement yami ku-email yami"
+      },
+      {
+        "row_id_a": 98,
+        "row_id_b": 104,
+        "language": "en",
+        "similarity": 0.9235,
+        "same_intent": true,
+        "intent_a": "password_reset",
+        "intent_b": "password_reset",
+        "text_a": "Change my password",
+        "text_b": "I want to change my password"
+      },
+      {
+        "row_id_a": 218,
+        "row_id_b": 562,
+        "language": "en",
+        "similarity": 0.9234,
+        "same_intent": true,
+        "intent_a": "transaction_dispute",
+        "intent_b": "transaction_dispute",
+        "text_a": "Fraudulent transaction",
+        "text_b": "Fraudulent transaction on my account"
+      },
+      {
+        "row_id_a": 904,
+        "row_id_b": 911,
+        "language": "en",
+        "similarity": 0.9233,
+        "same_intent": true,
+        "intent_a": "transaction_dispute",
+        "intent_b": "transaction_dispute",
+        "text_a": "I see a $1 charge in a transaction.",
+        "text_b": "$1 charge in transaction."
+      },
+      {
+        "row_id_a": 1228,
+        "row_id_b": 1237,
+        "language": "en",
+        "similarity": 0.9216,
+        "same_intent": true,
+        "intent_a": "card_request",
+        "intent_b": "card_request",
+        "text_a": "What are the cards and currencies that you support?",
+        "text_b": "What currencies and cards do you support?"
+      },
+      {
+        "row_id_a": 1093,
+        "row_id_b": 1107,
+        "language": "en",
+        "similarity": 0.9214,
+        "same_intent": true,
+        "intent_a": "mobile_money",
+        "intent_b": "mobile_money",
+        "text_a": "How long will a cash withdrawal be pending?",
+        "text_b": "How long will my ATM withdrawal be pending?"
+      },
+      {
+        "row_id_a": 1075,
+        "row_id_b": 1088,
+        "language": "en",
+        "similarity": 0.9202,
+        "same_intent": true,
+        "intent_a": "mobile_money",
+        "intent_b": "mobile_money",
+        "text_a": "What does it mean when a cash withdrawal is pending?",
+        "text_b": "What does it mean if my cash withdrawal is pending?"
+      },
+      {
+        "row_id_a": 1096,
+        "row_id_b": 1120,
+        "language": "en",
+        "similarity": 0.9188,
+        "same_intent": true,
+        "intent_a": "mobile_money",
+        "intent_b": "mobile_money",
+        "text_a": "Why would a cash withdrawal still be pending?",
+        "text_b": "Why would a cash withdrawal be pending?"
+      },
+      {
+        "row_id_a": 1053,
+        "row_id_b": 1106,
+        "language": "en",
+        "similarity": 0.9181,
+        "same_intent": true,
+        "intent_a": "mobile_money",
+        "intent_b": "mobile_money",
+        "text_a": "I got cash from an ATM earlier but it shows up as pending in the app. How can this still be pending, I already received the cash?",
+        "text_b": "I removed cash from an ATM earlier but it shows up as pending in the app. How can this still be pending, I already received the cash?"
+      },
+      {
+        "row_id_a": 1179,
+        "row_id_b": 1260,
+        "language": "en",
+        "similarity": 0.9167,
+        "same_intent": true,
+        "intent_a": "card_request",
+        "intent_b": "card_request",
+        "text_a": "Which cards and currencies are supported?",
+        "text_b": "Can you tell me which cards and currencies are supported?"
+      },
+      {
+        "row_id_a": 1406,
+        "row_id_b": 1409,
+        "language": "en",
+        "similarity": 0.9166,
+        "same_intent": true,
+        "intent_a": "transfer_money",
+        "intent_b": "transfer_money",
+        "text_a": "Transfer was declined.",
+        "text_b": "I see my transfer was declined."
+      },
+      {
+        "row_id_a": 881,
+        "row_id_b": 987,
+        "language": "en",
+        "similarity": 0.9136,
+        "same_intent": true,
+        "intent_a": "transaction_dispute",
+        "intent_b": "transaction_dispute",
+        "text_a": "Why is there an extra fee on my statement?",
+        "text_b": "Why is there an extra €1 fee in my statement?"
+      },
+      {
+        "row_id_a": 350,
+        "row_id_b": 356,
+        "language": "en",
+        "similarity": 0.9121,
+        "same_intent": true,
+        "intent_a": "general_inquiry",
+        "intent_b": "general_inquiry",
+        "text_a": "I have a question",
+        "text_b": "Question"
+      },
+      {
+        "row_id_a": 1530,
+        "row_id_b": 1601,
+        "language": "en",
+        "similarity": 0.9119,
+        "same_intent": true,
+        "intent_a": "mobile_wallet_fees",
+        "intent_b": "mobile_wallet_fees",
+        "text_a": "Why was there a fee for my cash withdrawal?",
+        "text_b": "Is there a fee for a cash withdrawal?"
+      },
+      {
+        "row_id_a": 1008,
+        "row_id_b": 1022,
+        "language": "en",
+        "similarity": 0.9089,
+        "same_intent": true,
+        "intent_a": "mobile_money",
+        "intent_b": "mobile_money",
+        "text_a": "Why is my ATM withdrawal still pending?",
+        "text_b": "Why is my cash withdrawal still pending?"
+      },
+      {
+        "row_id_a": 1383,
+        "row_id_b": 1390,
+        "language": "en",
+        "similarity": 0.908,
+        "same_intent": true,
+        "intent_a": "security_pin",
+        "intent_b": "security_pin",
+        "text_a": "Can I see the source of my available money?",
+        "text_b": "Where do I go to see the source of my available money?"
+      },
+      {
+        "row_id_a": 1529,
+        "row_id_b": 1557,
+        "language": "en",
+        "similarity": 0.9051,
+        "same_intent": true,
+        "intent_a": "mobile_wallet_fees",
+        "intent_b": "mobile_wallet_fees",
+        "text_a": "Why am I charged a fee for withdrawing cash?",
+        "text_b": "Why was I charged for withdrawing cash?"
+      },
+      {
+        "row_id_a": 1218,
+        "row_id_b": 1226,
+        "language": "en",
+        "similarity": 0.9003,
+        "same_intent": true,
+        "intent_a": "card_request",
+        "intent_b": "card_request",
+        "text_a": "I have one other credit card from the US. Do you take that?",
+        "text_b": "I have one other credit card from the US. Do you take it?"
+      },
+      {
+        "row_id_a": 56,
+        "row_id_b": 61,
+        "language": "sn",
+        "similarity": 0.9002,
+        "same_intent": true,
+        "intent_a": "transaction_history",
+        "intent_b": "transaction_history",
+        "text_a": "Ndinoda kuona transactions dzangu",
+        "text_b": "Ndoda kuona transactions dzangu"
+      }
+    ],
+    "sample_conflict_pairs": [
+      {
+        "row_id_a": 197,
+        "row_id_b": 512,
+        "language": "en",
+        "similarity": 0.9836,
+        "same_intent": false,
+        "intent_a": "account_statement",
+        "intent_b": "transaction_history",
+        "text_a": "Email my bank statement",
+        "text_b": "Email me my bank statement"
+      },
+      {
+        "row_id_a": 333,
+        "row_id_b": 760,
+        "language": "en",
+        "similarity": 0.9373,
+        "same_intent": false,
+        "intent_a": "complaint",
+        "intent_b": "escalation_request",
+        "text_a": "I need to speak to a manager",
+        "text_b": "Speak to a manager"
+      },
+      {
+        "row_id_a": 212,
+        "row_id_b": 545,
+        "language": "nd",
+        "similarity": 0.9294,
+        "same_intent": false,
+        "intent_a": "account_statement",
+        "intent_b": "transaction_history",
+        "text_a": "Thumela i-statement ku-email",
+        "text_b": "Thumela i-statement yami ku-email yami"
+      }
+    ]
+  },
+  "quality_analysis": {
+    "overall": {
+      "avg_quality": 9.72,
+      "min_quality": 1,
+      "max_quality": 10,
+      "low_quality_threshold": 4,
+      "low_quality_count": 6,
+      "low_quality_percentage": 0.37
+    },
+    "per_intent": [
+      {
+        "intent": "account_closure",
+        "count": 12,
+        "avg_quality": 10,
+        "min_quality": 10,
+        "max_quality": 10,
+        "low_quality_count": 0
+      },
+      {
+        "intent": "account_opening",
+        "count": 43,
+        "avg_quality": 9.91,
+        "min_quality": 8,
+        "max_quality": 10,
+        "low_quality_count": 0
+      },
+      {
+        "intent": "account_statement",
+        "count": 19,
+        "avg_quality": 9.79,
+        "min_quality": 6,
+        "max_quality": 10,
+        "low_quality_count": 0
+      },
+      {
+        "intent": "atm_location",
+        "count": 23,
+        "avg_quality": 9.83,
+        "min_quality": 8,
+        "max_quality": 10,
+        "low_quality_count": 0
+      },
+      {
+        "intent": "balance_inquiry",
+        "count": 95,
+        "avg_quality": 9.77,
+        "min_quality": 8,
+        "max_quality": 10,
+        "low_quality_count": 0
+      },
+      {
+        "intent": "bill_payment",
+        "count": 76,
+        "avg_quality": 9.68,
+        "min_quality": 8,
+        "max_quality": 10,
+        "low_quality_count": 0
+      },
+      {
+        "intent": "branch_location",
+        "count": 9,
+        "avg_quality": 10,
+        "min_quality": 10,
+        "max_quality": 10,
+        "low_quality_count": 0
+      },
+      {
+        "intent": "card_request",
+        "count": 142,
+        "avg_quality": 9.99,
+        "min_quality": 8,
+        "max_quality": 10,
+        "low_quality_count": 0
+      },
+      {
+        "intent": "complaint",
+        "count": 27,
+        "avg_quality": 9.7,
+        "min_quality": 8,
+        "max_quality": 10,
+        "low_quality_count": 0
+      },
+      {
+        "intent": "escalation_request",
+        "count": 19,
+        "avg_quality": 9,
+        "min_quality": 4,
+        "max_quality": 10,
+        "low_quality_count": 0
+      },
+      {
+        "intent": "general_inquiry",
+        "count": 63,
+        "avg_quality": 8.89,
+        "min_quality": 1,
+        "max_quality": 10,
+        "low_quality_count": 2
+      },
+      {
+        "intent": "goodbye",
+        "count": 37,
+        "avg_quality": 7.7,
+        "min_quality": 1,
+        "max_quality": 10,
+        "low_quality_count": 1
+      },
+      {
+        "intent": "greeting",
+        "count": 33,
+        "avg_quality": 5.55,
+        "min_quality": 1,
+        "max_quality": 8,
+        "low_quality_count": 3
+      },
+      {
+        "intent": "loan_inquiry",
+        "count": 30,
+        "avg_quality": 9.93,
+        "min_quality": 8,
+        "max_quality": 10,
+        "low_quality_count": 0
+      },
+      {
+        "intent": "mobile_money",
+        "count": 140,
+        "avg_quality": 9.93,
+        "min_quality": 8,
+        "max_quality": 10,
+        "low_quality_count": 0
+      },
+      {
+        "intent": "mobile_wallet_fees",
+        "count": 149,
+        "avg_quality": 9.99,
+        "min_quality": 8,
+        "max_quality": 10,
+        "low_quality_count": 0
+      },
+      {
+        "intent": "network_connectivity",
+        "count": 82,
+        "avg_quality": 9.98,
+        "min_quality": 8,
+        "max_quality": 10,
+        "low_quality_count": 0
+      },
+      {
+        "intent": "password_reset",
+        "count": 27,
+        "avg_quality": 9.85,
+        "min_quality": 8,
+        "max_quality": 10,
+        "low_quality_count": 0
+      },
+      {
+        "intent": "security_pin",
+        "count": 177,
+        "avg_quality": 10,
+        "min_quality": 10,
+        "max_quality": 10,
+        "low_quality_count": 0
+      },
+      {
+        "intent": "transaction_dispute",
+        "count": 182,
+        "avg_quality": 9.97,
+        "min_quality": 8,
+        "max_quality": 10,
+        "low_quality_count": 0
+      },
+      {
+        "intent": "transaction_history",
+        "count": 73,
+        "avg_quality": 9.53,
+        "min_quality": 5,
+        "max_quality": 10,
+        "low_quality_count": 0
+      },
+      {
+        "intent": "transfer_money",
+        "count": 162,
+        "avg_quality": 9.96,
+        "min_quality": 8,
+        "max_quality": 10,
+        "low_quality_count": 0
+      },
+      {
+        "intent": "update_profile",
+        "count": 15,
+        "avg_quality": 10,
+        "min_quality": 10,
+        "max_quality": 10,
+        "low_quality_count": 0
+      }
+    ],
+    "sample_low_quality_records": [
+      {
+        "row_id": 289,
+        "text": "Hey",
+        "intent": "greeting",
+        "language": "en",
+        "quality_score": 1,
+        "quality_reasons": [
+          "very_short_char_length",
+          "single_word"
+        ]
+      },
+      {
+        "row_id": 290,
+        "text": "Hi",
+        "intent": "greeting",
+        "language": "en",
+        "quality_score": 1,
+        "quality_reasons": [
+          "very_short_char_length",
+          "single_word"
+        ]
+      },
+      {
+        "row_id": 313,
+        "text": "Bye",
+        "intent": "goodbye",
+        "language": "en",
+        "quality_score": 1,
+        "quality_reasons": [
+          "very_short_char_length",
+          "single_word"
+        ]
+      },
+      {
+        "row_id": 354,
+        "text": "Help",
+        "intent": "general_inquiry",
+        "language": "en",
+        "quality_score": 1,
+        "quality_reasons": [
+          "short_char_length",
+          "single_word",
+          "ambiguous_generic_term"
+        ]
+      },
+      {
+        "row_id": 787,
+        "text": "Yo",
+        "intent": "greeting",
+        "language": "en",
+        "quality_score": 1,
+        "quality_reasons": [
+          "very_short_char_length",
+          "single_word"
+        ]
+      },
+      {
+        "row_id": 356,
+        "text": "Question",
+        "intent": "general_inquiry",
+        "language": "en",
+        "quality_score": 3,
+        "quality_reasons": [
+          "single_word",
+          "ambiguous_generic_term"
+        ]
+      }
+    ]
+  },
+  "next_step_recommendations": [
+    "Increase Shona and Ndebele examples toward >=500 each.",
+    "Raise low-frequency intents to >=120 examples each.",
+    "Resolve label conflicts found in exact and near-duplicate pairs.",
+    "Review low-quality records (quality_score < 4) before augmentation."
+  ]
+}

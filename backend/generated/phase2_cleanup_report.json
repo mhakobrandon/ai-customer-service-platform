@@ -1,0 +1,442 @@
+{
+  "metadata": {
+    "generated_at_utc": "2026-04-21T19:44:55.829135+00:00",
+    "analysis_version": "phase2_v1",
+    "source_dataset": "generated\\retraining_dataset.json",
+    "source_scored_dataset": "generated\\retraining_dataset_scored.json",
+    "quality_threshold": 4,
+    "near_duplicate_threshold": 0.9
+  },
+  "summary": {
+    "before_count": 1635,
+    "after_count": 1623,
+    "removed_total": 12,
+    "removed_low_quality": 6,
+    "removed_exact_duplicate_extras": 0,
+    "removed_exact_duplicate_conflicts": 0,
+    "removed_near_duplicate_conflicts": 6
+  },
+  "distribution_before": {
+    "intent_distribution": [
+      {
+        "intent": "transaction_dispute",
+        "count": 182,
+        "percentage": 11.13
+      },
+      {
+        "intent": "security_pin",
+        "count": 177,
+        "percentage": 10.83
+      },
+      {
+        "intent": "transfer_money",
+        "count": 162,
+        "percentage": 9.91
+      },
+      {
+        "intent": "mobile_wallet_fees",
+        "count": 149,
+        "percentage": 9.11
+      },
+      {
+        "intent": "card_request",
+        "count": 142,
+        "percentage": 8.69
+      },
+      {
+        "intent": "mobile_money",
+        "count": 140,
+        "percentage": 8.56
+      },
+      {
+        "intent": "balance_inquiry",
+        "count": 95,
+        "percentage": 5.81
+      },
+      {
+        "intent": "network_connectivity",
+        "count": 82,
+        "percentage": 5.02
+      },
+      {
+        "intent": "bill_payment",
+        "count": 76,
+        "percentage": 4.65
+      },
+      {
+        "intent": "transaction_history",
+        "count": 73,
+        "percentage": 4.46
+      },
+      {
+        "intent": "general_inquiry",
+        "count": 63,
+        "percentage": 3.85
+      },
+      {
+        "intent": "account_opening",
+        "count": 43,
+        "percentage": 2.63
+      },
+      {
+        "intent": "goodbye",
+        "count": 37,
+        "percentage": 2.26
+      },
+      {
+        "intent": "greeting",
+        "count": 33,
+        "percentage": 2.02
+      },
+      {
+        "intent": "loan_inquiry",
+        "count": 30,
+        "percentage": 1.83
+      },
+      {
+        "intent": "password_reset",
+        "count": 27,
+        "percentage": 1.65
+      },
+      {
+        "intent": "complaint",
+        "count": 27,
+        "percentage": 1.65
+      },
+      {
+        "intent": "atm_location",
+        "count": 23,
+        "percentage": 1.41
+      },
+      {
+        "intent": "account_statement",
+        "count": 19,
+        "percentage": 1.16
+      },
+      {
+        "intent": "escalation_request",
+        "count": 19,
+        "percentage": 1.16
+      },
+      {
+        "intent": "update_profile",
+        "count": 15,
+        "percentage": 0.92
+      },
+      {
+        "intent": "account_closure",
+        "count": 12,
+        "percentage": 0.73
+      },
+      {
+        "intent": "branch_location",
+        "count": 9,
+        "percentage": 0.55
+      }
+    ],
+    "language_distribution": [
+      {
+        "language": "en",
+        "count": 1209,
+        "percentage": 73.94
+      },
+      {
+        "language": "sn",
+        "count": 285,
+        "percentage": 17.43
+      },
+      {
+        "language": "nd",
+        "count": 141,
+        "percentage": 8.62
+      }
+    ]
+  },
+  "distribution_after": {
+    "intent_distribution": [
+      {
+        "intent": "transaction_dispute",
+        "count": 182,
+        "percentage": 11.21
+      },
+      {
+        "intent": "security_pin",
+        "count": 177,
+        "percentage": 10.91
+      },
+      {
+        "intent": "transfer_money",
+        "count": 162,
+        "percentage": 9.98
+      },
+      {
+        "intent": "mobile_wallet_fees",
+        "count": 149,
+        "percentage": 9.18
+      },
+      {
+        "intent": "card_request",
+        "count": 142,
+        "percentage": 8.75
+      },
+      {
+        "intent": "mobile_money",
+        "count": 140,
+        "percentage": 8.63
+      },
+      {
+        "intent": "balance_inquiry",
+        "count": 95,
+        "percentage": 5.85
+      },
+      {
+        "intent": "network_connectivity",
+        "count": 82,
+        "percentage": 5.05
+      },
+      {
+        "intent": "bill_payment",
+        "count": 76,
+        "percentage": 4.68
+      },
+      {
+        "intent": "transaction_history",
+        "count": 71,
+        "percentage": 4.37
+      },
+      {
+        "intent": "general_inquiry",
+        "count": 61,
+        "percentage": 3.76
+      },
+      {
+        "intent": "account_opening",
+        "count": 43,
+        "percentage": 2.65
+      },
+      {
+        "intent": "goodbye",
+        "count": 36,
+        "percentage": 2.22
+      },
+      {
+        "intent": "loan_inquiry",
+        "count": 30,
+        "percentage": 1.85
+      },
+      {
+        "intent": "greeting",
+        "count": 30,
+        "percentage": 1.85
+      },
+      {
+        "intent": "password_reset",
+        "count": 27,
+        "percentage": 1.66
+      },
+      {
+        "intent": "complaint",
+        "count": 26,
+        "percentage": 1.6
+      },
+      {
+        "intent": "atm_location",
+        "count": 23,
+        "percentage": 1.42
+      },
+      {
+        "intent": "escalation_request",
+        "count": 18,
+        "percentage": 1.11
+      },
+      {
+        "intent": "account_statement",
+        "count": 17,
+        "percentage": 1.05
+      },
+      {
+        "intent": "update_profile",
+        "count": 15,
+        "percentage": 0.92
+      },
+      {
+        "intent": "account_closure",
+        "count": 12,
+        "percentage": 0.74
+      },
+      {
+        "intent": "branch_location",
+        "count": 9,
+        "percentage": 0.55
+      }
+    ],
+    "language_distribution": [
+      {
+        "language": "en",
+        "count": 1199,
+        "percentage": 73.88
+      },
+      {
+        "language": "sn",
+        "count": 285,
+        "percentage": 17.56
+      },
+      {
+        "language": "nd",
+        "count": 139,
+        "percentage": 8.56
+      }
+    ]
+  },
+  "exact_duplicate_analysis": {
+    "duplicate_group_count": 0,
+    "label_conflict_group_count": 0,
+    "sample_duplicate_groups": [],
+    "sample_conflict_groups": []
+  },
+  "near_duplicate_conflict_analysis": {
+    "near_duplicate_conflict_pair_count": 3,
+    "sample_conflict_pairs": [
+      {
+        "row_id_a": 197,
+        "row_id_b": 512,
+        "language": "en",
+        "similarity": 0.9836,
+        "intent_a": "account_statement",
+        "intent_b": "transaction_history",
+        "text_a": "Email my bank statement",
+        "text_b": "Email me my bank statement"
+      },
+      {
+        "row_id_a": 333,
+        "row_id_b": 760,
+        "language": "en",
+        "similarity": 0.9373,
+        "intent_a": "complaint",
+        "intent_b": "escalation_request",
+        "text_a": "I need to speak to a manager",
+        "text_b": "Speak to a manager"
+      },
+      {
+        "row_id_a": 212,
+        "row_id_b": 545,
+        "language": "nd",
+        "similarity": 0.9294,
+        "intent_a": "account_statement",
+        "intent_b": "transaction_history",
+        "text_a": "Thumela i-statement ku-email",
+        "text_b": "Thumela i-statement yami ku-email yami"
+      }
+    ]
+  },
+  "sample_removed_rows": [
+    {
+      "row_id": 197,
+      "text": "Email my bank statement",
+      "intent": "account_statement",
+      "language": "en",
+      "reasons": [
+        "near_duplicate_label_conflict"
+      ]
+    },
+    {
+      "row_id": 212,
+      "text": "Thumela i-statement ku-email",
+      "intent": "account_statement",
+      "language": "nd",
+      "reasons": [
+        "near_duplicate_label_conflict"
+      ]
+    },
+    {
+      "row_id": 289,
+      "text": "Hey",
+      "intent": "greeting",
+      "language": "en",
+      "reasons": [
+        "low_quality"
+      ]
+    },
+    {
+      "row_id": 290,
+      "text": "Hi",
+      "intent": "greeting",
+      "language": "en",
+      "reasons": [
+        "low_quality"
+      ]
+    },
+    {
+      "row_id": 313,
+      "text": "Bye",
+      "intent": "goodbye",
+      "language": "en",
+      "reasons": [
+        "low_quality"
+      ]
+    },
+    {
+      "row_id": 333,
+      "text": "I need to speak to a manager",
+      "intent": "complaint",
+      "language": "en",
+      "reasons": [
+        "near_duplicate_label_conflict"
+      ]
+    },
+    {
+      "row_id": 354,
+      "text": "Help",
+      "intent": "general_inquiry",
+      "language": "en",
+      "reasons": [
+        "low_quality"
+      ]
+    },
+    {
+      "row_id": 356,
+      "text": "Question",
+      "intent": "general_inquiry",
+      "language": "en",
+      "reasons": [
+        "low_quality"
+      ]
+    },
+    {
+      "row_id": 512,
+      "text": "Email me my bank statement",
+      "intent": "transaction_history",
+      "language": "en",
+      "reasons": [
+        "near_duplicate_label_conflict"
+      ]
+    },
+    {
+      "row_id": 545,
+      "text": "Thumela i-statement yami ku-email yami",
+      "intent": "transaction_history",
+      "language": "nd",
+      "reasons": [
+        "near_duplicate_label_conflict"
+      ]
+    },
+    {
+      "row_id": 760,
+      "text": "Speak to a manager",
+      "intent": "escalation_request",
+      "language": "en",
+      "reasons": [
+        "near_duplicate_label_conflict"
+      ]
+    },
+    {
+      "row_id": 787,
+      "text": "Yo",
+      "intent": "greeting",
+      "language": "en",
+      "reasons": [
+        "low_quality"
+      ]
+    }
+  ]
+}
