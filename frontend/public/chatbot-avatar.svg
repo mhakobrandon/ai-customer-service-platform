@@ -1,0 +1,41 @@
+<svg width="220" height="220" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Chatbot assistant portrait</title>
+  <desc id="desc">Stylized chatbot avatar with headset on a soft gradient background.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f9e7cb" />
+      <stop offset="1" stop-color="#d8b57f" />
+    </linearGradient>
+    <linearGradient id="face" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e9f0ff" />
+      <stop offset="1" stop-color="#b8c8e8" />
+    </linearGradient>
+    <linearGradient id="shirt" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2f4d8b" />
+      <stop offset="1" stop-color="#1f376a" />
+    </linearGradient>
+  </defs>
+
+  <rect width="220" height="220" fill="url(#bg)" rx="26" />
+
+  <circle cx="110" cy="84" r="44" fill="#202c40" />
+  <ellipse cx="110" cy="99" rx="40" ry="50" fill="url(#face)" />
+
+  <rect x="72" y="58" width="76" height="18" rx="9" fill="#364f85" />
+  <rect x="66" y="76" width="10" height="34" rx="5" fill="#364f85" />
+  <rect x="144" y="76" width="10" height="34" rx="5" fill="#364f85" />
+
+  <circle cx="95" cy="95" r="7" fill="#24365f" />
+  <circle cx="125" cy="95" r="7" fill="#24365f" />
+  <circle cx="95" cy="95" r="2" fill="#d8e4ff" />
+  <circle cx="125" cy="95" r="2" fill="#d8e4ff" />
+
+  <rect x="95" y="113" width="30" height="7" rx="3.5" fill="#2d467f" />
+  <rect x="103" y="122" width="14" height="3" rx="1.5" fill="#5f78ad" />
+
+  <path d="M58 182c7-32 31-50 52-50s45 18 52 50" fill="url(#shirt)" />
+  <path d="M86 144l24 20 24-20" fill="none" stroke="#8ca5d9" stroke-width="5" stroke-linecap="round" />
+
+  <circle cx="157" cy="111" r="5" fill="#7bc6ff" />
+  <rect x="158" y="110" width="22" height="4" rx="2" fill="#7bc6ff" />
+</svg>

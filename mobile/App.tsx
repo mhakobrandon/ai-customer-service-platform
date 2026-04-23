@@ -43,7 +43,6 @@ import {
 } from './src/services/api'
 import {
   ActionCard,
-  ProviderContextCard,
   QuickActionGrid,
   SessionHubStatsCard,
   SessionTabs,
@@ -52,6 +51,7 @@ import {
 
 type AuthMode = 'login' | 'register' | 'otp'
 type LanguageCode = 'en' | 'sn' | 'nd'
+type AnalyticsPeriod = 'today' | 'week' | 'month' | 'all'
 
 type ChatMessage = IMessage & {
   intent?: string
@@ -76,6 +76,7 @@ type UserCoords = {
 const RootTabs = createBottomTabNavigator()
 type RootTabParamList = {
   'Session Hub': undefined
+  Analytics: undefined
   'Chat Session': undefined
   Notifications: undefined
   Profile: undefined
@@ -163,7 +164,7 @@ const SESSION_HUB_BACKGROUND =
 const INPUT_PROPS = {
   cursorColor: '#0f172a',
   placeholderTextColor: '#6f7c91',
-  selectionColor: '#0f766e',
+  selectionColor: '#3f73ff',
   underlineColorAndroid: 'transparent' as const,
 }
 
@@ -255,9 +256,11 @@ function AppContent() {
   const [profileEmail, setProfileEmail] = useState('')
   const [profilePhone, setProfilePhone] = useState('')
   const [profileLanguage, setProfileLanguage] = useState<LanguageCode>('en')
+  const [isProviderDropdownOpen, setIsProviderDropdownOpen] = useState(false)
+  const [analyticsPeriod, setAnalyticsPeriod] = useState<AnalyticsPeriod>('today')
   const [isLoadingProfile, setIsLoadingProfile] = useState(false)
   const [isSavingProfile, setIsSavingProfile] = useState(false)
-  const [themeMode, setThemeMode] = useState<'light' | 'dark'>('light')
+  const [themeMode, setThemeMode] = useState<'light' | 'blue'>('light')
   const [customerSeenCounts, setCustomerSeenCounts] = useState<Record<string, number>>({})
   const [mobileNotifications, setMobileNotifications] = useState<MobileNotification[]>([])
   const [notificationUnreadCount, setNotificationUnreadCount] = useState(0)
@@ -271,7 +274,7 @@ function AppContent() {
   const [locationError, setLocationError] = useState<string | null>(null)
   const [currentRoute, setCurrentRoute] = useState('Session Hub')
 
-  const isDarkTheme = themeMode === 'dark'
+  const isBlueTheme = themeMode === 'blue'
 
   const locationOptions = useMemo(() => {
     if (selectedProviderType === 'bank') {
@@ -497,8 +500,11 @@ function AppContent() {
         AsyncStorage.getItem(STORAGE_KEYS.themeMode),
       ])
 
-      if (storedThemeMode === 'dark' || storedThemeMode === 'light') {
+      if (storedThemeMode === 'light' || storedThemeMode === 'blue') {
         setThemeMode(storedThemeMode)
+      } else if (storedThemeMode === 'dark') {
+        // Migrate legacy dark mode preference to the new blue theme.
+        setThemeMode('blue')
       }
 
       const normalizedUrl = normalizeApiBaseUrl(storedBaseUrl ?? defaultDraftUrl)
@@ -894,7 +900,7 @@ function AppContent() {
   }
 
   async function toggleTheme(enabled: boolean) {
-    const nextMode: 'light' | 'dark' = enabled ? 'dark' : 'light'
+    const nextMode: 'light' | 'blue' = enabled ? 'blue' : 'light'
     setThemeMode(nextMode)
     await AsyncStorage.setItem(STORAGE_KEYS.themeMode, nextMode)
   }
@@ -1110,6 +1116,154 @@ function AppContent() {
   }).length
   const resolutionRate = tickets.length > 0 ? `${((resolvedTicketsCount / tickets.length) * 100).toFixed(1)}%` : '0.0%'
 
+  function getAnalyticsRange(period: AnalyticsPeriod) {
+    const now = new Date()
+    if (period === 'all') {
+      return { currentStart: null as Date | null, previousStart: null as Date | null }
+    }
+
+    const currentStart = new Date(now)
+    if (period === 'today') {
+      currentStart.setHours(0, 0, 0, 0)
+      const previousStart = new Date(currentStart)
+      previousStart.setDate(previousStart.getDate() - 1)
+      return { currentStart, previousStart }
+    }
+
+    if (period === 'week') {
+      currentStart.setDate(currentStart.getDate() - 6)
+      currentStart.setHours(0, 0, 0, 0)
+      const previousStart = new Date(currentStart)
+      previousStart.setDate(previousStart.getDate() - 7)
+      return { currentStart, previousStart }
+    }
+
+    currentStart.setDate(1)
+    currentStart.setHours(0, 0, 0, 0)
+    const previousStart = new Date(currentStart)
+    previousStart.setMonth(previousStart.getMonth() - 1)
+    return { currentStart, previousStart }
+  }
+
+  function isWithinRange(dateValue: string | null | undefined, start: Date | null, endExclusive: Date | null) {
+    if (!dateValue || !start || !endExclusive) {
+      return true
+    }
+    const parsed = new Date(dateValue)
+    if (Number.isNaN(parsed.getTime())) {
+      return false
+    }
+    return parsed >= start && parsed < endExclusive
+  }
+
+  const analyticsData = useMemo(() => {
+    const range = getAnalyticsRange(analyticsPeriod)
+    const now = new Date()
+
+    const currentSessions = sessions.filter((session) =>
+      isWithinRange(session.updated_at || session.created_at, range.currentStart, analyticsPeriod === 'all' ? null : now)
+    )
+
+    const currentTickets = tickets.filter((ticket) =>
+      isWithinRange(ticket.created_at, range.currentStart, analyticsPeriod === 'all' ? null : now)
+    )
+
+    const previousEnd = range.currentStart
+    const previousSessions = analyticsPeriod === 'all' || !range.previousStart || !previousEnd
+      ? []
+      : sessions.filter((session) => isWithinRange(session.updated_at || session.created_at, range.previousStart, previousEnd))
+
+    const previousTickets = analyticsPeriod === 'all' || !range.previousStart || !previousEnd
+      ? []
+      : tickets.filter((ticket) => isWithinRange(ticket.created_at, range.previousStart, previousEnd))
+
+    const openStatuses = ['new', 'assigned', 'in_progress', 'pending_customer', 'escalated', 'reopened']
+    const activeSessionsCurrent = currentSessions.filter((session) => session.status?.toLowerCase() === 'active').length
+    const openTicketsCurrent = currentTickets.filter((ticket) => openStatuses.includes((ticket.status || '').toLowerCase())).length
+    const resolvedTicketsCurrent = currentTickets.filter((ticket) => {
+      const status = (ticket.status || '').toLowerCase()
+      return status === 'resolved' || status === 'closed'
+    }).length
+    const resolutionRateCurrent = currentTickets.length > 0 ? (resolvedTicketsCurrent / currentTickets.length) * 100 : 0
+
+    const startOfToday = new Date(now)
+    startOfToday.setHours(0, 0, 0, 0)
+    const sessionSeries = Array.from({ length: 7 }, () => 0)
+    const activeSeries = Array.from({ length: 7 }, () => 0)
+    const openTicketSeries = Array.from({ length: 7 }, () => 0)
+    const resolutionSeries = Array.from({ length: 7 }, () => 0)
+
+    const getDayIndex = (rawDate: string | null | undefined) => {
+      if (!rawDate) {
+        return -1
+      }
+      const parsed = new Date(rawDate)
+      if (Number.isNaN(parsed.getTime())) {
+        return -1
+      }
+      const bucketDate = new Date(parsed)
+      bucketDate.setHours(0, 0, 0, 0)
+      const diffDays = Math.floor((bucketDate.getTime() - startOfToday.getTime()) / (24 * 60 * 60 * 1000))
+      const index = diffDays + 6
+      return index >= 0 && index < 7 ? index : -1
+    }
+
+    currentSessions.forEach((session) => {
+      const index = getDayIndex(session.updated_at || session.created_at)
+      if (index < 0) {
+        return
+      }
+      sessionSeries[index] += 1
+      if ((session.status || '').toLowerCase() === 'active') {
+        activeSeries[index] += 1
+      }
+    })
+
+    currentTickets.forEach((ticket) => {
+      const index = getDayIndex(ticket.created_at)
+      if (index < 0) {
+        return
+      }
+      const status = (ticket.status || '').toLowerCase()
+      if (openStatuses.includes(status)) {
+        openTicketSeries[index] += 1
+      }
+      if (status === 'resolved' || status === 'closed') {
+        resolutionSeries[index] += 1
+      }
+    })
+
+    return {
+      totalSessionsCurrent: currentSessions.length,
+      totalSessionsDelta: currentSessions.length - previousSessions.length,
+      activeSessionsCurrent,
+      activeSessionsDelta:
+        activeSessionsCurrent - previousSessions.filter((session) => session.status?.toLowerCase() === 'active').length,
+      openTicketsCurrent,
+      openTicketsDelta:
+        openTicketsCurrent - previousTickets.filter((ticket) => openStatuses.includes((ticket.status || '').toLowerCase())).length,
+      resolutionRateCurrent,
+      resolvedTicketsCurrent,
+      totalTicketsCurrent: currentTickets.length,
+      resolutionRateDelta: resolutionRateCurrent - (
+        previousTickets.length > 0
+          ? (previousTickets.filter((ticket) => {
+              const status = (ticket.status || '').toLowerCase()
+              return status === 'resolved' || status === 'closed'
+            }).length / previousTickets.length) * 100
+          : 0
+      ),
+      filteredSessionPreview: currentSessions
+        .slice()
+        .sort((a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime())
+        .slice(0, 4),
+      sessionSeries,
+      activeSeries,
+      openTicketSeries,
+      resolutionSeries,
+    }
+  }, [analyticsPeriod, sessions, tickets])
+
   function formatDateBadge(dateValue: Date) {
     const now = new Date()
     const sameDay =
@@ -1303,7 +1457,7 @@ function AppContent() {
     return (
       <SafeAreaView style={styles.loadingScreen}>
         <StatusBar style="light" />
-        <ActivityIndicator size="large" color="#f97316" />
+        <ActivityIndicator size="large" color="#3f73ff" />
         <Text style={styles.loadingText}>Preparing mobile workspace...</Text>
       </SafeAreaView>
     )
@@ -1336,7 +1490,8 @@ function AppContent() {
         ? Math.max(0, keyboardHeight + Math.max(8, insets.bottom))
         : 0
     const keyboardLift = Platform.OS === 'ios' ? iosKeyboardLift : androidKeyboardLift
-    const inputBottomPadding = keyboardHeight > 0 ? 4 : insets.bottom || 4
+    // Keep the composer flush with the tab bar when keyboard is closed.
+    const inputBottomPadding = keyboardHeight > 0 ? 4 : 0
     const goToDashboard = () => {
       if (typeof navigation?.jumpTo === 'function') {
         navigation.jumpTo('Session Hub')
@@ -1456,22 +1611,6 @@ function AppContent() {
                   resolutionRate={resolutionRate}
                 />
 
-                <View style={styles.talkToAgentCard}>
-                  <Pressable style={styles.talkToAgentButton} onPress={() => void startNewSession(true)}>
-                    <Ionicons color="#d1fae5" name="chatbubble-outline" size={22} />
-                    <Text style={styles.talkToAgentButtonText}>Start New Conversation +</Text>
-                  </Pressable>
-                </View>
-
-                <ProviderContextCard
-                  providers={providers}
-                  selectedProviderName={selectedProviderName}
-                  onSelectProvider={(providerName, providerType) => {
-                    setSelectedProviderName(providerName)
-                    setSelectedProviderType(providerType)
-                  }}
-                />
-
                 <QuickActionGrid
                   prompts={quickPrompts}
                   onPromptPress={(prompt) => {
@@ -1516,22 +1655,22 @@ function AppContent() {
               <Text style={styles.backButtonText}>Dashboard</Text>
             </Pressable>
           </View>
-          <View style={[styles.profileCard, isDarkTheme && styles.profileCardDark]}>
-            <Text style={[styles.profileTitle, isDarkTheme && styles.profileTitleDark]}>Profile settings</Text>
-            <Text style={[styles.profileCopy, isDarkTheme && styles.profileCopyDark]}>Update your display details and preferred language for responses.</Text>
+          <View style={[styles.profileCard, isBlueTheme && styles.profileCardBlue]}>
+            <Text style={[styles.profileTitle, isBlueTheme && styles.profileTitleBlue]}>Profile settings</Text>
+            <Text style={[styles.profileCopy, isBlueTheme && styles.profileCopyBlue]}>Update your display details and preferred language for responses.</Text>
 
-            <View style={[styles.themeToggleRow, isDarkTheme && styles.themeToggleRowDark]}>
+            <View style={[styles.themeToggleRow, isBlueTheme && styles.themeToggleRowBlue]}>
               <View style={styles.themeToggleTextWrap}>
-                <Text style={[styles.themeToggleTitle, isDarkTheme && styles.themeToggleTitleDark]}>Dark theme</Text>
-                <Text style={[styles.themeToggleCopy, isDarkTheme && styles.themeToggleCopyDark]}>Switch between default and dark appearance.</Text>
+                <Text style={[styles.themeToggleTitle, isBlueTheme && styles.themeToggleTitleBlue]}>Blue theme</Text>
+                <Text style={[styles.themeToggleCopy, isBlueTheme && styles.themeToggleCopyBlue]}>Switch between default and blue appearance.</Text>
               </View>
               <Switch
-                value={isDarkTheme}
+                value={isBlueTheme}
                 onValueChange={(value) => {
                   void toggleTheme(value)
                 }}
-                trackColor={{ false: '#cbd5e1', true: '#0f766e' }}
-                thumbColor={isDarkTheme ? '#f8fafc' : '#ffffff'}
+                trackColor={{ false: '#cbd5e1', true: '#3f73ff' }}
+                thumbColor={isBlueTheme ? '#eaf0ff' : '#ffffff'}
               />
             </View>
 
@@ -1551,6 +1690,49 @@ function AppContent() {
               placeholder="Optional"
             />
 
+            <Text style={styles.profileFieldLabel}>Current provider</Text>
+            <Pressable
+              style={[styles.providerSelectButton, isBlueTheme && styles.providerSelectButtonBlue]}
+              onPress={() => setIsProviderDropdownOpen((current) => !current)}
+              disabled={providers.length === 0}
+            >
+              <Text
+                style={[
+                  styles.providerSelectText,
+                  isBlueTheme && styles.providerSelectTextBlue,
+                  !selectedProviderName && styles.providerSelectPlaceholder,
+                ]}
+              >
+                {selectedProviderName || (providers.length > 0 ? 'Select provider' : 'No providers available')}
+              </Text>
+              <Ionicons
+                name={isProviderDropdownOpen ? 'chevron-up' : 'chevron-down'}
+                size={18}
+                color={isBlueTheme ? '#2f5ff4' : '#334155'}
+              />
+            </Pressable>
+
+            {isProviderDropdownOpen && providers.length > 0 ? (
+              <View style={[styles.providerSelectMenu, isBlueTheme && styles.providerSelectMenuBlue]}>
+                {providers.map((provider) => {
+                  const active = selectedProviderName === provider.provider
+                  return (
+                    <Pressable
+                      key={provider.provider}
+                      style={[styles.providerSelectOption, active && styles.providerSelectOptionActive]}
+                      onPress={() => {
+                        setSelectedProviderName(provider.provider)
+                        setSelectedProviderType(provider.type)
+                        setIsProviderDropdownOpen(false)
+                      }}
+                    >
+                      <Text style={[styles.providerSelectOptionText, active && styles.providerSelectOptionTextActive]}>{provider.provider}</Text>
+                    </Pressable>
+                  )
+                })}
+              </View>
+            ) : null}
+
             <Text style={styles.profileFieldLabel}>Preferred language</Text>
             <View style={styles.languageRow}>{languageOptions.map((option) => renderProfileLanguageChip({ code: option.code, label: option.label }))}</View>
 
@@ -1562,6 +1744,316 @@ function AppContent() {
               <Text style={styles.primaryButtonText}>{isSavingProfile ? 'Saving profile...' : 'Save profile'}</Text>
             </Pressable>
           </View>
+        </ScrollView>
+      </SafeAreaView>
+    )
+  }
+
+  function AnalyticsTabScreen(navigation: any) {
+    const periodOptions: Array<{ key: AnalyticsPeriod; label: string }> = [
+      { key: 'today', label: 'Today' },
+      { key: 'week', label: 'Week' },
+      { key: 'month', label: 'Month' },
+      { key: 'all', label: 'All time' },
+    ]
+
+    const formatDelta = (value: number, suffix: string) => {
+      const rounded = Math.round(value * 10) / 10
+      if (rounded > 0) {
+        return `+${rounded}${suffix}`
+      }
+      if (rounded < 0) {
+        return `${rounded}${suffix}`
+      }
+      return `0${suffix}`
+    }
+
+    const normalizeSeries = (series: number[]) => {
+      const max = Math.max(1, ...series)
+      return series.map((value) => Math.max(18, Math.round((value / max) * 100)))
+    }
+
+    const sessionBarHeights = normalizeSeries(analyticsData.sessionSeries)
+    const resolutionBarHeights = normalizeSeries(analyticsData.resolutionSeries)
+    const openTicketPoints = normalizeSeries(analyticsData.openTicketSeries)
+    const activePoints = normalizeSeries(analyticsData.activeSeries)
+
+    const compactFive = (series: number[]) => {
+      if (series.length <= 5) {
+        return series
+      }
+      return [series[0], series[2], series[3], series[5], series[6]]
+    }
+
+    const sessionBarHeightsFive = compactFive(sessionBarHeights)
+    const resolutionBarHeightsFive = compactFive(resolutionBarHeights)
+
+    const buildLinePoints = (series: number[]) => {
+      const picked = compactFive(series)
+      const max = Math.max(1, ...picked)
+      return picked.map((value, index) => {
+        const x = 6 + index * 22
+        const y = 92 - Math.round((value / max) * 58)
+        return { x, y }
+      })
+    }
+
+    const activeLinePoints = buildLinePoints(activePoints)
+    const ticketLinePoints = buildLinePoints(openTicketPoints)
+    const totalTicketsForCard = Math.max(analyticsData.totalTicketsCurrent, 1)
+    const resolvedTicketShare = analyticsData.totalTicketsCurrent > 0
+      ? (analyticsData.resolvedTicketsCurrent / analyticsData.totalTicketsCurrent) * 100
+      : 0
+    const openTicketShare = analyticsData.totalTicketsCurrent > 0
+      ? (analyticsData.openTicketsCurrent / analyticsData.totalTicketsCurrent) * 100
+      : 0
+    const remainingTicketShare = Math.max(0, 100 - resolvedTicketShare - openTicketShare)
+    const openArcOpacity = openTicketShare > 0 ? 1 : 0.68
+    const resolvedArcOpacity = resolvedTicketShare > 0 ? 1 : 0.68
+    const totalArcOpacity = remainingTicketShare > 0 ? 1 : 0.62
+
+    const getSegmentStyle = (start: { x: number; y: number }, end: { x: number; y: number }) => {
+      const dx = end.x - start.x
+      const dy = end.y - start.y
+      const length = Math.sqrt(dx * dx + dy * dy)
+      const angle = Math.atan2(dy, dx)
+      return {
+        left: (start.x + end.x) / 2 - length / 2,
+        top: (start.y + end.y) / 2 - 1,
+        width: length,
+        transform: [{ rotateZ: `${angle}rad` }],
+      }
+    }
+
+    return (
+      <SafeAreaView edges={['left', 'right']} style={styles.tabSafeArea}>
+        <ScrollView contentContainerStyle={styles.analyticsScrollContent} keyboardShouldPersistTaps="handled">
+          <Text style={styles.analyticsTitle}>Session Analytics</Text>
+
+          <View style={styles.analyticsPeriodGrid}>
+            {periodOptions.map((option) => {
+              const active = analyticsPeriod === option.key
+              return (
+                <Pressable
+                  key={option.key}
+                  onPress={() => setAnalyticsPeriod(option.key)}
+                  style={[styles.analyticsPeriodButton, active && styles.analyticsPeriodButtonActive]}
+                >
+                  <Text style={[styles.analyticsPeriodButtonText, active && styles.analyticsPeriodButtonTextActive]}>{option.label}</Text>
+                </Pressable>
+              )
+            })}
+          </View>
+
+          <View style={styles.analyticsGrid}>
+            <View style={styles.analyticsCard}>
+              <View style={styles.analyticsCardLabelRow}>
+                <Text style={styles.analyticsCardLabel}>Total sessions</Text>
+                <View style={styles.analyticsCardIconCircle}><Ionicons name="refresh" size={23} color="#2f5ff4" /></View>
+              </View>
+              <Text style={styles.analyticsCardValue}>{analyticsData.totalSessionsCurrent}</Text>
+              <Text style={styles.analyticsCardUnit}>sessions</Text>
+              <View style={styles.analyticsBarsRow}>
+                {sessionBarHeightsFive.map((height, index) => (
+                  <View
+                    key={`sessions-bar-${index}`}
+                    style={[
+                      styles.analyticsBar,
+                      { height: `${Math.max(20, height)}%` },
+                      index === 1 || index >= 3 ? styles.analyticsBarActive : styles.analyticsBarMuted,
+                    ]}
+                  />
+                ))}
+              </View>
+              <Text style={styles.analyticsCardTrend}>{formatDelta(analyticsData.totalSessionsDelta, analyticsPeriod === 'today' ? ' today' : analyticsPeriod === 'month' ? ' this month' : ' this week')}</Text>
+            </View>
+
+            <View style={[styles.analyticsCard, styles.analyticsCardAccent]}>
+              <View style={styles.analyticsCardLabelRow}>
+                <Text style={[styles.analyticsCardLabel, styles.analyticsCardLabelAccent]}>Active sessions</Text>
+                <View style={[styles.analyticsCardIconCircle, styles.analyticsCardIconCircleAccent]}><Ionicons name="chatbubble-outline" size={23} color="#ffffff" /></View>
+              </View>
+              <Text style={[styles.analyticsCardValue, styles.analyticsCardValueAccent]}>{analyticsData.activeSessionsCurrent}</Text>
+              <Text style={[styles.analyticsCardUnit, styles.analyticsCardUnitAccent]}>
+                {analyticsData.totalSessionsCurrent > 0 ? `${Math.round((analyticsData.activeSessionsCurrent / analyticsData.totalSessionsCurrent) * 100)}% of total` : '0% of total'}
+              </Text>
+              <View style={styles.analyticsWaveRow}>
+                <View style={styles.analyticsLineCanvas}>
+                  {activeLinePoints.slice(0, -1).map((point, index) => {
+                    const next = activeLinePoints[index + 1]
+                    return (
+                      <View
+                        key={`active-line-${index}`}
+                        style={[
+                          styles.analyticsLineSegment,
+                          styles.analyticsLineSegmentAccent,
+                          getSegmentStyle(point, next),
+                        ]}
+                      />
+                    )
+                  })}
+                  {activeLinePoints.map((point, index) => (
+                    <View
+                      key={`active-dot-${index}`}
+                      style={[
+                        styles.analyticsLinePoint,
+                        styles.analyticsLinePointAccent,
+                        { left: point.x - 2.5, top: point.y - 2.5 },
+                      ]}
+                    />
+                  ))}
+                </View>
+              </View>
+              <Text style={[styles.analyticsCardTrend, styles.analyticsCardTrendAccent]}>{formatDelta(analyticsData.activeSessionsDelta, analyticsPeriod === 'today' ? ' today' : analyticsPeriod === 'month' ? ' this month' : ' since yesterday')}</Text>
+            </View>
+
+            <View style={styles.analyticsCard}>
+              <View style={styles.analyticsCardLabelRow}>
+                <Text style={styles.analyticsCardLabel}>Open tickets</Text>
+                <View style={[styles.analyticsCardIconCircle, styles.analyticsCardIconCircleWarn]}><Ionicons name="alert-circle-outline" size={23} color="#2f5ff4" /></View>
+              </View>
+              <Text style={[styles.analyticsCardValue, styles.analyticsCardValueSmall]}>{analyticsData.openTicketsCurrent}</Text>
+              <Text style={styles.analyticsCardUnit}>open tickets</Text>
+              <Text style={styles.analyticsReferenceLine}>{analyticsData.resolutionRateCurrent.toFixed(1)}% resolved</Text>
+              <View style={styles.analyticsWaveRowTall}>
+                <View style={styles.analyticsLineCanvas}>
+                  {ticketLinePoints.slice(0, -1).map((point, index) => {
+                    const next = ticketLinePoints[index + 1]
+                    return (
+                      <View
+                        key={`ticket-line-${index}`}
+                        style={[
+                          styles.analyticsLineSegment,
+                          styles.analyticsLineSegmentOpen,
+                          getSegmentStyle(point, next),
+                        ]}
+                      />
+                    )
+                  })}
+                  {ticketLinePoints.map((point, index) => (
+                    <View
+                      key={`ticket-dot-${index}`}
+                      style={[
+                        styles.analyticsLinePoint,
+                        styles.analyticsLinePointOpen,
+                        { left: point.x - 2.8, top: point.y - 2.8 },
+                      ]}
+                    />
+                  ))}
+                </View>
+              </View>
+              <Text style={[styles.analyticsCardTrend, analyticsData.openTicketsDelta > 0 && styles.analyticsCardTrendWarn]}>
+                {formatDelta(analyticsData.openTicketsDelta, analyticsPeriod === 'today' ? ' today' : analyticsPeriod === 'month' ? ' this month' : ' from last week')}
+              </Text>
+            </View>
+
+            <View style={styles.analyticsCard}>
+              <View style={styles.analyticsCardLabelRow}>
+                <Text style={styles.analyticsCardLabel}>Resolution</Text>
+                <View style={[styles.analyticsCardIconCircle, styles.analyticsCardIconCircleBlue]}><Ionicons name="star-outline" size={23} color="#2f5ff4" /></View>
+              </View>
+              <Text style={[styles.analyticsCardValue, styles.analyticsCardValueSmall]}>{analyticsData.resolutionRateCurrent.toFixed(1)}%</Text>
+              <Text style={styles.analyticsCardUnit}>{analyticsData.resolvedTicketsCurrent}/{analyticsData.totalTicketsCurrent} resolved</Text>
+              <View style={styles.analyticsBarsTallRow}>
+                {resolutionBarHeightsFive.map((height, index) => (
+                  <View
+                    key={`resolution-bar-${index}`}
+                    style={[
+                      styles.analyticsTallBar,
+                      { height: `${Math.max(20, height)}%` },
+                      index >= 3 ? styles.analyticsTallBarActive : styles.analyticsTallBarMuted,
+                    ]}
+                  />
+                ))}
+              </View>
+              <Text style={styles.analyticsCardTrend}>{formatDelta(analyticsData.resolutionRateDelta, analyticsPeriod === 'today' ? '% today' : analyticsPeriod === 'month' ? '% this month' : '% this week')}</Text>
+            </View>
+          </View>
+
+          <LinearGradient
+            colors={['#3f73ff', '#2f5ff4', '#1e3a8a']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.analyticsTicketStatsCard}
+          >
+            <View pointerEvents="none" style={styles.analyticsTicketStatsGlowOne} />
+            <View pointerEvents="none" style={styles.analyticsTicketStatsGlowTwo} />
+            <View style={styles.analyticsTicketStatsHeader}>
+              <Text style={styles.analyticsTicketStatsTitle}>Ticket Statistics</Text>
+              <View style={styles.analyticsTicketStatsPeriodPill}>
+                <Text style={styles.analyticsTicketStatsPeriodText}>{periodOptions.find((option) => option.key === analyticsPeriod)?.label || 'Today'}</Text>
+                <Ionicons name="chevron-down" size={12} color="#dbe8ff" />
+              </View>
+            </View>
+
+            <View style={styles.analyticsTicketStatsBody}>
+              <View style={styles.analyticsDonutWrap}>
+                <View style={styles.analyticsDonutRing}>
+                  <View style={[styles.analyticsDonutArcPrimary, { transform: [{ rotate: `${-90 + Math.round(openTicketShare * 3.6)}deg` }], opacity: openArcOpacity }]} />
+                  <View style={[styles.analyticsDonutArcSecondary, { transform: [{ rotate: `${-90 + Math.round((openTicketShare + resolvedTicketShare) * 3.6)}deg` }], opacity: resolvedArcOpacity }]} />
+                  <View style={[styles.analyticsDonutArcTertiary, { transform: [{ rotate: `${-90 + Math.round((openTicketShare + resolvedTicketShare + remainingTicketShare) * 3.6)}deg` }], opacity: totalArcOpacity }]} />
+                  <View style={styles.analyticsDonutCenter}>
+                    <Text style={styles.analyticsDonutCenterText}>
+                      {Math.round(resolvedTicketShare)}%
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={[styles.analyticsDonutBadge, styles.analyticsDonutBadgeLeft]}>
+                  <Text style={styles.analyticsDonutBadgeText}>
+                    {Math.round(openTicketShare)}%
+                  </Text>
+                </View>
+
+                <View style={[styles.analyticsDonutBadge, styles.analyticsDonutBadgeRight]}>
+                  <Text style={styles.analyticsDonutBadgeText}>
+                    {Math.round(resolvedTicketShare)}%
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.analyticsTicketStatsLegend}>
+                <View style={styles.analyticsLegendItem}>
+                  <View style={[styles.analyticsLegendIcon, styles.analyticsLegendIconOpen]}>
+                    <Ionicons name="time-outline" size={24} color="#facc15" />
+                  </View>
+                  <View style={styles.analyticsLegendTextWrap}>
+                    <Text style={styles.analyticsLegendLabel}>Open</Text>
+                    <Text style={styles.analyticsLegendValue}>{analyticsData.openTicketsCurrent}</Text>
+                    <Text style={styles.analyticsLegendMeta}>{Math.round(openTicketShare)}%</Text>
+                  </View>
+                </View>
+
+                <View style={styles.analyticsLegendItem}>
+                  <View style={[styles.analyticsLegendIcon, styles.analyticsLegendIconResolved]}>
+                    <Ionicons name="checkmark-done-outline" size={24} color="#22c55e" />
+                  </View>
+                  <View style={styles.analyticsLegendTextWrap}>
+                    <Text style={styles.analyticsLegendLabel}>Resolved</Text>
+                    <Text style={styles.analyticsLegendValue}>{analyticsData.resolvedTicketsCurrent}</Text>
+                    <Text style={styles.analyticsLegendMeta}>{Math.round(resolvedTicketShare)}%</Text>
+                  </View>
+                </View>
+
+                <View style={styles.analyticsLegendItem}>
+                  <View style={[styles.analyticsLegendIcon, styles.analyticsLegendIconTotal]}>
+                    <Ionicons name="layers-outline" size={24} color="#ffffff" />
+                  </View>
+                  <View style={styles.analyticsLegendTextWrap}>
+                    <Text style={styles.analyticsLegendLabel}>Total</Text>
+                    <Text style={styles.analyticsLegendValue}>{totalTicketsForCard}</Text>
+                    <Text style={styles.analyticsLegendMeta}>100%</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.analyticsTicketMixRow}>
+              <View style={[styles.analyticsTicketMixSegment, { flex: Math.max(openTicketShare, 5), backgroundColor: '#facc15' }]} />
+              <View style={[styles.analyticsTicketMixSegment, { flex: Math.max(resolvedTicketShare, 5), backgroundColor: '#22c55e' }]} />
+              <View style={[styles.analyticsTicketMixSegment, { flex: Math.max(remainingTicketShare, 5), backgroundColor: '#ffffff' }]} />
+            </View>
+          </LinearGradient>
         </ScrollView>
       </SafeAreaView>
     )
@@ -1626,13 +2118,13 @@ function AppContent() {
   }
 
   return (
-      <SafeAreaView style={[styles.safeArea, isDarkTheme && styles.safeAreaDark]}>
+      <SafeAreaView style={[styles.safeArea, isBlueTheme && styles.safeAreaBlue]}>
 
       <StatusBar style="light" />
       {currentRoute === 'Session Hub' && (
         <View style={[styles.chatHeader, { backgroundColor: 'transparent', shadowColor: 'transparent', elevation: 0 }]}> 
           <View style={[styles.chatHeaderOverlay, { backgroundColor: 'transparent' }]}> 
-            <TopHeader userName={currentUser.name} onLocationPress={() => void handleOpenLocationFinder()} isLocating={isLocatingUser || isLoadingNearbyLocations} onLogout={handleLogout} />
+            <TopHeader userName={profileName || currentUser.name} onLocationPress={() => void handleOpenLocationFinder()} isLocating={isLocatingUser || isLoadingNearbyLocations} onLogout={handleLogout} />
           </View>
         </View>
       )}
@@ -1689,7 +2181,7 @@ function AppContent() {
             </View>
           ) : isLoadingNearbyLocations ? (
             <View style={styles.locationLoadingWrap}>
-              <ActivityIndicator color="#0f766e" size="small" />
+              <ActivityIndicator color="#3f73ff" size="small" />
             </View>
           ) : nearbyLocations.length === 0 ? (
             <Text style={styles.locationEmptyCopy}>No locations found nearby. Try a different category or refresh your location.</Text>
@@ -1699,7 +2191,7 @@ function AppContent() {
                 <View key={`${loc.name}-${index}`} style={styles.locationCard}>
                   <View style={styles.locationCardHead}>
                     <View style={styles.locationCardIcon}>
-                      <Ionicons color="#0f766e" name="business-outline" size={16} />
+                      <Ionicons color="#3f73ff" name="business-outline" size={16} />
                     </View>
                     <Text numberOfLines={1} style={styles.locationCardTitle}>{loc.name}</Text>
                   </View>
@@ -1740,33 +2232,39 @@ function AppContent() {
             initialRouteName="Session Hub"
             screenOptions={({ route }) => ({
               headerShown: false,
-              tabBarStyle: [styles.tabBar, isDarkTheme && styles.tabBarDark],
+              tabBarStyle: [styles.tabBar, isBlueTheme && styles.tabBarBlue],
               tabBarLabelStyle: styles.tabLabel,
-              tabBarActiveTintColor: isDarkTheme ? '#f59e0b' : '#0f766e',
-              tabBarInactiveTintColor: isDarkTheme ? '#94a3b8' : '#64748b',
+              tabBarActiveTintColor: '#ffffff',
+              tabBarInactiveTintColor: 'rgba(255,255,255,0.58)',
               tabBarHideOnKeyboard: true,
               tabBarIcon: ({ color, size, focused }) => {
                 const iconName = route.name === 'Session Hub'
                   ? focused
-                    ? 'grid'
-                    : 'grid-outline'
+                    ? 'home'
+                    : 'home-outline'
+                  : route.name === 'Analytics'
+                    ? focused
+                      ? 'analytics'
+                      : 'analytics-outline'
                   : route.name === 'Chat Session'
                     ? focused
-                      ? 'chatbubble'
+                      ? 'chatbubble-outline'
                       : 'chatbubble-outline'
                     : route.name === 'Notifications'
                       ? focused
                         ? 'notifications'
                         : 'notifications-outline'
                       : focused
-                        ? 'person-circle'
-                        : 'person-circle-outline'
-                return <Ionicons color={color} name={iconName} size={size} />
+                        ? 'person'
+                        : 'person-outline'
+                const iconSize = route.name === 'Chat Session' ? 22 : 18
+                return <Ionicons color={color} name={iconName} size={iconSize} />
               },
             })}
           >
             <RootTabs.Screen
               name="Session Hub"
+              options={{ tabBarLabel: 'Home' }}
               listeners={({ navigation }) => ({
                 tabPress: (event) => {
                   const state = navigation.getState()
@@ -1787,18 +2285,32 @@ function AppContent() {
             >
               {(props) => SessionInfoTabScreen(props.navigation)}
             </RootTabs.Screen>
-            <RootTabs.Screen name="Chat Session">
+            <RootTabs.Screen name="Analytics" options={{ tabBarLabel: 'Analytics' }}>
+              {(props) => AnalyticsTabScreen(props.navigation)}
+            </RootTabs.Screen>
+            <RootTabs.Screen
+              name="Chat Session"
+              options={{
+                tabBarLabel: 'New chat',
+                tabBarLabelStyle: [styles.tabLabel, styles.chatTabLabel],
+                tabBarItemStyle: styles.chatTabItem,
+                tabBarIconStyle: styles.chatTabIconWrap,
+                tabBarActiveTintColor: '#ffffff',
+                tabBarInactiveTintColor: '#ffffff',
+              }}
+            >
               {(props) => ChatSessionTabScreen(props.navigation)}
             </RootTabs.Screen>
             <RootTabs.Screen
               name="Notifications"
               options={{
+                tabBarLabel: 'Notifications',
                 tabBarBadge: notificationUnreadCount > 0 ? (notificationUnreadCount > 99 ? '99+' : notificationUnreadCount) : undefined,
               }}
             >
               {(props) => NotificationsTabScreen(props.navigation)}
             </RootTabs.Screen>
-            <RootTabs.Screen name="Profile">
+            <RootTabs.Screen name="Profile" options={{ tabBarLabel: 'Profile' }}>
               {(props) => ProfileTabScreen(props.navigation)}
             </RootTabs.Screen>
           </RootTabs.Navigator>
@@ -1872,8 +2384,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#ffffff',
   },
-  safeAreaDark: {
-    backgroundColor: '#020617',
+  safeAreaBlue: {
+    backgroundColor: '#ffffff',
   },
   loadingScreen: {
     flex: 1,
@@ -2030,14 +2542,14 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     alignItems: 'center',
-    backgroundColor: '#f59e0b',
+    backgroundColor: '#2f5ff4',
     borderRadius: 16,
     justifyContent: 'center',
     minHeight: 52,
     paddingHorizontal: 16,
   },
   primaryButtonText: {
-    color: '#0f172a',
+    color: '#f8fafc',
     fontSize: 15,
     fontWeight: '800',
   },
@@ -2063,7 +2575,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   statusText: {
-    color: '#0f766e',
+    color: '#3f73ff',
     fontSize: 14,
     fontWeight: '700',
   },
@@ -2079,7 +2591,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   languageChipActive: {
-    backgroundColor: '#164e63',
+    backgroundColor: '#1e3a8a',
   },
   languageChipText: {
     color: '#284053',
@@ -2099,7 +2611,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   modePillActive: {
-    backgroundColor: '#0f766e',
+    backgroundColor: '#3f73ff',
   },
   modePillText: {
     color: '#284053',
@@ -2114,7 +2626,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   collapsibleHeaderText: {
-    color: '#0f766e',
+    color: '#3f73ff',
     fontSize: 13,
     fontWeight: '800',
     textTransform: 'uppercase',
@@ -2128,13 +2640,13 @@ const styles = StyleSheet.create({
   },
   tabSafeArea: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f0f4f8',
   },
   infoScrollContent: {
     flexGrow: 1,
-    paddingBottom: 8,
+    paddingBottom: 10,
     paddingTop: 0,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f0f4f8',
   },
   pageBackground: {
     ...StyleSheet.absoluteFillObject,
@@ -2144,7 +2656,7 @@ const styles = StyleSheet.create({
     borderRadius: 0,
   },
   sessionHubPage: {
-    backgroundColor: 'transparent',
+    backgroundColor: '#f0f4f8',
     flex: 1,
     marginTop: 0,
   },
@@ -2162,18 +2674,15 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
   },
   sessionHubSurface: {
-    backgroundColor: '#ffffff',
-    borderTopLeftRadius: 34,
-    borderTopRightRadius: 34,
+    backgroundColor: '#f0f4f8',
     marginTop: 0,
-    paddingTop: 10,
-    paddingBottom: 4,
-    overflow: 'hidden',
+    paddingTop: 4,
+    paddingBottom: 6,
     zIndex: 1,
   },
   sessionHubStartButton: {
     alignItems: 'center',
-    backgroundColor: '#0f8d72',
+    backgroundColor: '#3f73ff',
     borderRadius: 18,
     flexDirection: 'row',
     gap: 8,
@@ -2184,25 +2693,654 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   sessionHubStartButtonText: {
-    color: '#dcfce7',
+    color: '#dbe8ff',
     fontSize: 20,
     fontWeight: '800',
   },
   tabBar: {
-    backgroundColor: '#ffffff',
-    borderTopColor: '#dbe5ef',
-    borderTopWidth: 1,
-    height: 64,
-    paddingBottom: 8,
-    paddingTop: 6,
+    backgroundColor: '#2f5ff4',
+    borderTopColor: '#2f5ff4',
+    borderTopWidth: 0,
+    height: 74,
+    paddingBottom: 12,
+    paddingTop: 8,
+    elevation: 0,
   },
-  tabBarDark: {
-    backgroundColor: '#ffffff',
-    borderTopColor: '#dbe5ef',
+  tabBarBlue: {
+    backgroundColor: '#2f5ff4',
+    borderTopColor: '#2f5ff4',
   },
   tabLabel: {
+    fontSize: 9,
+    fontWeight: '500',
+    marginTop: -2,
+  },
+  chatTabLabel: {
+    alignSelf: 'center',
+    marginLeft: 0,
+    textAlign: 'center',
+    width: '100%',
+  },
+  chatTabItem: {
+    marginTop: 0,
+  },
+  chatTabIconWrap: {
+    width: 50,
+    height: 50,
+    marginTop: -24,
+    borderRadius: 999,
+    backgroundColor: '#2f5ff4',
+    borderWidth: 3,
+    borderColor: '#dbe8ff',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 9,
+    elevation: 4,
+  },
+  analyticsScrollContent: {
+    backgroundColor: '#f5f6fa',
+    flexGrow: 1,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 12,
+  },
+  analyticsHeaderWrap: {
+    alignItems: 'center',
+    backgroundColor: '#2f5ff4',
+    flexDirection: 'row',
+    gap: 12,
+    minHeight: 94,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  analyticsAvatarWrap: {
+    height: 44,
+    position: 'relative',
+    width: 44,
+  },
+  analyticsAvatar: {
+    alignItems: 'center',
+    backgroundColor: '#dbe8ff',
+    borderColor: 'rgba(255,255,255,0.26)',
+    borderRadius: 22,
+    borderWidth: 2,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
+  },
+  analyticsAvatarText: {
+    color: '#2f5ff4',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  analyticsAvatarDot: {
+    backgroundColor: '#93b8ff',
+    borderColor: '#2f5ff4',
+    borderRadius: 6,
+    borderWidth: 2,
+    bottom: -1,
+    height: 12,
+    position: 'absolute',
+    right: -1,
+    width: 12,
+  },
+  analyticsHeaderTextWrap: {
+    flex: 1,
+  },
+  analyticsHeaderGreeting: {
+    color: 'rgba(255,255,255,0.72)',
+    fontSize: 12,
+    marginBottom: 2,
+  },
+  analyticsHeaderName: {
+    color: '#ffffff',
+    fontSize: 20,
+    fontWeight: '800',
+  },
+  analyticsHeaderIcons: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  analyticsHeaderIcon: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    borderRadius: 14,
+    height: 28,
+    justifyContent: 'center',
+    position: 'relative',
+    width: 28,
+  },
+  analyticsHeaderNotifDot: {
+    backgroundColor: '#ef4444',
+    borderColor: '#2f5ff4',
+    borderRadius: 4,
+    borderWidth: 1,
+    height: 8,
+    position: 'absolute',
+    right: 4,
+    top: 4,
+    width: 8,
+  },
+  analyticsTitle: {
+    color: '#1a1a2e',
+    fontSize: 26,
+    fontWeight: '800',
+    marginBottom: 2,
+  },
+  analyticsSubtitle: {
+    color: '#6b7280',
+    fontSize: 12,
+    marginBottom: 10,
+  },
+  analyticsPeriodGrid: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  analyticsPeriodButton: {
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderColor: '#bfc3c8',
+    borderRadius: 10,
+    borderWidth: 1,
+    flex: 1,
+    justifyContent: 'center',
+    minHeight: 46,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+  },
+  analyticsPeriodButtonActive: {
+    backgroundColor: '#eaf0ff',
+    borderColor: '#93b8ff',
+  },
+  analyticsPeriodButtonText: {
+    color: '#0f172a',
     fontSize: 12,
     fontWeight: '700',
+    lineHeight: 14,
+    textAlign: 'center',
+  },
+  analyticsPeriodButtonTextActive: {
+    color: '#0f172a',
+  },
+  analyticsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  analyticsCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 14,
+    minHeight: 192,
+    overflow: 'hidden',
+    paddingHorizontal: 11,
+    paddingTop: 11,
+    paddingBottom: 9,
+    width: '48.5%',
+  },
+  analyticsCardAccent: {
+    backgroundColor: '#2f5ff4',
+  },
+  analyticsCardLabelRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  analyticsCardIconCircle: {
+    alignItems: 'center',
+    backgroundColor: '#eaf0ff',
+    borderRadius: 15,
+    height: 30,
+    justifyContent: 'center',
+    width: 30,
+  },
+  analyticsCardIconCircleAccent: {
+    backgroundColor: 'rgba(255,255,255,0.26)',
+  },
+  analyticsCardIconCircleWarn: {
+    backgroundColor: '#fdeccf',
+  },
+  analyticsCardIconCircleBlue: {
+    backgroundColor: '#dbeafe',
+  },
+  analyticsCardLabel: {
+    color: '#999999',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  analyticsCardLabelAccent: {
+    color: 'rgba(255,255,255,0.7)',
+  },
+  analyticsCardValue: {
+    color: '#1a1a2e',
+    fontSize: 38,
+    fontWeight: '500',
+    letterSpacing: -1,
+    lineHeight: 40,
+    marginTop: 2,
+  },
+  analyticsCardValueAccent: {
+    color: '#ffffff',
+    fontSize: 32,
+  },
+  analyticsCardValueSmall: {
+    fontSize: 34,
+    lineHeight: 36,
+  },
+  analyticsCardUnit: {
+    color: '#aaaaaa',
+    fontSize: 11,
+    marginTop: 1,
+  },
+  analyticsCardUnitAccent: {
+    color: 'rgba(255,255,255,0.65)',
+  },
+  analyticsReferenceLine: {
+    color: '#64748b',
+    fontSize: 11,
+    marginTop: 1,
+  },
+  analyticsBarsRow: {
+    alignItems: 'flex-end',
+    flexDirection: 'row',
+    gap: 4,
+    height: 48,
+    marginTop: 6,
+    width: '100%',
+  },
+  analyticsBar: {
+    backgroundColor: '#93b8ff',
+    borderRadius: 3,
+    flex: 1,
+    minHeight: 8,
+  },
+  analyticsBarMuted: {
+    backgroundColor: '#e8eceb',
+  },
+  analyticsBarActive: {
+    backgroundColor: '#2f5ff4',
+  },
+  analyticsWaveRow: {
+    height: 36,
+    marginTop: 6,
+    position: 'relative',
+    width: '100%',
+  },
+  analyticsWaveRowTall: {
+    height: 44,
+    marginTop: 6,
+    position: 'relative',
+    width: '100%',
+  },
+  analyticsLineCanvas: {
+    height: '100%',
+    position: 'absolute',
+    width: '100%',
+  },
+  analyticsLineSegment: {
+    borderRadius: 1.5,
+    height: 2,
+    position: 'absolute',
+  },
+  analyticsLineSegmentAccent: {
+    backgroundColor: 'rgba(150, 245, 207, 0.9)',
+  },
+  analyticsLineSegmentOpen: {
+    backgroundColor: '#3f73ff',
+  },
+  analyticsLinePoint: {
+    borderRadius: 2.5,
+    height: 5,
+    position: 'absolute',
+    width: 5,
+  },
+  analyticsLinePointAccent: {
+    backgroundColor: '#ffffff',
+  },
+  analyticsLinePointOpen: {
+    backgroundColor: '#4f83ff',
+    borderColor: '#f5f6fa',
+    borderWidth: 1,
+  },
+  analyticsBarsTallRow: {
+    alignItems: 'flex-end',
+    flexDirection: 'row',
+    gap: 4,
+    height: 48,
+    marginTop: 6,
+    width: '100%',
+  },
+  analyticsTallBar: {
+    backgroundColor: '#cde2f7',
+    borderRadius: 3,
+    flex: 1,
+    minHeight: 8,
+  },
+  analyticsTallBarActive: {
+    backgroundColor: '#2f5ff4',
+  },
+  analyticsTallBarMuted: {
+    backgroundColor: '#dbe8ff',
+  },
+  analyticsCardTrend: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#eaf0ff',
+    borderRadius: 20,
+    color: '#2f5ff4',
+    fontSize: 12,
+    fontWeight: '700',
+    marginTop: 6,
+    minHeight: 22,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  analyticsCardTrendAccent: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    color: '#ffffff',
+  },
+  analyticsCardTrendWarn: {
+    backgroundColor: '#eaf0ff',
+    color: '#2f5ff4',
+  },
+  analyticsTicketStatsCard: {
+    borderRadius: 16,
+    marginTop: 8,
+    minHeight: 152,
+    overflow: 'hidden',
+    paddingHorizontal: 10,
+    paddingVertical: 9,
+    position: 'relative',
+  },
+  analyticsTicketStatsGlowOne: {
+    backgroundColor: 'rgba(122, 165, 255, 0.24)',
+    borderRadius: 999,
+    height: 130,
+    position: 'absolute',
+    right: -70,
+    top: -60,
+    width: 130,
+  },
+  analyticsTicketStatsGlowTwo: {
+    backgroundColor: 'rgba(173, 201, 255, 0.18)',
+    borderRadius: 999,
+    height: 90,
+    left: -50,
+    position: 'absolute',
+    top: 28,
+    width: 90,
+  },
+  analyticsTicketStatsHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 2,
+  },
+  analyticsTicketStatsTitle: {
+    color: '#f8fbff',
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
+  analyticsTicketStatsPeriodPill: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: 999,
+    flexDirection: 'row',
+    gap: 3,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+  },
+  analyticsTicketStatsPeriodText: {
+    color: '#dbe8ff',
+    fontSize: 9,
+    fontWeight: '600',
+  },
+  analyticsTicketStatsBody: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 18,
+    marginTop: 4,
+  },
+  analyticsDonutWrap: {
+    alignItems: 'center',
+    height: 150,
+    justifyContent: 'center',
+    position: 'relative',
+    width: 182,
+  },
+  analyticsDonutRing: {
+    alignItems: 'center',
+    borderColor: 'rgba(255, 255, 255, 0.32)',
+    borderRadius: 63,
+    borderWidth: 8,
+    height: 126,
+    justifyContent: 'center',
+    marginLeft: 0,
+    width: 126,
+  },
+  analyticsDonutArcPrimary: {
+    borderColor: 'transparent',
+    borderLeftColor: '#facc15',
+    borderRadius: 63,
+    borderTopColor: '#facc15',
+    borderWidth: 8,
+    height: 126,
+    left: -8,
+    position: 'absolute',
+    top: -8,
+    transform: [{ rotate: '42deg' }],
+    width: 126,
+  },
+  analyticsDonutArcSecondary: {
+    borderColor: 'transparent',
+    borderRadius: 63,
+    borderRightColor: '#22c55e',
+    borderTopColor: '#22c55e',
+    borderWidth: 8,
+    height: 126,
+    left: -8,
+    position: 'absolute',
+    top: -8,
+    transform: [{ rotate: '-10deg' }],
+    width: 126,
+  },
+  analyticsDonutArcTertiary: {
+    borderBottomColor: '#ffffff',
+    borderColor: 'transparent',
+    borderRadius: 63,
+    borderLeftColor: '#ffffff',
+    borderWidth: 8,
+    height: 126,
+    left: -8,
+    position: 'absolute',
+    top: -8,
+    transform: [{ rotate: '208deg' }],
+    width: 126,
+  },
+  analyticsDonutCenter: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(30, 58, 138, 0.94)',
+    borderRadius: 39,
+    height: 78,
+    justifyContent: 'center',
+    width: 78,
+  },
+  analyticsDonutCenterText: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  analyticsDonutBadge: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(30, 58, 138, 0.72)',
+    borderRadius: 12,
+    height: 24,
+    justifyContent: 'center',
+    position: 'absolute',
+    width: 24,
+  },
+  analyticsDonutBadgeLeft: {
+    left: 18,
+    top: 22,
+  },
+  analyticsDonutBadgeRight: {
+    left: 160,
+    top: 68,
+  },
+  analyticsDonutBadgeText: {
+    color: '#f8fafc',
+    fontSize: 9,
+    fontWeight: '700',
+  },
+  analyticsTicketStatsLegend: {
+    alignItems: 'center',
+    gap: 5,
+    justifyContent: 'center',
+    marginLeft: 0,
+    width: 122,
+  },
+  analyticsLegendItem: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 10,
+    justifyContent: 'center',
+    minWidth: 116,
+  },
+  analyticsLegendTextWrap: {
+    alignItems: 'center',
+    minWidth: 56,
+  },
+  analyticsLegendIcon: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    borderRadius: 14,
+    height: 28,
+    justifyContent: 'center',
+    width: 28,
+  },
+  analyticsLegendIconOpen: {
+    backgroundColor: 'rgba(250, 204, 21, 0.22)',
+  },
+  analyticsLegendIconResolved: {
+    backgroundColor: 'rgba(34, 197, 94, 0.22)',
+  },
+  analyticsLegendIconTotal: {
+    backgroundColor: 'rgba(255, 255, 255, 0.28)',
+  },
+  analyticsLegendLabel: {
+    color: 'rgba(236, 243, 255, 0.76)',
+    fontSize: 9,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  analyticsLegendValue: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: '700',
+    lineHeight: 20,
+    textAlign: 'center',
+  },
+  analyticsLegendMeta: {
+    color: 'rgba(236, 243, 255, 0.76)',
+    fontSize: 8,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  analyticsTicketMixRow: {
+    borderRadius: 999,
+    flexDirection: 'row',
+    gap: 3,
+    height: 6,
+    marginTop: 6,
+    overflow: 'hidden',
+  },
+  analyticsTicketMixSegment: {
+    borderRadius: 999,
+    height: '100%',
+  },
+  analyticsRecentHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  analyticsRecentTitle: {
+    color: '#1a1a2e',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  analyticsSeeAll: {
+    color: '#2f5ff4',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  analyticsRecentList: {
+    gap: 8,
+  },
+  analyticsRecentItem: {
+    backgroundColor: '#ffffff',
+    borderRadius: 11,
+    borderColor: 'rgba(0,0,0,0.06)',
+    borderWidth: 0.5,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  analyticsRecentAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#eaf0ff',
+  },
+  analyticsRecentAvatarText: {
+    color: '#2f5ff4',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  analyticsRecentBody: {
+    flex: 1,
+    minWidth: 0,
+  },
+  analyticsRecentName: {
+    color: '#1a1a2e',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  analyticsRecentMeta: {
+    color: '#2f5ff4',
+    fontSize: 10,
+    marginTop: 2,
+  },
+  analyticsRecentRight: {
+    alignItems: 'flex-end',
+  },
+  analyticsRecentStatus: {
+    color: '#2f5ff4',
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  analyticsRecentTime: {
+    color: '#999999',
+    fontSize: 10,
+    marginTop: 2,
+  },
+  analyticsRecentEmpty: {
+    backgroundColor: '#ffffff',
+    borderRadius: 11,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+  },
+  analyticsRecentEmptyText: {
+    color: '#64748b',
+    fontSize: 12,
   },
   notificationsScrollContent: {
     flexGrow: 1,
@@ -2279,7 +3417,7 @@ const styles = StyleSheet.create({
   },
   notificationItemBadge: {
     alignItems: 'center',
-    backgroundColor: '#0f8d72',
+    backgroundColor: '#3f73ff',
     borderRadius: 999,
     justifyContent: 'center',
     minWidth: 24,
@@ -2287,7 +3425,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   notificationItemBadgeText: {
-    color: '#ecfeff',
+    color: '#dbe8ff',
     fontSize: 11,
     fontWeight: '800',
   },
@@ -2297,18 +3435,14 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   talkToAgentCard: {
-    backgroundColor: 'rgba(248,250,252,0.92)',
-    borderColor: 'rgba(226,232,240,0.95)',
-    borderRadius: 26,
+    backgroundColor: '#2f5ff4',
+    borderColor: 'rgba(255,255,255,0.18)',
+    borderRadius: 16,
     borderWidth: 1,
-    marginBottom: 6,
+    marginBottom: 8,
     marginHorizontal: 14,
-    padding: 10,
-    shadowColor: '#0f172a',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
   },
   talkToAgentTitle: {
     color: '#0f172a',
@@ -2324,16 +3458,16 @@ const styles = StyleSheet.create({
   },
   talkToAgentButton: {
     alignItems: 'center',
-    backgroundColor: '#0f8d72',
-    borderRadius: 18,
+    backgroundColor: 'transparent',
+    borderRadius: 12,
     flexDirection: 'row',
     gap: 8,
     justifyContent: 'center',
-    minHeight: 42,
+    minHeight: 36,
     paddingHorizontal: 14,
   },
   talkToAgentButtonText: {
-    color: '#dcfce7',
+    color: '#dbe8ff',
     fontSize: 13,
     fontWeight: '800',
   },
@@ -2343,7 +3477,7 @@ const styles = StyleSheet.create({
     paddingBottom: 3,
     paddingTop: 1.5,
     minHeight: 29,
-    backgroundColor: '#0c82be',
+    backgroundColor: '#2f5ff4',
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
     overflow: 'hidden',
@@ -2416,7 +3550,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   locationTypeChipActive: {
-    backgroundColor: '#0f766e',
+    backgroundColor: '#3f73ff',
   },
   locationTypeChipText: {
     color: '#334155',
@@ -2424,7 +3558,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   locationTypeChipTextActive: {
-    color: '#ecfeff',
+    color: '#dbe8ff',
   },
   locationEmptyState: {
     borderColor: '#cbd5e1',
@@ -2441,7 +3575,7 @@ const styles = StyleSheet.create({
   },
   locationPrimaryButton: {
     alignSelf: 'flex-start',
-    backgroundColor: '#0f766e',
+    backgroundColor: '#3f73ff',
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 9,
@@ -2487,7 +3621,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#dcfce7',
+    backgroundColor: '#dbe8ff',
   },
   locationCardTitle: {
     flex: 1,
@@ -2496,7 +3630,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   locationCardDistance: {
-    color: '#0f766e',
+    color: '#3f73ff',
     fontSize: 12,
     fontWeight: '700',
   },
@@ -2654,13 +3788,13 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   sessionActionButton: {
-    backgroundColor: '#f59e0b',
+    backgroundColor: '#2f5ff4',
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
   sessionActionButtonText: {
-    color: '#0f172a',
+    color: '#f8fafc',
     fontWeight: '800',
   },
   providerPanel: {
@@ -2690,8 +3824,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   providerChipActive: {
-    backgroundColor: '#f59e0b',
-    borderColor: '#f59e0b',
+    backgroundColor: '#2f5ff4',
+    borderColor: '#2f5ff4',
   },
   providerChipText: {
     color: '#1e293b',
@@ -2699,7 +3833,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   providerChipTextActive: {
-    color: '#0f172a',
+    color: '#f8fafc',
   },
   quickActionCard: {
     backgroundColor: '#f8fafc',
@@ -2762,7 +3896,7 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
   },
   sessionTabActive: {
-    backgroundColor: '#0f766e',
+    backgroundColor: '#3f73ff',
   },
   sessionTabLabel: {
     color: '#34475a',
@@ -2807,7 +3941,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   ratingChipActive: {
-    backgroundColor: '#164e63',
+    backgroundColor: '#1e3a8a',
   },
   ratingChipText: {
     color: '#334155',
@@ -2839,7 +3973,7 @@ const styles = StyleSheet.create({
   },
   feedbackPrimaryButton: {
     alignItems: 'center',
-    backgroundColor: '#0f766e',
+    backgroundColor: '#3f73ff',
     borderRadius: 12,
     flex: 1,
     justifyContent: 'center',
@@ -2903,7 +4037,7 @@ const styles = StyleSheet.create({
   },
   sendButton: {
     alignItems: 'center',
-    backgroundColor: '#f59e0b',
+    backgroundColor: '#2f5ff4',
     borderRadius: 999,
     justifyContent: 'center',
     minWidth: 72,
@@ -2911,7 +4045,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   sendButtonText: {
-    color: '#0f172a',
+    color: '#f8fafc',
     fontWeight: '800',
   },
   messageMetaText: {
@@ -2950,7 +4084,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   messageBubbleMine: {
-    backgroundColor: '#0f766e',
+    backgroundColor: '#3f73ff',
     borderBottomRightRadius: 6,
   },
   messageBubbleOther: {
@@ -2992,12 +4126,12 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 10,
     paddingTop: 4,
-    paddingBottom: 4,
+    paddingBottom: 0,
     shadowColor: '#0f172a',
     shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 8,
+    shadowOpacity: 0.03,
+    shadowRadius: 2,
+    elevation: 1,
   },
   stickyInputField: {
     backgroundColor: '#edf4fa',
@@ -3011,7 +4145,7 @@ const styles = StyleSheet.create({
   },
   stickySendButton: {
     alignItems: 'center',
-    backgroundColor: '#0f766e',
+    backgroundColor: '#3f73ff',
     borderRadius: 999,
     justifyContent: 'center',
     minHeight: 40,
@@ -3072,7 +4206,7 @@ const styles = StyleSheet.create({
   },
   modalPrimaryButton: {
     alignItems: 'center',
-    backgroundColor: '#0f766e',
+    backgroundColor: '#3f73ff',
     borderRadius: 12,
     flex: 1,
     justifyContent: 'center',
@@ -3090,16 +4224,16 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 10,
   },
-  profileCardDark: {
-    backgroundColor: '#111827',
+  profileCardBlue: {
+    backgroundColor: '#eaf0ff',
   },
   profileTitle: {
     color: '#1e293b',
     fontSize: 20,
     fontWeight: '800',
   },
-  profileTitleDark: {
-    color: '#f8fafc',
+  profileTitleBlue: {
+    color: '#1e3a8a',
   },
   profileCopy: {
     color: '#475569',
@@ -3107,14 +4241,70 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     marginBottom: 4,
   },
-  profileCopyDark: {
-    color: '#cbd5e1',
+  profileCopyBlue: {
+    color: '#2f4f9a',
   },
   profileFieldLabel: {
     color: '#334155',
     fontSize: 12,
     fontWeight: '700',
     marginTop: 2,
+  },
+  providerSelectButton: {
+    alignItems: 'center',
+    backgroundColor: '#edf4fa',
+    borderColor: '#dbe5ef',
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    minHeight: 44,
+    paddingHorizontal: 12,
+  },
+  providerSelectButtonBlue: {
+    backgroundColor: '#dbe8ff',
+    borderColor: '#93b8ff',
+  },
+  providerSelectText: {
+    color: '#0f172a',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  providerSelectTextBlue: {
+    color: '#1e3a8a',
+  },
+  providerSelectPlaceholder: {
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  providerSelectMenu: {
+    backgroundColor: '#f8fafc',
+    borderColor: '#dbe5ef',
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 6,
+    padding: 8,
+  },
+  providerSelectMenuBlue: {
+    backgroundColor: '#eef4ff',
+    borderColor: '#93b8ff',
+  },
+  providerSelectOption: {
+    backgroundColor: '#edf4fa',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 9,
+  },
+  providerSelectOptionActive: {
+    backgroundColor: '#3f73ff',
+  },
+  providerSelectOptionText: {
+    color: '#0f172a',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  providerSelectOptionTextActive: {
+    color: '#dbe8ff',
   },
   inputReadOnly: {
     color: '#64748b',
@@ -3137,9 +4327,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
-  themeToggleRowDark: {
-    backgroundColor: '#1f2937',
-    borderColor: '#334155',
+  themeToggleRowBlue: {
+    backgroundColor: '#dbe8ff',
+    borderColor: '#93b8ff',
   },
   themeToggleTextWrap: {
     flex: 1,
@@ -3150,15 +4340,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
-  themeToggleTitleDark: {
-    color: '#f8fafc',
+  themeToggleTitleBlue: {
+    color: '#1e3a8a',
   },
   themeToggleCopy: {
     color: '#64748b',
     fontSize: 12,
     marginTop: 2,
   },
-  themeToggleCopyDark: {
-    color: '#94a3b8',
+  themeToggleCopyBlue: {
+    color: '#2f4f9a',
   },
 })

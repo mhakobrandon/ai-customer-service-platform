@@ -59,9 +59,6 @@ export default function AgentConsole() {
   const [reply, setReply] = useState('')
   const [sending, setSending] = useState(false)
   const [ticketActionLoading, setTicketActionLoading] = useState(false)
-  const [newEscalationNotice, setNewEscalationNotice] = useState<string | null>(null)
-  const hasInboxInitializedRef = useRef(false)
-  const previousInboxCountRef = useRef(0)
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -199,24 +196,11 @@ export default function AgentConsole() {
     return () => clearInterval(interval)
   }, [activeSessionId])
 
-  useEffect(() => {
-    const currentCount = inbox.length
-    const previousCount = previousInboxCountRef.current
-
-    if (!hasInboxInitializedRef.current) {
-      hasInboxInitializedRef.current = true
-      previousInboxCountRef.current = currentCount
-      return
-    }
-
-    if (currentCount > previousCount) {
-      const waitingNow = currentCount - previousCount
-      setNewEscalationNotice(
-        `${waitingNow} new escalated customer${waitingNow > 1 ? 's are' : ' is'} waiting for your response.`
-      )
-    }
-
-    previousInboxCountRef.current = currentCount
+  const consoleStats = useMemo(() => {
+    const waiting = inbox.length
+    const unreplied = inbox.filter((item) => item.unreplied).length
+    const claimed = inbox.filter((item) => item.status === 'assigned').length
+    return { waiting, unreplied, claimed }
   }, [inbox])
 
   if (loading) {
@@ -228,65 +212,80 @@ export default function AgentConsole() {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Box>
-          <Typography variant="h5" fontWeight="bold">
-            Human Agent Console
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Handle escalated chats in real time.
-          </Typography>
+    <Box
+      sx={{
+        p: { xs: 1.25, md: 2.25 },
+        minHeight: '100dvh',
+        background: 'linear-gradient(180deg, #f6f8fd 0%, #eff3fb 100%)',
+      }}
+    >
+      <Paper
+        elevation={0}
+        sx={{
+          mb: 2,
+          p: { xs: 1.5, md: 2 },
+          borderRadius: '14px',
+          border: '1px solid #e2e8f4',
+          background: 'linear-gradient(120deg, #ffffff 0%, #f7f9ff 100%)',
+          boxShadow: '0 12px 24px rgba(15, 23, 42, 0.06)',
+        }}
+      >
+        <Box display="flex" justifyContent="space-between" alignItems="center" gap={1.5} flexWrap="wrap">
+          <Box>
+            <Typography variant="h5" fontWeight={800} sx={{ letterSpacing: '-0.01em', color: '#1e2640' }}>
+              Human Agent Console
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#6a738d' }}>
+              Handle escalated conversations with fast response controls and ticket actions.
+            </Typography>
+          </Box>
+          <Button
+            variant="outlined"
+            onClick={() => navigate(dashboardRoute)}
+            sx={{
+              borderRadius: '10px',
+              textTransform: 'none',
+              fontWeight: 700,
+              px: 1.4,
+            }}
+          >
+            Back to Dashboard
+          </Button>
         </Box>
-        <Button variant="outlined" onClick={() => navigate(dashboardRoute)}>
-          Back to Dashboard
-        </Button>
-      </Box>
+
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mt: 1.5 }}>
+          <Chip color="warning" variant="outlined" label={`${consoleStats.waiting} waiting`} />
+          <Chip color="error" variant="outlined" label={`${consoleStats.unreplied} unreplied`} />
+          <Chip color="success" variant="outlined" label={`${consoleStats.claimed} claimed`} />
+        </Stack>
+      </Paper>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+        <Alert severity="error" sx={{ mb: 2, borderRadius: '10px' }} onClose={() => setError(null)}>
           {error}
-        </Alert>
-      )}
-
-      {newEscalationNotice && (
-        <Alert severity="warning" sx={{ mb: 2 }} onClose={() => setNewEscalationNotice(null)}>
-          {newEscalationNotice}
-        </Alert>
-      )}
-
-      {inbox.length > 0 && (
-        <Alert
-          severity="info"
-          sx={{ mb: 2 }}
-          action={
-            <Button
-              color="inherit"
-              size="small"
-              onClick={() => {
-                const firstWaiting = inbox[0]
-                if (firstWaiting) {
-                  setActiveSessionId(firstWaiting.session_id)
-                }
-              }}
-            >
-              View waiting customer
-            </Button>
-          }
-        >
-          {`${inbox.length} escalated customer${inbox.length > 1 ? 's are' : ' is'} currently waiting for a human response.`}
         </Alert>
       )}
 
       <Grid container spacing={2}>
         <Grid item xs={12} md={4}>
-          <Paper sx={{ height: '70vh', overflow: 'auto' }}>
+          <Paper
+            sx={{
+              height: { xs: '42vh', md: '74vh' },
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              border: '1px solid #e2e8f4',
+              borderRadius: '14px',
+              boxShadow: '0 12px 24px rgba(15, 23, 42, 0.06)',
+              background: 'linear-gradient(180deg, #ffffff 0%, #f8faff 100%)',
+            }}
+          >
             <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
               <Typography variant="subtitle1" fontWeight="bold">
                 Escalation Inbox ({inbox.length})
               </Typography>
             </Box>
-            <List sx={{ p: 0 }}>
+            <List sx={{ p: 0, flex: 1, overflow: 'auto' }}>
               {inbox.length === 0 ? (
                 <Box sx={{ p: 2 }}>
                   <Typography variant="body2" color="text.secondary">
@@ -302,9 +301,11 @@ export default function AgentConsole() {
                     sx={{
                       borderBottom: '1px solid',
                       borderColor: 'divider',
+                      px: 1.5,
+                      py: 0.9,
                       backgroundColor: item.unreplied ? 'rgba(211, 47, 47, 0.06)' : 'transparent',
                       '&:hover': {
-                        backgroundColor: item.unreplied ? 'rgba(211, 47, 47, 0.12)' : undefined,
+                        backgroundColor: item.unreplied ? 'rgba(211, 47, 47, 0.12)' : 'rgba(63, 109, 246, 0.05)',
                       },
                     }}
                   >
@@ -348,7 +349,18 @@ export default function AgentConsole() {
         </Grid>
 
         <Grid item xs={12} md={8}>
-          <Paper sx={{ height: '70vh', display: 'flex', flexDirection: 'column' }}>
+          <Paper
+            sx={{
+              height: { xs: '62vh', md: '74vh' },
+              display: 'flex',
+              flexDirection: 'column',
+              border: '1px solid #e2e8f4',
+              borderRadius: '14px',
+              boxShadow: '0 12px 24px rgba(15, 23, 42, 0.06)',
+              overflow: 'hidden',
+              background: 'linear-gradient(180deg, #ffffff 0%, #f8faff 100%)',
+            }}
+          >
             <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Box>
                 <Typography variant="subtitle1" fontWeight="bold">
@@ -397,7 +409,7 @@ export default function AgentConsole() {
 
             <Box
               ref={messagesContainerRef}
-              sx={{ flexGrow: 1, overflow: 'auto', p: 2, bgcolor: 'background.default' }}
+              sx={{ flexGrow: 1, overflow: 'auto', p: 2, bgcolor: '#f5f8ff' }}
             >
               {activeSessionId ? (
                 messages.map((msg) => (
@@ -413,6 +425,8 @@ export default function AgentConsole() {
                       sx={{
                         p: 1.5,
                         maxWidth: '75%',
+                        borderRadius: '12px',
+                        border: '1px solid #e7ecf8',
                         bgcolor: msg.is_from_customer ? 'white' : msg.is_from_agent ? 'warning.50' : 'primary.50',
                       }}
                     >

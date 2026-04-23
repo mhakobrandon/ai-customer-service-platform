@@ -69,61 +69,109 @@ function getProviderBrandPalette(providerName: string) {
   const key = providerName.toLowerCase()
 
   if (key.includes('eco')) {
-    return { strong: '#00A1DE', soft: '#E6F6FC', text: '#007AA8' }
+    return { strong: '#2f5ff4', soft: '#eaf0ff', text: '#1e3a8a' }
   }
 
   if (key.includes('one')) {
-    return { strong: '#F58220', soft: '#FFF1E6', text: '#C85F09' }
+    return { strong: '#3f73ff', soft: '#edf3ff', text: '#2246a3' }
   }
 
   if (key.includes('inn')) {
-    return { strong: '#1E63B6', soft: '#EAF2FD', text: '#174C8D' }
+    return { strong: '#375bcf', soft: '#e8eeff', text: '#1d3f99' }
   }
 
   if (key.includes('cbz')) {
-    return { strong: '#CE1126', soft: '#FDEBED', text: '#9B0D1D' }
+    return { strong: '#5b86ff', soft: '#eff3ff', text: '#2f4faa' }
   }
 
-  return { strong: '#64748b', soft: '#f1f5f9', text: '#334155' }
+  return { strong: '#647fb8', soft: '#eef2fb', text: '#2f477f' }
+}
+
+function getTimeBasedGreeting(now = new Date()) {
+  const hour = now.getHours()
+
+  if (!Number.isFinite(hour) || hour < 0 || hour > 23) {
+    return 'Hello'
+  }
+
+  if (hour >= 5 && hour < 12) {
+    return 'Good morning'
+  }
+
+  if (hour >= 12 && hour < 17) {
+    return 'Good afternoon'
+  }
+
+  if (hour >= 17 && hour < 22) {
+    return 'Good evening'
+  }
+
+  return 'Hello'
+}
+
+function getUserInitials(rawName: string) {
+  const normalized = rawName.trim()
+  if (!normalized) {
+    return '??'
+  }
+
+  const withoutEmailDomain = normalized.includes('@') ? normalized.split('@')[0] : normalized
+  const parts = withoutEmailDomain.split(/[\s._-]+/).filter(Boolean)
+
+  if (parts.length >= 2) {
+    return `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase()
+  }
+
+  const token = (parts[0] ?? '').replace(/[^a-zA-Z0-9]/g, '')
+  if (!token) {
+    return '??'
+  }
+
+  return token.slice(0, 2).toUpperCase()
 }
 
 export function TopHeader({ userName, onLocationPress, isLocating = false, onLogout }: TopHeaderProps) {
-  const firstName = (userName || 'Customer').trim().split(/\s+/)[0]
-  const initials = (userName || 'CU')
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('')
+  const displayName = (userName || '').trim()
+  const fallbackName = displayName || 'Customer'
+  const firstNameSource = fallbackName.includes('@') ? fallbackName.split('@')[0] : fallbackName
+  const firstName = firstNameSource.split(/[\s._-]+/).filter(Boolean)[0] || 'Customer'
+  const initials = getUserInitials(fallbackName)
+  const greeting = getTimeBasedGreeting()
 
   return (
     <LinearGradient
-      colors={["#0f8d72", "#10b981", "#0f766e"]}
+      colors={['#1e3a8a', '#2f5ff4', '#1e3a8a']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.topHeaderShell}
     >
+      <View pointerEvents="none" style={styles.headerBgRingLarge} />
+      <View pointerEvents="none" style={styles.headerBgRingSmall} />
       <View style={styles.topHeaderRow}>
         <View style={styles.topHeaderLeft}>
-          <View style={styles.profileAvatar}>
-            <Text style={styles.profileAvatarText}>{initials || 'CU'}</Text>
+          <View style={styles.avatarWrap}>
+            <LinearGradient colors={['#3f73ff', '#2f5ff4']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.profileAvatar}>
+              <Text style={styles.profileAvatarText}>{initials}</Text>
+            </LinearGradient>
+            <View style={styles.avatarOnlineDot} />
           </View>
           <View style={styles.topHeaderTextWrap}>
-            <Text style={styles.topHeaderHello}>Hello,</Text>
+            <Text style={styles.topHeaderHello}>{greeting}</Text>
             <Text numberOfLines={1} style={styles.topHeaderName}>{firstName}</Text>
           </View>
         </View>
 
         <View style={styles.topHeaderRight}>
           <Pressable onPress={onLocationPress} style={styles.locationButton} accessibilityLabel="Find nearby locations" hitSlop={12}>
+            <View style={styles.headerActionDot} />
             {isLocating ? (
               <ActivityIndicator color="#f8fafc" size="small" />
             ) : (
-              <Ionicons name="location-outline" size={24} color="#f8fafc" />
+              <Ionicons name="location-outline" size={18} color="#f8fafc" />
             )}
           </Pressable>
           <Pressable onPress={onLogout} style={styles.logoutButton} accessibilityLabel="Log out" hitSlop={12}>
-            <Ionicons name="log-out-outline" size={26} color="#f8fafc" />
+            <Ionicons name="log-out-outline" size={18} color="#f8fafc" />
           </Pressable>
         </View>
       </View>
@@ -133,47 +181,74 @@ export function TopHeader({ userName, onLocationPress, isLocating = false, onLog
 
 export function SessionHubStatsCard({ totalSessions, activeSessions, openTickets, resolutionRate }: SessionHubStatsProps) {
   return (
-    <View style={styles.statsCard}>
-        <View style={styles.statsGridRow}>
-          <View style={styles.statsCell}>
-            <View style={styles.statsIconBubble}>
-              <Ionicons color="#2563eb" name="refresh-circle" size={29} />
-            </View>
-            <Text style={styles.statsLabel}>Total sessions</Text>
-            <Text style={styles.statsValue}>{totalSessions}</Text>
-            <View pointerEvents="none" style={[styles.statsFullOverlay, styles.statsTopOverlayBlue]} />
-          </View>
+    <LinearGradient colors={['#3f73ff', '#2f5ff4', '#1e3a8a']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.statsCard}>
+      <View pointerEvents="none" style={styles.statsGlassPanel} />
+      <View pointerEvents="none" style={styles.statsGlowBlobOne} />
+      <View pointerEvents="none" style={styles.statsGlowBlobTwo} />
+      <View pointerEvents="none" style={styles.statsShimmer} />
+      <View pointerEvents="none" style={styles.statsCurveWrap}>
+        <View style={styles.statsCurveOne} />
+        <View style={styles.statsCurveTwo} />
+        <View style={styles.statsCurveThree} />
+      </View>
 
-        <View style={styles.statsCell}>
-          <View style={styles.statsIconBubble}>
-            <Ionicons color="#10b981" name="chatbubble" size={28} />
-          </View>
-          <Text style={styles.statsLabel}>Active sessions</Text>
-          <Text style={styles.statsValue}>{activeSessions}</Text>
-          <View pointerEvents="none" style={[styles.statsFullOverlay, styles.statsTopOverlayGreen]} />
+      <View style={styles.statsTopRow}>
+        <View>
+          <Text style={styles.statsLabel}>AI Customer Service</Text>
+          <Text style={styles.statsSubLabel}>Real-time support performance</Text>
+          <Text style={styles.statsValue}>{totalSessions} sessions</Text>
+        </View>
+        <View style={styles.statsLiveBadge}>
+          <View style={styles.statsLiveDot} />
+          <Text style={styles.statsLiveText}>LIVE</Text>
         </View>
       </View>
 
-      <View style={[styles.statsGridRow, styles.statsGridRowLast]}>
-        <View style={styles.statsCell}>
-          <View style={styles.statsIconBubble}>
-            <Ionicons color="#d97706" name="alert-circle" size={28} />
+      <View style={styles.statsActionRow}>
+        <View style={styles.statsActionItem}>
+          <View style={styles.statsActionIconWrap}>
+            <Ionicons color="#ffffff" name="chatbubble-outline" size={14} />
           </View>
-          <Text style={styles.statsLabel}>Open tickets</Text>
-          <Text style={styles.statsValue}>{openTickets}</Text>
-          <View pointerEvents="none" style={[styles.statsFullOverlay, styles.statsTopOverlayOrange]} />
+          <Text style={styles.statsActionLabel}>Active</Text>
+          <Text style={styles.statsActionValue}>{activeSessions}</Text>
         </View>
-
-        <View style={styles.statsCell}>
-          <View style={styles.statsIconBubble}>
-            <Ionicons color="#0284c7" name="star" size={28} />
+        <View style={styles.statsActionItem}>
+          <View style={styles.statsActionIconWrap}>
+            <Ionicons color="#ffffff" name="time-outline" size={14} />
           </View>
-          <Text style={styles.statsLabel}>Resolution rate</Text>
-          <Text style={styles.statsValue}>{resolutionRate}</Text>
-          <View pointerEvents="none" style={[styles.statsFullOverlay, styles.statsTopOverlaySky]} />
+          <Text style={styles.statsActionLabel}>Sessions</Text>
+          <Text style={styles.statsActionValue}>{totalSessions}</Text>
+        </View>
+        <View style={styles.statsActionItem}>
+          <View style={styles.statsActionIconWrap}>
+            <Ionicons color="#ffffff" name="refresh-outline" size={14} />
+          </View>
+          <Text style={styles.statsActionLabel}>Tickets</Text>
+          <Text style={styles.statsActionValue}>{openTickets}</Text>
+        </View>
+        <View style={styles.statsActionItem}>
+          <View style={styles.statsActionIconWrap}>
+            <Ionicons color="#ffffff" name="stats-chart-outline" size={14} />
+          </View>
+          <Text style={styles.statsActionLabel}>Rate</Text>
+          <Text style={styles.statsActionValue}>{resolutionRate}</Text>
         </View>
       </View>
-    </View>
+
+      <View pointerEvents="none" style={styles.statsSparklineRow}>
+        <View style={[styles.statsSparklineBar, { height: `${Math.max(24, Math.min(100, activeSessions * 8))}%` }]} />
+        <View style={[styles.statsSparklineBar, styles.statsSparklineBarMuted, { height: `${Math.max(20, Math.min(92, openTickets * 7))}%` }]} />
+        <View style={[styles.statsSparklineBar, { height: `${Math.max(28, Math.min(100, totalSessions * 3.5))}%` }]} />
+        <View style={[styles.statsSparklineBar, styles.statsSparklineBarBright, { height: `${Math.max(26, Number.parseFloat(resolutionRate) || 26)}%` }]} />
+      </View>
+
+      <View pointerEvents="none" style={styles.cardDotsRow}>
+        <View style={[styles.cardDot, styles.cardDotActive]} />
+        <View style={styles.cardDot} />
+        <View style={styles.cardDot} />
+        <View style={styles.cardDot} />
+      </View>
+    </LinearGradient>
   )
 }
 
@@ -234,30 +309,40 @@ export function QuickActionGrid({ prompts, onPromptPress }: QuickActionGridProps
   const getPromptDisplay = (prompt: string) => {
     const lower = prompt.toLowerCase()
     if (lower.includes('balance')) {
-      return { label: 'Wallet', icon: 'wallet-outline' as const }
+      return { label: 'Wallet', icon: 'wallet-outline' as const, tone: 'teal' as const }
     }
     if (lower.includes('dispute')) {
-      return { label: 'Transaction', icon: 'card-outline' as const }
+      return { label: 'Transaction', icon: 'card-outline' as const, tone: 'blue' as const }
     }
     if (lower.includes('atm')) {
-      return { label: 'ATM', icon: 'business-outline' as const }
+      return { label: 'ATM', icon: 'business-outline' as const, tone: 'purple' as const }
     }
     if (lower.includes('pin')) {
-      return { label: 'PIN reset', icon: 'id-card-outline' as const }
+      return { label: 'PIN reset', icon: 'id-card-outline' as const, tone: 'amber' as const }
     }
-    return { label: prompt, icon: 'chatbubble-outline' as const }
+    return { label: prompt, icon: 'chatbubble-outline' as const, tone: 'blue' as const }
   }
 
   return (
     <View style={styles.quickActionCard}>
-      <Text style={styles.quickActionTitle}>Quick services</Text>
+      <Text style={styles.quickActionTitle}>Chat shortcuts</Text>
       <View style={styles.quickActionGrid}>
         {prompts.map((prompt) => {
-          const { label, icon } = getPromptDisplay(prompt)
+          const { label, icon, tone } = getPromptDisplay(prompt)
+          const toneStyle =
+            tone === 'teal'
+              ? styles.quickActionIconBoxTeal
+              : tone === 'purple'
+                ? styles.quickActionIconBoxPurple
+                : tone === 'amber'
+                  ? styles.quickActionIconBoxAmber
+                  : styles.quickActionIconBoxBlue
+          const iconColor =
+            tone === 'teal' ? '#2f5ff4' : tone === 'purple' ? '#3f73ff' : tone === 'amber' ? '#1e3a8a' : '#2f5ff4'
           return (
             <Pressable key={prompt} onPress={() => onPromptPress(prompt)} style={styles.quickActionButton}>
-              <View style={styles.quickActionIconBox}>
-                <Ionicons color="#2463ab" name={icon} size={20} />
+              <View style={[styles.quickActionIconBox, toneStyle]}>
+                <Ionicons color={iconColor} name={icon} size={18} />
               </View>
               <Text numberOfLines={1} style={styles.quickActionButtonText}>{label}</Text>
             </Pressable>
@@ -277,17 +362,18 @@ export function SessionTabs({ sessions, activeSessionId, onSelectSession }: Sess
         contentContainerStyle={styles.sessionTabsList}
         showsVerticalScrollIndicator={false}
       >
-        {sessions.map((session) => {
+        {sessions.map((session, index) => {
           const active = session.session_id === activeSessionId
           const displayId = session.session_id.length > 9 ? `...${session.session_id.slice(-4)}` : session.session_id
+          const avatarTone = active ? styles.sessionAvatarActive : index % 3 === 2 ? styles.sessionAvatarWarning : styles.sessionAvatarInactive
           return (
             <Pressable
               key={session.session_id}
               onPress={() => onSelectSession(session.session_id)}
               style={[styles.sessionTab, active && styles.sessionTabActive]}
             >
-              <View style={styles.sessionTabIconWrap}>
-                <Ionicons color="#2f7ec8" name="chatbubble-ellipses-outline" size={16} />
+              <View style={[styles.sessionAvatar, avatarTone]}>
+                <Text style={styles.sessionAvatarText}>{displayId.replace('...', '').slice(0, 2).toUpperCase()}</Text>
               </View>
               <View style={styles.sessionTabBody}>
                 <Text numberOfLines={1} style={[styles.sessionTabTitle, active && styles.sessionTabLabelActive]}>
@@ -381,15 +467,35 @@ const styles = StyleSheet.create({
     width: '100%',
     alignSelf: 'stretch',
     borderRadius: 18,
-    borderBottomWidth: 2,
-    borderBottomColor: '#d6f0e3',
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingTop: 14,
+    paddingBottom: 18,
     shadowColor: '#0f172a',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 4,
+    overflow: 'hidden',
+  },
+  headerBgRingLarge: {
+    position: 'absolute',
+    right: -40,
+    top: -50,
+    width: 200,
+    height: 200,
+    borderRadius: 999,
+    borderWidth: 40,
+    borderColor: 'rgba(255,255,255,0.04)',
+  },
+  headerBgRingSmall: {
+    position: 'absolute',
+    right: 30,
+    top: 10,
+    width: 80,
+    height: 80,
+    borderRadius: 999,
+    borderWidth: 20,
+    borderColor: 'rgba(255,255,255,0.04)',
   },
   topHeaderRow: {
     flexDirection: 'row',
@@ -405,144 +511,278 @@ const styles = StyleSheet.create({
   topHeaderTextWrap: {
     flex: 1,
     paddingRight: 4,
+    marginLeft: 2,
   },
   topHeaderHello: {
-    color: '#f8fafc',
-    fontSize: 16,
-    fontWeight: '700',
+    color: 'rgba(255,255,255,0.66)',
+    fontSize: 12,
+    fontWeight: '600',
   },
   topHeaderName: {
     color: '#f8fafc',
-    fontSize: 22,
-    fontWeight: '800',
-    lineHeight: 26,
+    fontSize: 18,
+    fontWeight: '500',
+    letterSpacing: -0.2,
+    lineHeight: 22,
   },
   topHeaderRight: {
     flexDirection: 'row',
     alignItems: 'center',
     marginLeft: 8,
   },
-  profileAvatar: {
-    alignItems: 'center',
-    backgroundColor: '#f8fafc',
-    borderColor: 'rgba(15,23,42,0.08)',
-    borderRadius: 999,
-    borderWidth: 1,
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
+  avatarWrap: {
+    position: 'relative',
     marginRight: 8,
   },
+  profileAvatar: {
+    alignItems: 'center',
+    borderColor: 'rgba(255,255,255,0.32)',
+    borderRadius: 999,
+    borderWidth: 2,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
+  },
   profileAvatarText: {
-    color: '#0f172a',
+    color: '#ffffff',
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: '500',
+  },
+  avatarOnlineDot: {
+    position: 'absolute',
+    right: 1,
+    bottom: 1,
+    width: 10,
+    height: 10,
+    borderRadius: 999,
+    backgroundColor: '#22c55e',
+    borderWidth: 2,
+    borderColor: '#bbf7d0',
   },
   logoutButton: {
-    backgroundColor: 'rgba(15,23,42,0.13)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(255,255,255,0.18)',
+    borderWidth: 1,
     borderRadius: 999,
-    padding: 4,
+    width: 36,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
   },
   locationButton: {
-    backgroundColor: 'rgba(15,23,42,0.13)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(255,255,255,0.18)',
+    borderWidth: 1,
     borderRadius: 999,
-    padding: 5,
+    width: 36,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
+    marginRight: 7,
+    position: 'relative',
+  },
+  headerActionDot: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    width: 8,
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: '#e24b4a',
+    borderWidth: 1.5,
+    borderColor: '#2f5ff4',
   },
   statsCard: {
-    backgroundColor: '#f8fafc',
-    borderColor: '#e2e8f0',
-    borderRadius: 13.36,
+    marginHorizontal: 14,
+    marginTop: 0,
+    marginBottom: 14,
+    borderColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 22,
     borderWidth: 1,
-    marginHorizontal: 14.72,
-    marginBottom: 14.72,
-    padding: 10.33,
-    shadowColor: '#0f172a',
-    shadowOffset: { width: 0, height: 3.09 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8.30,
-    elevation: 2.09,
-  },
-  statsGridRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 10,
-  },
-  statsGridRowLast: {
-    marginBottom: 0,
-  },
-  statsCell: {
-    backgroundColor: '#ffffff',
-    borderColor: '#e2e8f0',
-    borderRadius: 14.44,
-    borderWidth: 1,
-    flex: 1,
-    minHeight: 52.11,
-    paddingHorizontal: 12.23,
-    paddingVertical: 8.30,
-    paddingRight: 59.08,
-    justifyContent: 'space-between',
+    padding: 18,
+    backgroundColor: '#3f73ff',
+    shadowColor: '#0a3a34',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.45,
+    shadowRadius: 22,
+    elevation: 10,
     position: 'relative',
     overflow: 'hidden',
   },
-  statsFullOverlay: {
+  statsGlassPanel: {
+    ...StyleSheet.absoluteFillObject,
+    borderColor: 'rgba(255,255,255,0.18)',
+    borderRadius: 22,
+    borderWidth: 1,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+  },
+  statsGlowBlobOne: {
+    backgroundColor: 'rgba(96, 129, 255, 0.22)',
+    borderRadius: 999,
+    height: 170,
     position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    borderRadius: 14,
-    zIndex: 3,
+    right: -80,
+    top: -60,
+    width: 170,
   },
-  statsTopOverlayBlue: {
-    backgroundColor: 'rgba(37,99,235,0.16)',
+  statsGlowBlobTwo: {
+    backgroundColor: 'rgba(133, 163, 255, 0.16)',
+    borderRadius: 999,
+    height: 120,
+    left: -60,
+    position: 'absolute',
+    top: 56,
+    width: 120,
   },
-  statsTopOverlayGreen: {
-    backgroundColor: 'rgba(16,185,129,0.16)',
+  statsShimmer: {
+    position: 'absolute',
+    inset: 0,
+    backgroundColor: 'rgba(255,255,255,0.05)',
   },
-  statsTopOverlayOrange: {
-    backgroundColor: 'rgba(217,119,6,0.16)',
+  statsCurveWrap: {
+    position: 'absolute',
+    right: -36,
+    top: -28,
   },
-  statsTopOverlaySky: {
-    backgroundColor: 'rgba(2,132,199,0.16)',
+  statsCurveOne: {
+    width: 120,
+    height: 120,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.09)',
   },
-  statsCellHeader: {
+  statsCurveTwo: {
+    width: 164,
+    height: 164,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    position: 'absolute',
+    top: -22,
+    left: -22,
+  },
+  statsCurveThree: {
+    width: 210,
+    height: 210,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.07)',
+    position: 'absolute',
+    top: -45,
+    left: -45,
+  },
+  statsTopRow: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 8,
+    marginBottom: 14,
   },
   statsLabel: {
-    color: '#64748b',
-    fontSize: 10,
+    color: 'rgba(228, 236, 255, 0.90)',
+    fontSize: 12,
     fontWeight: '700',
-    textTransform: 'uppercase',
     letterSpacing: 0.4,
-    flex: 1,
+    marginBottom: 2,
+    textTransform: 'uppercase',
   },
-  statsIconBubble: {
-    alignItems: 'center',
-    backgroundColor: '#e7eefc',
-    borderRadius: 999,
-    height: 44,
-    justifyContent: 'center',
-    width: 44,
-    position: 'absolute',
-    right: 6,
-    top: '50%',
-    transform: [{ translateY: -22 }],
+  statsSubLabel: {
+    color: 'rgba(219, 232, 255, 0.84)',
+    fontSize: 11,
+    marginBottom: 6,
   },
   statsValue: {
-    color: '#0f172a',
-    fontSize: 29.51,
+    color: '#ffffff',
+    fontSize: 31,
+    fontWeight: '700',
+    letterSpacing: -0.5,
+  },
+  statsLiveBadge: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(30, 58, 138, 0.42)',
+    borderColor: 'rgba(255,255,255,0.24)',
+    borderRadius: 999,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  statsLiveDot: {
+    backgroundColor: '#22c55e',
+    borderRadius: 999,
+    height: 7,
+    width: 7,
+  },
+  statsLiveText: {
+    color: '#eaf0ff',
+    fontSize: 10,
     fontWeight: '800',
-    lineHeight: 34.61,
-    marginTop: 8.30,
-    paddingLeft: 2.09,
+    letterSpacing: 0.6,
+  },
+  cardDotsRow: {
+    position: 'absolute',
+    left: 14,
+    bottom: 10,
+    flexDirection: 'row',
+    gap: 5,
+  },
+  cardDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+  },
+  cardDotActive: {
+    backgroundColor: 'rgba(255,255,255,0.5)',
+  },
+  statsActionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  statsActionItem: {
+    alignItems: 'center',
+    width: '24%',
+  },
+  statsActionIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.22)',
+    marginBottom: 4,
+  },
+  statsActionLabel: {
+    color: 'rgba(228, 236, 255, 0.90)',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  statsActionValue: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  statsSparklineRow: {
+    alignItems: 'flex-end',
+    flexDirection: 'row',
+    gap: 6,
+    height: 34,
+    marginBottom: 4,
+  },
+  statsSparklineBar: {
+    backgroundColor: 'rgba(255,255,255,0.46)',
+    borderRadius: 3,
+    flex: 1,
+    minHeight: 8,
+  },
+  statsSparklineBarMuted: {
+    backgroundColor: 'rgba(191, 219, 254, 0.32)',
+  },
+  statsSparklineBarBright: {
+    backgroundColor: '#22d3ee',
   },
   headerCard: {
     backgroundColor: '#f8fafc',
@@ -589,12 +829,13 @@ const styles = StyleSheet.create({
     width: 30,
   },
   providerPanel: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 0,
+    backgroundColor: '#f0f4f8',
+    borderRadius: 16,
     marginBottom: 10,
     marginHorizontal: 14,
     paddingHorizontal: 14,
-    paddingVertical: 0,
+    paddingTop: 14,
+    paddingBottom: 10,
   },
   providerPanelHeader: {
     alignItems: 'center',
@@ -603,13 +844,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   providerPanelTitle: {
-    color: '#1f2937',
-    fontSize: 18,
-    fontWeight: '700',
+    color: '#1a1a2e',
+    fontSize: 13,
+    fontWeight: '500',
   },
   providerSeeAll: {
-    color: '#35658f',
-    fontSize: 13,
+    color: '#2f5ff4',
+    fontSize: 11,
     fontWeight: '600',
   },
   providerRow: {
@@ -618,27 +859,19 @@ const styles = StyleSheet.create({
     paddingRight: 0,
   },
   providerChip: {
-    backgroundColor: '#ffffff',
-    borderColor: '#d1d5db',
+    borderColor: 'transparent',
     borderRadius: 999,
-    borderWidth: 1,
-    paddingHorizontal: 18,
-    paddingVertical: 8,
+    borderWidth: 0,
+    paddingHorizontal: 14,
+    paddingVertical: 5,
   },
   providerChipActive: {
-    borderColor: 'rgba(255,255,255,0.9)',
-    borderWidth: 1.5,
-    shadowColor: '#0f172a',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 4,
-    transform: [{ translateY: -1 }],
+    transform: [{ translateY: -0.5 }],
   },
   providerChipText: {
     color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 11,
+    fontWeight: '500',
   },
   providerChipTextActive: {
     color: '#ffffff',
@@ -649,27 +882,39 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   quickActionCard: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 0,
+    backgroundColor: '#f0f4f8',
+    borderRadius: 16,
     marginBottom: 7,
     marginHorizontal: 14,
     paddingHorizontal: 14,
-    paddingVertical: 0,
+    paddingTop: 10,
+    paddingBottom: 12,
   },
   quickActionTitle: {
-    color: '#1f2937',
-    fontSize: 18,
-    fontWeight: '700',
+    color: '#1a1a2e',
+    fontSize: 15,
+    fontWeight: '500',
     marginBottom: 12,
   },
   quickActionIconBox: {
     alignItems: 'center',
-    backgroundColor: '#e5eef8',
-    borderRadius: 12,
-    height: 52,
+    borderRadius: 11,
+    height: 38,
     justifyContent: 'center',
-    marginBottom: 8,
-    width: 52,
+    marginBottom: 5,
+    width: 38,
+  },
+  quickActionIconBoxTeal: {
+    backgroundColor: '#eaf0ff',
+  },
+  quickActionIconBoxBlue: {
+    backgroundColor: '#ddeef9',
+  },
+  quickActionIconBoxPurple: {
+    backgroundColor: '#e3ecff',
+  },
+  quickActionIconBoxAmber: {
+    backgroundColor: '#dbe8ff',
   },
   quickActionGrid: {
     flexDirection: 'row',
@@ -677,33 +922,35 @@ const styles = StyleSheet.create({
   },
   quickActionButton: {
     alignItems: 'center',
-    backgroundColor: 'transparent',
-    borderRadius: 12,
+    backgroundColor: '#ffffff',
+    borderColor: 'rgba(0,0,0,0.06)',
+    borderWidth: 0.5,
+    borderRadius: 11,
     flexDirection: 'column',
     justifyContent: 'center',
-    minHeight: 94,
+    minHeight: 88,
     paddingHorizontal: 4,
     width: '24%',
   },
   quickActionButtonText: {
-    color: '#111827',
-    fontSize: 12,
-    fontWeight: '600',
-    lineHeight: 14,
+    color: '#555555',
+    fontSize: 11,
+    fontWeight: '500',
+    lineHeight: 15,
     textAlign: 'center',
   },
   sessionTabsWrap: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 0,
+    backgroundColor: '#f0f4f8',
+    borderRadius: 16,
     marginBottom: 8,
     marginHorizontal: 14,
     paddingVertical: 12,
-    paddingTop: 10,
+    paddingTop: 8,
   },
   sessionTabsTitle: {
-    color: '#1f2937',
-    fontSize: 18,
-    fontWeight: '800',
+    color: '#1a1a2e',
+    fontSize: 15,
+    fontWeight: '500',
     marginBottom: 10,
     paddingHorizontal: 14,
   },
@@ -713,61 +960,74 @@ const styles = StyleSheet.create({
     paddingBottom: 2,
   },
   sessionTabsScroll: {
-    maxHeight: 124,
+    maxHeight: 216,
   },
   sessionTab: {
     alignItems: 'center',
     backgroundColor: '#ffffff',
-    borderColor: '#e2e8f0',
-    borderRadius: 14,
-    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.06)',
+    borderRadius: 11,
+    borderWidth: 0.5,
     flexDirection: 'row',
     gap: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
   },
   sessionTabActive: {
-    borderColor: '#cde5d6',
-    backgroundColor: '#f8fffb',
+    borderColor: '#2f5ff4',
+    backgroundColor: '#ffffff',
   },
-  sessionTabIconWrap: {
+  sessionAvatar: {
     alignItems: 'center',
-    backgroundColor: '#eaf1fa',
-    borderRadius: 10,
+    borderRadius: 999,
     height: 36,
     justifyContent: 'center',
     width: 36,
+  },
+  sessionAvatarActive: {
+    backgroundColor: '#eaf0ff',
+  },
+  sessionAvatarInactive: {
+    backgroundColor: '#ddeef9',
+  },
+  sessionAvatarWarning: {
+    backgroundColor: '#dbe8ff',
+  },
+  sessionAvatarText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#2f5ff4',
   },
   sessionTabBody: {
     flex: 1,
     minWidth: 0,
   },
   sessionTabTitle: {
-    color: '#111827',
-    fontSize: 16,
-    fontWeight: '700',
+    color: '#1a1a2e',
+    fontSize: 13,
+    fontWeight: '500',
   },
   sessionTabSubtitle: {
-    color: '#6b7280',
-    fontSize: 12,
+    color: '#111827',
+    fontSize: 11,
     marginTop: 2,
   },
   sessionStatusPill: {
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#f3f4f6',
     borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
   },
   sessionStatusPillActive: {
-    backgroundColor: '#dcfce7',
+    backgroundColor: '#eaf0ff',
   },
   sessionStatusText: {
-    color: '#475569',
+    color: '#888888',
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '500',
   },
   sessionStatusTextActive: {
-    color: '#15803d',
+    color: '#2f5ff4',
   },
   sessionTabLabel: {
     color: '#111827',
@@ -802,7 +1062,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   ratingChipActive: {
-    backgroundColor: '#164e63',
+    backgroundColor: '#1e3a8a',
   },
   ratingChipText: {
     color: '#334155',
@@ -842,7 +1102,7 @@ const styles = StyleSheet.create({
   },
   feedbackPrimaryButton: {
     alignItems: 'center',
-    backgroundColor: '#0f766e',
+    backgroundColor: '#3f73ff',
     borderRadius: 12,
     flex: 1,
     justifyContent: 'center',

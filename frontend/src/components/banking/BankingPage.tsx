@@ -7,31 +7,18 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Container,
-  AppBar,
-  Toolbar,
-  Typography,
-  IconButton,
-  Button,
 } from '@mui/material';
 import {
-  AccountBalance as BankingIcon,
   ArrowBack as BackIcon,
-  Dashboard as DashboardIcon,
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../services/authService'
-import { getDashboardRoute } from '../../utils/dashboardRoute'
 import BankSelection from './BankSelection';
 import BankDetails from './BankDetails';
 import { BankingPlatform } from '../../types/banking';
+import AdminPageChrome from '../admin/AdminPageChrome';
 
 const BankingPage: React.FC = () => {
   const [selectedPlatform, setSelectedPlatform] = useState<BankingPlatform | null>(null);
-  const navigate = useNavigate();
-  const { user } = useAuth()
-
-  const dashboardRoute = getDashboardRoute(user?.role)
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSelectPlatform = (platform: BankingPlatform) => {
     setSelectedPlatform(platform);
@@ -41,53 +28,33 @@ const BankingPage: React.FC = () => {
     setSelectedPlatform(null);
   };
 
-  return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
-      {/* App Bar */}
-      <AppBar
-        position="static"
-        elevation={0}
-        sx={{
-          backgroundColor: 'background.paper',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          backdropFilter: 'blur(10px)',
-        }}
-      >
-        <Toolbar>
-          <IconButton
-            edge="start"
-            onClick={() => navigate(dashboardRoute)}
-            sx={{ mr: 2, color: 'text.primary' }}
-          >
-            <BackIcon />
-          </IconButton>
-          <BankingIcon sx={{ mr: 1, color: 'primary.main' }} />
-          <Typography variant="h6" color="text.primary" sx={{ flexGrow: 1 }}>
-            Banking Platforms Integration Hub
-          </Typography>
-          <Button
-            startIcon={<DashboardIcon />}
-            onClick={() => navigate(dashboardRoute)}
-            sx={{ display: { xs: 'none', sm: 'flex' } }}
-          >
-            Dashboard
-          </Button>
-        </Toolbar>
-      </AppBar>
+  const topActions = selectedPlatform ? (
+    <button type="button" className="btn" onClick={handleBack}>
+      <BackIcon sx={{ fontSize: 12 }} /> All Platforms
+    </button>
+  ) : undefined;
 
-      {/* Main Content */}
-      <Container maxWidth="xl" sx={{ py: 4 }}>
+  return (
+    <AdminPageChrome
+      activePage="banking"
+      searchValue={searchQuery}
+      onSearchChange={setSearchQuery}
+      searchPlaceholder="Search banking platforms by name, USSD code, or service..."
+      topActions={topActions}
+    >
+      <Box sx={{ p: { xs: 0.75, md: 1.25 } }}>
         {selectedPlatform ? (
           <BankDetails platform={selectedPlatform} onBack={handleBack} />
         ) : (
           <BankSelection
             onSelect={handleSelectPlatform}
             selectedPlatformId={undefined}
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
           />
         )}
-      </Container>
-    </Box>
+      </Box>
+    </AdminPageChrome>
   );
 };
 

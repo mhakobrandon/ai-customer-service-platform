@@ -16,8 +16,13 @@ import RegisterPage from './components/auth/RegisterPage'
 import ChatInterface from './components/chat/ChatInterface'
 import RoleDashboard from './components/dashboard/RoleDashboard'
 import CustomerDashboard from './components/dashboard/CustomerDashboard'
-import AgentDashboard from './components/dashboard/AgentDashboard'
+import AgentDashboardHome from './components/dashboard/AgentDashboardHome'
+import AgentEscalationInboxPage from './components/dashboard/AgentEscalationInboxPage'
+import AgentMyTicketsPage from './components/dashboard/AgentMyTicketsPage'
+import AgentReportsPage from './components/dashboard/AgentReportsPage'
 import SupervisorDashboard from './components/dashboard/SupervisorDashboard'
+import SupervisorAgentPerformancePage from './components/dashboard/SupervisorAgentPerformancePage'
+import SupervisorReportsPage from './components/dashboard/SupervisorReportsPage'
 import AdminDashboard from './components/dashboard/AdminDashboard'
 import AdminPanel from './components/admin/AdminPanel'
 import UserManagement from './components/admin/UserManagement'
@@ -70,10 +75,70 @@ function App() {
           }
         />
         <Route
+          path="/dashboard/customer/tickets"
+          element={
+            isAuthenticated ? (
+              user?.role === 'customer' ? <CustomerDashboard /> : <Navigate to="/dashboard" />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/dashboard/customer/tickets/:ticketId"
+          element={
+            isAuthenticated ? (
+              user?.role === 'customer' ? <CustomerDashboard /> : <Navigate to="/dashboard" />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
           path="/dashboard/agent"
           element={
             isAuthenticated ? (
-              user?.role === 'agent' ? <AgentDashboard /> : <Navigate to="/dashboard" />
+              user?.role === 'agent' ? <AgentDashboardHome /> : <Navigate to="/dashboard" />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/dashboard/agent/performance"
+          element={
+            isAuthenticated ? (
+              user?.role === 'agent' ? <Navigate to="/dashboard/agent" replace /> : <Navigate to="/dashboard" />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/dashboard/agent/reports"
+          element={
+            isAuthenticated ? (
+              user?.role === 'agent' ? <AgentReportsPage /> : <Navigate to="/dashboard" />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/dashboard/agent/escalations"
+          element={
+            isAuthenticated ? (
+              user?.role === 'agent' ? <AgentEscalationInboxPage /> : <Navigate to="/dashboard" />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/dashboard/agent/tickets"
+          element={
+            isAuthenticated ? (
+              user?.role === 'agent' ? <AgentMyTicketsPage /> : <Navigate to="/dashboard" />
             ) : (
               <Navigate to="/login" />
             )
@@ -84,6 +149,26 @@ function App() {
           element={
             isAuthenticated ? (
               user?.role === 'supervisor' ? <SupervisorDashboard /> : <Navigate to="/dashboard" />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/dashboard/supervisor/agent-performance"
+          element={
+            isAuthenticated ? (
+              user?.role === 'supervisor' ? <SupervisorAgentPerformancePage /> : <Navigate to="/dashboard" />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/dashboard/supervisor/reports"
+          element={
+            isAuthenticated ? (
+              user?.role === 'supervisor' ? <SupervisorReportsPage /> : <Navigate to="/dashboard" />
             ) : (
               <Navigate to="/login" />
             )

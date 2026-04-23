@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ChangeEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
 import {
   Alert,
   Box,
@@ -24,18 +23,19 @@ import {
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
   TextField,
   Typography,
 } from '@mui/material'
 import {
   Add as AddIcon,
-  ArrowBack as BackIcon,
   Delete as DeleteIcon,
   Edit as EditIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material'
 import { adminAPI } from '../../services/apiService'
+import AdminPageChrome from './AdminPageChrome'
 
 type LocationType = 'atm' | 'bank' | 'econet_shop' | 'netone_shop' | 'cashout_agent' | 'innbucks_outlet' | 'telecash_shop' | 'agency_banking'
 
@@ -89,12 +89,14 @@ const initialForm = {
 }
 
 export default function LocationManagement() {
-  const navigate = useNavigate()
   const [items, setItems] = useState<LocationItem[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState<string>('')
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(6)
 
   const [openDialog, setOpenDialog] = useState(false)
   const [editingItem, setEditingItem] = useState<LocationItem | null>(null)
@@ -105,9 +107,38 @@ export default function LocationManagement() {
   const [previewData, setPreviewData] = useState<ImportPreviewData | null>(null)
 
   const filteredItems = useMemo(() => {
-    if (!typeFilter) return items
-    return items.filter((item) => item.location_type === typeFilter)
-  }, [items, typeFilter])
+    const query = searchQuery.trim().toLowerCase()
+
+    return items.filter((item) => {
+      const matchesType = !typeFilter || item.location_type === typeFilter
+      if (!matchesType) {
+        return false
+      }
+
+      if (!query) {
+        return true
+      }
+
+      const typeLabel = LOCATION_TYPE_OPTIONS.find((entry) => entry.value === item.location_type)?.label || item.location_type
+
+      const searchable = [
+        item.name,
+        item.address || '',
+        item.contact || '',
+        item.provider || '',
+        typeLabel,
+      ]
+        .join(' ')
+        .toLowerCase()
+
+      return searchable.includes(query)
+    })
+  }, [items, typeFilter, searchQuery])
+
+  const paginatedFilteredItems = useMemo(() => {
+    const start = page * rowsPerPage
+    return filteredItems.slice(start, start + rowsPerPage)
+  }, [filteredItems, page, rowsPerPage])
 
   const fetchItems = async () => {
     try {
@@ -251,6 +282,17 @@ export default function LocationManagement() {
     fetchItems()
   }, [typeFilter])
 
+  useEffect(() => {
+    const maxPage = Math.max(0, Math.ceil(filteredItems.length / rowsPerPage) - 1)
+    if (page > maxPage) {
+      setPage(maxPage)
+    }
+  }, [filteredItems.length, page, rowsPerPage])
+
+  useEffect(() => {
+    setPage(0)
+  }, [typeFilter, searchQuery])
+
   const openCreateDialog = () => {
     setEditingItem(null)
     setForm(initialForm)
@@ -318,36 +360,50 @@ export default function LocationManagement() {
     return LOCATION_TYPE_OPTIONS.find((entry) => entry.value === type)?.label || type
   }
 
+  const handlePageChange = (_event: unknown, newPage: number) => {
+    setPage(newPage)
+  }
+
+  const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(Number.parseInt(event.target.value, 10))
+    setPage(0)
+  }
+
+  const topActions = (
+    <>
+      <button type="button" className="btn" onClick={fetchItems}>
+        <RefreshIcon sx={{ fontSize: 12 }} /> Refresh
+      </button>
+      <button type="button" className="btn" onClick={() => handleExport('csv')}>
+        Export CSV
+      </button>
+      <button type="button" className="btn" onClick={() => handleExport('json')}>
+        Export JSON
+      </button>
+      <button type="button" className="btn" onClick={handleDownloadTemplate}>
+        Download Template
+      </button>
+      <button type="button" className="btn" onClick={openCreateDialog}>
+        <AddIcon sx={{ fontSize: 12 }} /> Add Location
+      </button>
+    </>
+  )
+
   return (
-    <Box sx={{ p: 3 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Box display="flex" alignItems="center" gap={1}>
-          <IconButton onClick={() => navigate('/admin')}>
-            <BackIcon />
-          </IconButton>
-          <Typography variant="h4" fontWeight="bold">Location Directory Management</Typography>
-        </Box>
-        <Box display="flex" gap={1}>
-          <Button variant="outlined" startIcon={<RefreshIcon />} onClick={fetchItems}>
-            Refresh
-          </Button>
-          <Button variant="outlined" onClick={() => handleExport('csv')}>
-            Export CSV
-          </Button>
-          <Button variant="outlined" onClick={() => handleExport('json')}>
-            Export JSON
-          </Button>
-          <Button variant="outlined" onClick={handleDownloadTemplate}>
-            Download Template
-          </Button>
-          <Button variant="outlined" component="label" disabled={importing}>
-            {importing ? 'Importing...' : 'Import CSV/JSON'}
-            <input hidden type="file" accept=".csv,.json,application/json,text/csv" onChange={handleImport} />
-          </Button>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={openCreateDialog}>
-            Add Location
-          </Button>
-        </Box>
+    <AdminPageChrome
+      activePage="locations"
+      searchValue={searchQuery}
+      onSearchChange={setSearchQuery}
+      searchPlaceholder="Search locations by name, address, contact, provider, or type..."
+      topActions={topActions}
+    >
+    <Box sx={{ p: { xs: 0.75, md: 1.25 } }}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Typography variant="h4" fontWeight="bold">Location Directory Management</Typography>
+        <Button variant="outlined" component="label" disabled={importing}>
+          {importing ? 'Importing...' : 'Import CSV/JSON'}
+          <input hidden type="file" accept=".csv,.json,application/json,text/csv" onChange={handleImport} />
+        </Button>
       </Box>
 
       {error && (
@@ -401,7 +457,7 @@ export default function LocationManagement() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredItems.map((item) => (
+            {paginatedFilteredItems.map((item) => (
               <TableRow key={item.id} hover>
                 <TableCell>{item.name}</TableCell>
                 <TableCell>{getTypeLabel(item.location_type)}</TableCell>
@@ -429,6 +485,17 @@ export default function LocationManagement() {
           </TableBody>
         </Table>
       </TableContainer>
+      <TablePagination
+        component="div"
+        count={filteredItems.length}
+        page={page}
+        onPageChange={handlePageChange}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleRowsPerPageChange}
+        rowsPerPageOptions={[6, 10, 25]}
+        showFirstButton
+        showLastButton
+      />
 
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth maxWidth="md">
         <DialogTitle>{editingItem ? 'Edit Location' : 'Add Location'}</DialogTitle>
@@ -577,5 +644,6 @@ export default function LocationManagement() {
         </DialogActions>
       </Dialog>
     </Box>
+    </AdminPageChrome>
   )
 }

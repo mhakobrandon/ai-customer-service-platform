@@ -5,7 +5,7 @@
  * Author: Brandon K Mhako (R223931W)
  */
 
-import { useState, useEffect, useMemo, type MouseEvent } from 'react';
+import { useState, useEffect, useMemo, type ChangeEvent, type MouseEvent } from 'react';
 import {
   Box,
   Paper,
@@ -21,10 +21,9 @@ import {
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
   IconButton,
-  Tabs,
-  Tab,
   Avatar,
   List,
   ListItem,
@@ -63,7 +62,6 @@ import {
   Block as BlockIcon,
   PersonOff as PersonOffIcon,
   Logout as LogoutIcon,
-  Home as HomeIcon,
   AccountBalance as BankingIcon,
   ReportProblem as OverdueIcon,
   PersonSearch as UnassignedIcon,
@@ -80,7 +78,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend,
   Tooltip as RechartsTooltip,
   BarChart,
   Bar,
@@ -94,10 +91,10 @@ import { analyticsAPI, adminAPI, ticketAPI } from '../../services/apiService';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../services/authService';
 import { getDashboardRoute } from '../../utils/dashboardRoute';
-import PageHeader from '../common/PageHeader';
 import { downloadCsv, filterByDateRange, getDateRangeForPeriod, ReportPeriod } from '../../utils/reporting';
 import { formatDateTime, formatDateOnly, formatDateMediumShort } from '../../utils/dateUtils';
 import NotificationBell from '../common/NotificationBell';
+import DashboardShell, { type DashboardShellNavSection, toInitials } from '../dashboard/DashboardShell';
 import {
   AppNotification,
   computeAdminTicketCreatedNotifications,
@@ -123,6 +120,7 @@ interface DashboardData {
     total: number;
     open: number;
     resolved: number;
+    closed: number;
     resolution_rate: number;
   };
   chat_sessions: {
@@ -286,72 +284,140 @@ function StatCard({
   };
 
   const palette = theme.palette[color];
+  const isPrimaryHighlight = !isDark && color === 'primary';
 
   return (
     <Card
       elevation={0}
       sx={{
         height: '100%',
-        borderRadius: 3,
+        borderRadius: 0.5,
         position: 'relative',
         overflow: 'hidden',
-        background: isDark
-          ? DARK_GRADIENTS[color]
-          : `linear-gradient(135deg, ${alpha(palette.main, 0.08)} 0%, ${alpha(palette.light || palette.main, 0.03)} 100%)`,
-        border: `1px solid ${isDark ? alpha(palette.light || palette.main, 0.28) : alpha(palette.main, 0.15)}`,
-        boxShadow: isDark ? `0 4px 20px ${alpha(palette.main, 0.35)}` : `0 2px 10px ${alpha(palette.main, 0.1)}`,
+        background: isPrimaryHighlight
+          ? 'linear-gradient(135deg, #2f5ff4 0%, #3f73ff 100%)'
+          : isDark
+            ? DARK_GRADIENTS[color]
+            : '#ffffff',
+        border: `1px solid ${
+          isPrimaryHighlight
+            ? alpha('#3f73ff', 0.5)
+            : isDark
+              ? alpha(palette.light || palette.main, 0.28)
+              : alpha('#0f172a', 0.08)
+        }`,
+        boxShadow: isPrimaryHighlight
+          ? '0 8px 20px rgba(47, 95, 244, 0.24)'
+          : isDark
+            ? `0 4px 20px ${alpha(palette.main, 0.35)}`
+            : '0 2px 8px rgba(15, 23, 42, 0.06)',
         transition: 'transform 180ms ease, box-shadow 180ms ease',
         '&:hover': {
           transform: 'translateY(-2px)',
-          boxShadow: isDark ? `0 8px 28px ${alpha(palette.main, 0.5)}` : `0 4px 18px ${alpha(palette.main, 0.2)}`,
+          boxShadow: isPrimaryHighlight
+            ? '0 10px 24px rgba(47, 95, 244, 0.3)'
+            : isDark
+              ? `0 8px 28px ${alpha(palette.main, 0.5)}`
+              : '0 6px 16px rgba(15, 23, 42, 0.1)',
         },
       }}
     >
-      {/* Decorative circle */}
-      <Box sx={{ position: 'absolute', right: -16, top: -16, width: 80, height: 80, borderRadius: '50%', background: alpha('#fff', isDark ? 0.07 : 0.5), pointerEvents: 'none' }} />
-      <CardContent sx={{ p: 2.5, position: 'relative' }}>
-        <Box display="flex" justifyContent="space-between" alignItems="flex-start" gap={2}>
+      <CardContent sx={{ p: { xs: 1.35, md: 1.55 }, position: 'relative' }}>
+        <Box display="flex" justifyContent="space-between" alignItems="flex-start" gap={0.8}>
           <Box flex={1} minWidth={0}>
             <Typography
               sx={{
-                textTransform: 'uppercase',
-                letterSpacing: '0.07em',
                 fontWeight: 600,
-                fontSize: '0.67rem',
-                color: isDark ? 'rgba(255,255,255,0.65)' : 'text.secondary',
-                mb: 0.75,
+                fontSize: '0.73rem',
+                color: isPrimaryHighlight
+                  ? 'rgba(241, 245, 255, 0.95)'
+                  : isDark
+                    ? 'rgba(255,255,255,0.68)'
+                    : '#4b5563',
+                mb: 0.65,
               }}
             >
               {title}
             </Typography>
-            <Typography variant="h4" fontWeight={800} lineHeight={1.1}
-              sx={{ color: isDark ? '#fff' : (palette.dark || palette.main) }}>
+            <Typography
+              variant="h5"
+              fontWeight={700}
+              lineHeight={1.05}
+              sx={{
+                color: isPrimaryHighlight ? '#dbe8ff' : isDark ? '#fff' : '#111827',
+                fontSize: { xs: '1.55rem', md: '1.68rem' },
+              }}
+            >
               {value}
             </Typography>
             {subtitle && (
-              <Typography variant="caption" sx={{ color: isDark ? 'rgba(255,255,255,0.55)' : 'text.secondary', display: 'block', mt: 0.5 }}>
+              <Typography
+                sx={{
+                  color: isPrimaryHighlight
+                    ? 'rgba(232, 240, 255, 0.9)'
+                    : isDark
+                      ? 'rgba(255,255,255,0.55)'
+                      : '#6b7280',
+                  display: 'block',
+                  mt: 0.35,
+                  lineHeight: 1.2,
+                  fontSize: '0.75rem',
+                  fontWeight: 500,
+                }}
+              >
                 {subtitle}
               </Typography>
             )}
             {trend && (
-              <Box display="flex" alignItems="center" sx={{ mt: 0.75 }}>
+              <Box display="flex" alignItems="center" sx={{ mt: 0.45 }}>
                 {trend.positive ? (
-                  <TrendingUpIcon fontSize="small" sx={{ color: isDark ? '#34d399' : 'success.main', mr: 0.5 }} />
+                  <TrendingUpIcon
+                    fontSize="small"
+                    sx={{ color: isPrimaryHighlight ? '#86efac' : isDark ? '#34d399' : 'success.main', mr: 0.4 }}
+                  />
                 ) : (
-                  <TrendingDownIcon fontSize="small" sx={{ color: isDark ? '#f87171' : 'error.main', mr: 0.5 }} />
+                  <TrendingDownIcon
+                    fontSize="small"
+                    sx={{ color: isPrimaryHighlight ? '#fecaca' : isDark ? '#f87171' : 'error.main', mr: 0.4 }}
+                  />
                 )}
-                <Typography variant="caption" sx={{ color: trend.positive ? (isDark ? '#34d399' : 'success.main') : (isDark ? '#f87171' : 'error.main'), fontWeight: 600 }}>
+                <Typography
+                  sx={{
+                    color: trend.positive
+                      ? isPrimaryHighlight
+                        ? '#86efac'
+                        : isDark
+                          ? '#34d399'
+                          : 'success.main'
+                      : isPrimaryHighlight
+                        ? '#fecaca'
+                        : isDark
+                          ? '#f87171'
+                          : 'error.main',
+                    fontWeight: 700,
+                    fontSize: '0.74rem',
+                  }}
+                >
                   {trend.value}%
                 </Typography>
               </Box>
             )}
           </Box>
-          <Avatar sx={{
-            bgcolor: isDark ? alpha('#fff', 0.15) : alpha(palette.main, 0.12),
-            color: isDark ? '#fff' : palette.main,
-            width: 46,
-            height: 46,
-          }}>
+          <Avatar
+            sx={{
+              bgcolor: isPrimaryHighlight
+                ? 'rgba(236, 243, 255, 0.22)'
+                : isDark
+                  ? alpha('#fff', 0.15)
+                  : alpha(palette.main, 0.1),
+              color: isPrimaryHighlight ? '#e4ecff' : isDark ? '#fff' : palette.main,
+              width: { xs: 30, md: 32 },
+              height: { xs: 30, md: 32 },
+              border: `1px solid ${
+                isPrimaryHighlight ? 'rgba(236, 243, 255, 0.4)' : alpha(palette.main, isDark ? 0.28 : 0.18)
+              }`,
+            }}
+          >
             {icon}
           </Avatar>
         </Box>
@@ -361,14 +427,23 @@ function StatCard({
 }
 
 // Main Admin Panel Component
-export default function AdminPanel() {
+interface AdminPanelProps {
+  defaultTab?: number;
+}
+
+const ADMIN_USERS_ROWS_PER_PAGE = 6;
+const ADMIN_ESCALATIONS_ROWS_PER_PAGE = 6;
+const ADMIN_TICKETS_ROWS_PER_PAGE = 6;
+
+export default function AdminPanel({ defaultTab = 0 }: AdminPanelProps) {
   const navigate = useNavigate();
   const { logout, user } = useAuth();
   const theme = useTheme();
   const dashboardRoute = getDashboardRoute(user?.role);
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(defaultTab);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [performanceData, setPerformanceData] = useState<PerformanceData | null>(null);
   const [users, setUsers] = useState<User[]>([]);
@@ -469,6 +544,16 @@ export default function AdminPanel() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [profileMessageType, setProfileMessageType] = useState<'success' | 'error'>('success');
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
+  const [usersPage, setUsersPage] = useState(0);
+  const [usersRowsPerPage, setUsersRowsPerPage] = useState(ADMIN_USERS_ROWS_PER_PAGE);
+  const [escalationsPage, setEscalationsPage] = useState(0);
+  const [escalationsRowsPerPage, setEscalationsRowsPerPage] = useState(ADMIN_ESCALATIONS_ROWS_PER_PAGE);
+  const [ticketsPage, setTicketsPage] = useState(0);
+  const [ticketsRowsPerPage, setTicketsRowsPerPage] = useState(ADMIN_TICKETS_ROWS_PER_PAGE);
+
+  useEffect(() => {
+    setTabValue(defaultTab);
+  }, [defaultTab]);
 
   // Load data
   useEffect(() => {
@@ -662,7 +747,7 @@ export default function AdminPanel() {
 
   const fetchRecentEscalations = async () => {
     try {
-      const response = await analyticsAPI.getRecentEscalations(10);
+      const response = await analyticsAPI.getRecentEscalations(100);
       setRecentEscalations(response.data.escalations || []);
     } catch (err) {
       console.error('Failed to fetch recent escalations:', err);
@@ -730,10 +815,142 @@ export default function AdminPanel() {
     }));
   }, [users]);
 
+  const userDistributionColors = useMemo(
+    () => [
+      theme.palette.primary.main,
+      theme.palette.info.main,
+      theme.palette.warning.main,
+      theme.palette.success.main,
+      theme.palette.error.main,
+    ],
+    [
+      theme.palette.error.main,
+      theme.palette.info.main,
+      theme.palette.primary.main,
+      theme.palette.success.main,
+      theme.palette.warning.main,
+    ]
+  );
+
+  const totalUsersInDistribution = useMemo(
+    () => userDistributionData.reduce((sum, entry) => sum + entry.value, 0),
+    [userDistributionData]
+  );
+
   const activeAgentUsers = useMemo(
     () => users.filter((currentUser) => currentUser.role === 'agent' && currentUser.is_active),
     [users]
   );
+
+  const filteredUsers = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    if (!normalizedQuery) {
+      return users;
+    }
+
+    return users.filter((currentUser) => {
+      const name = currentUser.name?.toLowerCase() || '';
+      const email = currentUser.email?.toLowerCase() || '';
+      const role = currentUser.role?.toLowerCase() || '';
+      return (
+        name.includes(normalizedQuery)
+        || email.includes(normalizedQuery)
+        || role.includes(normalizedQuery)
+      );
+    });
+  }, [users, searchQuery]);
+
+  const paginatedUsers = useMemo(() => {
+    const start = usersPage * usersRowsPerPage;
+    return filteredUsers.slice(start, start + usersRowsPerPage);
+  }, [filteredUsers, usersPage, usersRowsPerPage]);
+
+  const filteredTickets = useMemo(() => {
+    return allTickets.filter((ticket) => {
+      if (ticketStatusFilter && ticket.status !== ticketStatusFilter) return false;
+      if (ticketPriorityFilter && ticket.priority !== ticketPriorityFilter) return false;
+      if (showOverdueOnly && !ticket.is_overdue) return false;
+      return true;
+    });
+  }, [allTickets, ticketStatusFilter, ticketPriorityFilter, showOverdueOnly]);
+
+  const paginatedEscalations = useMemo(() => {
+    const start = escalationsPage * escalationsRowsPerPage;
+    return recentEscalations.slice(start, start + escalationsRowsPerPage);
+  }, [recentEscalations, escalationsPage, escalationsRowsPerPage]);
+
+  const paginatedFilteredTickets = useMemo(() => {
+    const start = ticketsPage * ticketsRowsPerPage;
+    return filteredTickets.slice(start, start + ticketsRowsPerPage);
+  }, [filteredTickets, ticketsPage, ticketsRowsPerPage]);
+
+  useEffect(() => {
+    const maxPage = Math.max(0, Math.ceil(filteredUsers.length / usersRowsPerPage) - 1);
+    if (usersPage > maxPage) {
+      setUsersPage(maxPage);
+    }
+  }, [filteredUsers.length, usersPage, usersRowsPerPage]);
+
+  useEffect(() => {
+    const maxPage = Math.max(0, Math.ceil(recentEscalations.length / escalationsRowsPerPage) - 1);
+    if (escalationsPage > maxPage) {
+      setEscalationsPage(maxPage);
+    }
+  }, [recentEscalations.length, escalationsPage, escalationsRowsPerPage]);
+
+  useEffect(() => {
+    const maxPage = Math.max(0, Math.ceil(filteredTickets.length / ticketsRowsPerPage) - 1);
+    if (ticketsPage > maxPage) {
+      setTicketsPage(maxPage);
+    }
+  }, [filteredTickets.length, ticketsPage, ticketsRowsPerPage]);
+
+  useEffect(() => {
+    setTicketsPage(0);
+  }, [ticketStatusFilter, ticketPriorityFilter, showOverdueOnly]);
+
+  useEffect(() => {
+    if (!notificationFocusTicketId) {
+      return;
+    }
+
+    const focusedIndex = filteredTickets.findIndex((ticket) => (ticket.ticket_id || ticket.id) === notificationFocusTicketId);
+    if (focusedIndex < 0) {
+      return;
+    }
+
+    const focusedPage = Math.floor(focusedIndex / ticketsRowsPerPage);
+    if (focusedPage !== ticketsPage) {
+      setTicketsPage(focusedPage);
+    }
+  }, [notificationFocusTicketId, filteredTickets, ticketsRowsPerPage, ticketsPage]);
+
+  const handleUsersPageChange = (_event: unknown, newPage: number) => {
+    setUsersPage(newPage);
+  };
+
+  const handleUsersRowsPerPageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setUsersRowsPerPage(Number.parseInt(event.target.value, 10));
+    setUsersPage(0);
+  };
+
+  const handleEscalationsPageChange = (_event: unknown, newPage: number) => {
+    setEscalationsPage(newPage);
+  };
+
+  const handleEscalationsRowsPerPageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setEscalationsRowsPerPage(Number.parseInt(event.target.value, 10));
+    setEscalationsPage(0);
+  };
+
+  const handleTicketsPageChange = (_event: unknown, newPage: number) => {
+    setTicketsPage(newPage);
+  };
+
+  const handleTicketsRowsPerPageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setTicketsRowsPerPage(Number.parseInt(event.target.value, 10));
+    setTicketsPage(0);
+  };
 
   const handleAssignTicket = async (ticketId: string, agentId: string) => {
     if (!agentId) return;
@@ -805,6 +1022,21 @@ export default function AdminPanel() {
     if (typeof value !== 'number' || Number.isNaN(value)) return 0;
     return Math.max(0, Math.min(100, value));
   }, [dashboardData?.messages?.ai_resolution_rate]);
+
+  const totalMessagesProcessedPercent = useMemo(() => {
+    const total = dashboardData?.messages?.total;
+    if (typeof total !== 'number' || Number.isNaN(total) || total <= 0) return 0;
+    // Use a stable 1000-message reference so the bar communicates relative volume.
+    return Math.max(0, Math.min(100, (total / 1000) * 100));
+  }, [dashboardData?.messages?.total]);
+
+  const aiHandledMessagesPercent = useMemo(() => {
+    const total = dashboardData?.messages?.total;
+    const handled = dashboardData?.messages?.ai_handled;
+    if (typeof total !== 'number' || Number.isNaN(total) || total <= 0) return 0;
+    if (typeof handled !== 'number' || Number.isNaN(handled) || handled <= 0) return 0;
+    return Math.max(0, Math.min(100, (handled / total) * 100));
+  }, [dashboardData?.messages?.total, dashboardData?.messages?.ai_handled]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -878,6 +1110,39 @@ export default function AdminPanel() {
       return status === 'open' || status === 'pending';
     }).length;
   }, [allTickets]);
+
+  const ticketResolutionStats = useMemo(() => {
+    const resolvedOrClosedFromList = allTickets.filter((ticket) => {
+      const status = (ticket.status || '').toLowerCase();
+      return status === 'resolved' || status === 'closed';
+    });
+
+    const totalTicketCount = allTickets.length > 0
+      ? allTickets.length
+      : (dashboardData?.tickets?.total || 0);
+
+    const resolvedOrClosedCount = allTickets.length > 0
+      ? resolvedOrClosedFromList.length
+      : ((dashboardData?.tickets?.resolved || 0) + (dashboardData?.tickets?.closed || 0));
+
+    const aiResolvedCount = resolvedOrClosedFromList.filter((ticket) => !ticket.assigned_agent_id).length;
+
+    const resolutionRate = totalTicketCount > 0
+      ? (resolvedOrClosedCount / totalTicketCount) * 100
+      : 0;
+
+    const aiResolutionRate = resolvedOrClosedCount > 0
+      ? (aiResolvedCount / resolvedOrClosedCount) * 100
+      : 0;
+
+    return {
+      totalTicketCount,
+      resolvedOrClosedCount,
+      aiResolvedCount,
+      resolutionRate,
+      aiResolutionRate,
+    };
+  }, [allTickets, dashboardData?.tickets?.closed, dashboardData?.tickets?.resolved, dashboardData?.tickets?.total]);
 
   const downloadAdminUsersReport = () => {
     downloadCsv(
@@ -953,132 +1218,109 @@ export default function AdminPanel() {
     );
   }
 
-  const sectionHeadingSx = {
-    mb: 1,
-    fontWeight: 700,
-    letterSpacing: 0.2,
-    fontSize: { xs: '0.96rem', md: '1.0rem' },
-  };
-
   const overviewCardHeaderSx = {
-    pb: 0.25,
-    pt: 1,
+    py: 0.5,
+    px: 1.25,
+    '& .MuiCardHeader-action': {
+      m: 0,
+      alignSelf: 'center',
+    },
     '& .MuiCardHeader-title': {
       fontWeight: 650,
-      fontSize: '0.9rem',
+      fontSize: '0.82rem',
     },
     '& .MuiCardHeader-subheader': {
-      fontSize: '0.72rem',
+      fontSize: '0.68rem',
     },
   };
+  const displayName = profileName || user?.name || 'Admin User';
 
-  const dashboardHeroBackground = [
-    'radial-gradient(1200px 640px at -6% -12%, rgba(145, 212, 255, 0.75), transparent 58%)',
-    'radial-gradient(900px 520px at 110% -8%, rgba(147, 185, 255, 0.62), transparent 55%)',
-    'linear-gradient(160deg, #edf6ff 0%, #d7ecff 36%, #c3e2ff 72%, #b7dbff 100%)',
-  ].join(',');
+  const adminSidebarSections: DashboardShellNavSection[] = [
+    {
+      id: 'main',
+      title: 'Main',
+      items: [
+        { id: 'admin-overview', label: 'Overview', icon: <DashboardIcon sx={{ fontSize: 13 }} />, active: tabValue === 0, onClick: () => setTabValue(0) },
+        { id: 'admin-ai', label: 'AI Analytics', icon: <AIIcon sx={{ fontSize: 13 }} />, active: tabValue === 1, onClick: () => setTabValue(1) },
+        { id: 'admin-users', label: 'Users', icon: <PeopleIcon sx={{ fontSize: 13 }} />, active: tabValue === 2, onClick: () => setTabValue(2) },
+        { id: 'admin-escalations', label: 'Escalations', icon: <WarningIcon sx={{ fontSize: 13 }} />, active: tabValue === 3, onClick: () => setTabValue(3) },
+        { id: 'admin-tickets', label: 'Tickets', icon: <TicketIcon sx={{ fontSize: 13 }} />, active: tabValue === 4, onClick: () => setTabValue(4) },
+        { id: 'admin-reports', label: 'Reports', icon: <ReportsIcon sx={{ fontSize: 13 }} />, active: tabValue === 5, onClick: () => setTabValue(5) },
+        { id: 'admin-config', label: 'Configuration', icon: <SettingsIcon sx={{ fontSize: 13 }} />, active: tabValue === 6, onClick: () => setTabValue(6) },
+        { id: 'admin-intergartions', label: 'Intergartions', icon: <SpeedIcon sx={{ fontSize: 13 }} />, active: tabValue === 7, onClick: () => setTabValue(7) },
+      ],
+    },
+    {
+      id: 'operations',
+      title: 'Operations',
+      items: [
+        { id: 'admin-dashboard-home', label: 'Dashboard Home', icon: <DashboardIcon sx={{ fontSize: 13 }} />, onClick: () => navigate(dashboardRoute) },
+        { id: 'admin-console', label: 'Agent Console', icon: <ChatIcon sx={{ fontSize: 13 }} />, onClick: () => navigate('/agent/console') },
+        { id: 'admin-chat', label: 'Chat', icon: <ChatIcon sx={{ fontSize: 13 }} />, onClick: () => navigate('/chat') },
+        { id: 'admin-banking', label: 'Banking', icon: <BankingIcon sx={{ fontSize: 13 }} />, onClick: () => navigate('/banking') },
+        { id: 'admin-locations', label: 'Locations', icon: <FilterIcon sx={{ fontSize: 13 }} />, onClick: () => navigate('/admin/locations') },
+        { id: 'admin-nlp', label: 'NLP Review', icon: <AIIcon sx={{ fontSize: 13 }} />, onClick: () => navigate('/admin/nlp-feedback') },
+      ],
+    },
+    {
+      id: 'account',
+      title: 'Account',
+      items: [
+        { id: 'admin-profile', label: 'Profile', icon: <ProfileIcon sx={{ fontSize: 13 }} />, onClick: handleOpenProfileDialog },
+        { id: 'admin-logout', label: 'Logout', icon: <LogoutIcon sx={{ fontSize: 13 }} />, onClick: handleLogout },
+      ],
+    },
+  ];
+
+  const adminTopActions = (
+    <>
+      <NotificationBell
+        items={adminNotifications}
+        unreadCount={adminUnreadCount}
+        onOpenItem={(item) => {
+          const ticketId = typeof item.meta?.ticket_id === 'string' ? item.meta.ticket_id : null;
+          setTabValue(4);
+          setTicketStatusFilter('');
+          setTicketPriorityFilter('');
+          setShowOverdueOnly(item.route === '#overdue-tickets');
+          setNotificationFocusTicketId(ticketId);
+        }}
+        onMarkAllRead={() => {
+          markAdminOverdueNotificationsRead(user?.id, allTickets);
+          markAdminTicketCreatedNotificationsRead(user?.id, allTickets);
+          setAdminNotifications([]);
+          setAdminUnreadCount(0);
+        }}
+        tooltip="Overdue ticket alerts"
+      />
+
+      <button type="button" className="btn" onClick={(event) => handleOpenProfileMenu(event)}>
+        <ProfileIcon sx={{ fontSize: 12 }} /> {profileName || 'Admin'}
+      </button>
+      <button type="button" className="btn" onClick={handleRefresh} disabled={refreshing}>
+        <RefreshIcon sx={{ fontSize: 12 }} className={refreshing ? 'rotating' : ''} /> Refresh
+      </button>
+      <button type="button" className="btn" onClick={handleLogout}>
+        <LogoutIcon sx={{ fontSize: 12 }} /> Logout
+      </button>
+    </>
+  );
 
   return (
-    <Box
-      sx={{
-        position: 'relative',
-        height: '100vh',
-        overflow: 'hidden',
-        background: dashboardHeroBackground,
-      }}
+    <DashboardShell
+      roleClassName="role-dashboard-admin"
+      brandLabel="Taur.ai Admin"
+      brandIcon={<DashboardIcon sx={{ fontSize: 13 }} />}
+      sidebarSections={adminSidebarSections}
+      searchValue={searchQuery}
+      onSearchChange={setSearchQuery}
+      searchPlaceholder="Search analytics, users, tickets, and reports..."
+      topActions={adminTopActions}
+      userName={displayName}
+      userMeta="Admin control room"
+      userInitials={toInitials(displayName, 'AD')}
+      onUserCardClick={handleOpenProfileDialog}
     >
-      <Box
-        aria-hidden
-        sx={{
-          position: 'absolute',
-          inset: 0,
-          pointerEvents: 'none',
-          backgroundImage:
-            'linear-gradient(transparent 31px, rgba(255,255,255,0.16) 32px), linear-gradient(90deg, transparent 31px, rgba(255,255,255,0.16) 32px)',
-          backgroundSize: '32px 32px',
-          opacity: 0.45,
-        }}
-      />
-
-      <Box
-        sx={{
-          position: 'relative',
-          zIndex: 1,
-        px: { xs: 1.5, sm: 2.5, md: 3.5 },
-        pt: { xs: 1.5, md: 2 },
-        pb: 0,
-        height: '100vh',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        maxWidth: 1680,
-        mx: 'auto',
-        }}
-      >
-      <PageHeader
-        mb={1}
-        compact
-        transparent
-        title="Admin Dashboard"
-        subtitle="Platform analytics and operations"
-        actions={
-          <>
-            <NotificationBell
-              items={adminNotifications}
-              unreadCount={adminUnreadCount}
-              onOpenItem={(item) => {
-                const ticketId = typeof item.meta?.ticket_id === 'string' ? item.meta.ticket_id : null;
-                setTabValue(4);
-                setTicketStatusFilter('');
-                setTicketPriorityFilter('');
-                setShowOverdueOnly(item.route === '#overdue-tickets');
-                setNotificationFocusTicketId(ticketId);
-              }}
-              onMarkAllRead={() => {
-                markAdminOverdueNotificationsRead(user?.id, allTickets);
-                markAdminTicketCreatedNotificationsRead(user?.id, allTickets);
-                setAdminNotifications([]);
-                setAdminUnreadCount(0);
-              }}
-              tooltip="Overdue ticket alerts"
-            />
-            <Button variant="outlined" startIcon={<HomeIcon />} onClick={() => navigate(dashboardRoute)} size="small">
-              Dashboard
-            </Button>
-            <Button variant="outlined" color="warning" onClick={() => navigate('/agent/console')} size="small">
-              Agent Console
-            </Button>
-            <Button variant="outlined" startIcon={<ChatIcon />} onClick={() => navigate('/chat')} size="small">
-              Chat
-            </Button>
-            <Button variant="outlined" color="secondary" startIcon={<BankingIcon />} onClick={() => navigate('/banking')} size="small">
-              Banking
-            </Button>
-            <Button variant="outlined" color="secondary" onClick={() => navigate('/admin/locations')} size="small">
-              Locations
-            </Button>
-            <Button variant="outlined" color="info" startIcon={<AIIcon />} onClick={() => navigate('/admin/nlp-feedback')} size="small">
-              NLP Review
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<ProfileIcon />}
-              onClick={handleOpenProfileMenu}
-              size="small"
-            >
-              {profileName || 'Admin'}
-            </Button>
-            <Tooltip title="Refresh Data">
-              <IconButton onClick={handleRefresh} disabled={refreshing}>
-                <RefreshIcon className={refreshing ? 'rotating' : ''} />
-              </IconButton>
-            </Tooltip>
-            <Button variant="outlined" color="error" startIcon={<LogoutIcon />} onClick={handleLogout} size="small">
-              Logout
-            </Button>
-          </>
-        }
-      />
       <Menu
         anchorEl={profileAnchorEl}
         open={Boolean(profileAnchorEl)}
@@ -1176,79 +1418,9 @@ export default function AdminPanel() {
         </Alert>
       )}
 
-      {/* Navigation Tabs */}
-      <Paper
-        sx={{
-          mb: 1.5,
-          borderRadius: 2,
-          p: 0,
-          flexShrink: 0,
-          overflow: 'hidden',
-          border: 'none',
-          boxShadow: (t) => `0 1px 4px ${alpha(t.palette.common.black, 0.12)}`,
-        }}
-      >
-        <Tabs
-          value={tabValue}
-          onChange={(_, newValue) => setTabValue(newValue)}
-          textColor="primary"
-          variant="scrollable"
-          scrollButtons="auto"
-          allowScrollButtonsMobile
-          sx={{
-            minHeight: 48,
-            px: 0,
-            '& .MuiTabs-scroller': {
-              margin: '0 !important',
-            },
-            '& .MuiTabs-indicator': {
-              display: 'none',
-            },
-            '& .MuiTab-root': {
-              minHeight: 48,
-              fontWeight: 600,
-              textTransform: 'none',
-              borderRadius: 1.75,
-              px: { xs: 1.25, sm: 1.75 },
-              fontSize: '0.82rem',
-              color: 'text.secondary',
-              transition: 'all 0.2s ease',
-              '&:hover': {
-                bgcolor: (t) => alpha(t.palette.primary.main, 0.1),
-                color: 'primary.main',
-              },
-              '&.Mui-selected': {
-                bgcolor: (t) => alpha(t.palette.primary.main, 0.16),
-                color: 'primary.main',
-              },
-              '&.Mui-selected:hover': {
-                bgcolor: (t) => alpha(t.palette.primary.main, 0.22),
-              },
-            },
-            '& .MuiTab-root:first-of-type': {
-              marginLeft: '0 !important',
-              borderTopLeftRadius: 8,
-              borderBottomLeftRadius: 8,
-            },
-          }}
-        >
-          <Tab icon={<DashboardIcon />} label="Overview" iconPosition="start" />
-          <Tab icon={<AIIcon />} label="AI Analytics" iconPosition="start" />
-          <Tab icon={<PeopleIcon />} label="Users" iconPosition="start" />
-          <Tab icon={<TicketIcon />} label="Escalations" iconPosition="start" />
-          <Tab icon={<FilterIcon />} label="Tickets" iconPosition="start" />
-          <Tab icon={<ReportsIcon />} label="Reports" iconPosition="start" />
-          <Tab icon={<SettingsIcon />} label="Configuration" iconPosition="start" />
-        </Tabs>
-      </Paper>
-
       {/* Overview Tab */}
       <TabPanel value={tabValue} index={0}>
-        <Typography variant="h6" sx={sectionHeadingSx}>
-          Executive Snapshot
-        </Typography>
-
-        <Grid container spacing={1.25} mb={1.25}>
+        <Grid container spacing={1} mb={0.9}>
           <Grid item xs={6} sm={4} md={2}>
             <StatCard
               title="Total Tickets"
@@ -1262,8 +1434,8 @@ export default function AdminPanel() {
           <Grid item xs={6} sm={4} md={2}>
             <StatCard
               title="Resolution Rate"
-              value={`${dashboardData?.tickets.resolution_rate?.toFixed(1) || 0}%`}
-              subtitle="Tickets resolved"
+              value={`${ticketResolutionStats.resolutionRate.toFixed(1)}%`}
+              subtitle={`${ticketResolutionStats.resolvedOrClosedCount}/${ticketResolutionStats.totalTicketCount} resolved or closed`}
               icon={<CheckCircleIcon />}
               color="success"
             />
@@ -1280,8 +1452,8 @@ export default function AdminPanel() {
           <Grid item xs={6} sm={4} md={2}>
             <StatCard
               title="AI Resolution Rate"
-              value={`${dashboardData?.messages.ai_resolution_rate?.toFixed(1) || 0}%`}
-              subtitle="Handled by AI"
+              value={`${ticketResolutionStats.aiResolutionRate.toFixed(1)}%`}
+              subtitle={`${ticketResolutionStats.aiResolvedCount}/${ticketResolutionStats.resolvedOrClosedCount} resolved without handoff`}
               icon={<AIIcon />}
               color="warning"
             />
@@ -1306,272 +1478,382 @@ export default function AdminPanel() {
           </Grid>
         </Grid>
 
-        <Typography variant="h6" sx={sectionHeadingSx}>
-          Analytics Overview
-        </Typography>
-
-        <Grid container spacing={1.25} mb={1.25}>
-          <Grid item xs={12} lg={6}>
-            <Card elevation={1} sx={{ height: '100%', borderRadius: 2.5 }}>
-              <CardHeader title="Users Distribution" subheader="By role" sx={overviewCardHeaderSx} />
-              <CardContent sx={{ height: 231.5, pt: 0.5, pb: 0.5 }}>
-                {userDistributionData.length === 0 ? (
-                  <Typography color="text.secondary" textAlign="center" py={6}>
-                    No user data available.
-                  </Typography>
-                ) : (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart margin={{ top: 8, right: 12, left: 12, bottom: 28 }}>
-                      <Pie
-                        data={userDistributionData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="44%"
-                        outerRadius={72}
-                        label={false}
-                        labelLine={false}
-                      >
-                        {userDistributionData.map((entry, index) => {
-                          const chartColors = [
-                            theme.palette.primary.main,
-                            theme.palette.success.main,
-                            theme.palette.warning.main,
-                            theme.palette.info.main,
-                            theme.palette.error.main,
-                          ];
-                          return <Cell key={`${entry.name}-${index}`} fill={chartColors[index % chartColors.length]} />;
-                        })}
-                      </Pie>
-                      <RechartsTooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-                      <Legend verticalAlign="bottom" height={24} iconSize={9} wrapperStyle={{ fontSize: 10, paddingTop: 8 }} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} lg={6}>
-            <Card elevation={1} sx={{ height: '100%', borderRadius: 2.5 }}>
-              <CardHeader
-                title="Issues Graph"
-                subheader="Tickets created (last 14 records)"
-                sx={overviewCardHeaderSx}
-              />
-              <CardContent sx={{ height: 231.5, pt: 1 }}>
-                {issuesGraphData.length === 0 ? (
-                  <Typography color="text.secondary" textAlign="center" py={6}>
-                    No ticket issue data available.
-                  </Typography>
-                ) : (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={issuesGraphData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="date"
-                        tick={{ fontSize: 10 }}
-                        label={{ value: 'Date (MM-DD)', position: 'insideBottom', offset: -3, style: { fontSize: 10 } }}
-                      />
-                      <YAxis
-                        allowDecimals={false}
-                        tick={{ fontSize: 10 }}
-                        label={{ value: 'Issue Count', angle: -90, position: 'insideLeft', style: { fontSize: 10 } }}
-                      />
-                      <RechartsTooltip />
-                      <Bar dataKey="issues" fill={theme.palette.warning.main} radius={[6, 6, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} lg={6}>
-            <Card elevation={1} sx={{ height: '100%', borderRadius: 2.5 }}>
-              <CardHeader
-                title="Average Resolution Time"
-                subheader="Trend by time window"
-                sx={overviewCardHeaderSx}
-              />
-              <CardContent sx={{ height: 231.5, pt: 1 }}>
-                {resolutionTrend.length === 0 ? (
-                  <Typography color="text.secondary" textAlign="center" py={6}>
-                    No resolution trend data available.
-                  </Typography>
-                ) : (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={resolutionTrend}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="period"
-                        tick={{ fontSize: 10 }}
-                        label={{ value: 'Time Window', position: 'insideBottom', offset: -3, style: { fontSize: 10 } }}
-                      />
-                      <YAxis
-                        tick={{ fontSize: 10 }}
-                        label={{ value: 'Hours', angle: -90, position: 'insideLeft', style: { fontSize: 10 } }}
-                      />
-                      <RechartsTooltip />
-                      <Line
-                        type="monotone"
-                        dataKey="avg_resolution_time_hours"
-                        stroke={theme.palette.primary.main}
-                        strokeWidth={3}
-                        dot={{ r: 4 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} lg={6}>
-            <Card elevation={1} sx={{ height: '100%', borderRadius: 2.5 }}>
-              <CardHeader
-                title="Customer Ratings Distribution"
-                subheader="Ratings captured from ticket feedback"
-                sx={overviewCardHeaderSx}
-              />
-              <CardContent sx={{ height: 231.5, pt: 1 }}>
-                {ratingDistributionData.every((entry) => entry.count === 0) ? (
-                  <Typography color="text.secondary" textAlign="center" py={6}>
-                    No customer rating data available yet.
-                  </Typography>
-                ) : (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={ratingDistributionData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="rating" tick={{ fontSize: 10 }} />
-                      <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
-                      <RechartsTooltip />
-                      <Bar dataKey="count" fill={theme.palette.info.main} radius={[6, 6, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-
-        {/* Performance Metrics */}
-        <Typography variant="h6" sx={sectionHeadingSx}>
-          Operational Health
-        </Typography>
-
-        <Grid container spacing={1.25}>
-          <Grid item xs={12} md={6}>
-            <Card elevation={1} sx={{ borderRadius: 2.5, height: '100%' }}>
-              <CardHeader
-                title="Performance Metrics"
-                action={
-                  <FormControl size="small" sx={{ minWidth: 120 }}>
-                    <InputLabel>Period</InputLabel>
-                    <Select
-                      value={performancePeriod}
-                      label="Period"
-                      onChange={(e) => setPerformancePeriod(e.target.value as number)}
+        <Grid container spacing={1} alignItems="stretch">
+          <Grid item xs={12} lg={4}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, height: '100%' }}>
+              <Card elevation={1} sx={{ borderRadius: 0.75, display: 'flex', flexDirection: 'column', flex: { lg: 1 } }}>
+                <CardHeader title="Users Distribution" subheader="By role" sx={overviewCardHeaderSx} />
+                <CardContent
+                  sx={{
+                    height: { xs: 198, lg: 'auto' },
+                    flex: { lg: 1 },
+                    minHeight: 0,
+                    px: { xs: 1, sm: 1.25 },
+                    pt: 0.5,
+                    pb: 0.25,
+                  }}
+                >
+                  {userDistributionData.length === 0 ? (
+                    <Typography color="text.secondary" textAlign="center" py={6}>
+                      No user data available.
+                    </Typography>
+                  ) : (
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'stretch',
+                        gap: 0.35,
+                        height: '100%',
+                      }}
                     >
-                      <MenuItem value={7}>Last 7 days</MenuItem>
-                      <MenuItem value={14}>Last 14 days</MenuItem>
-                      <MenuItem value={30}>Last 30 days</MenuItem>
-                    </Select>
-                  </FormControl>
-                }
-              />
-              <CardContent sx={{ pt: 1 }}>
-                <List dense sx={{ py: 0 }}>
-                  <ListItem sx={{ py: 0.4 }}>
-                    <ListItemAvatar>
-                      <Avatar sx={{ bgcolor: 'primary.main' }}>
-                        <SpeedIcon />
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary="Avg. Resolution Time"
-                      secondary={`${performanceData?.average_resolution_time_hours || 0} hours`}
-                    />
-                  </ListItem>
-                  <Divider variant="inset" component="li" />
-                  <ListItem sx={{ py: 0.4 }}>
-                    <ListItemAvatar>
-                      <Avatar sx={{ bgcolor: 'success.main' }}>
-                        <StarIcon />
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary="Customer Satisfaction"
-                      secondary={`${performanceData?.average_customer_satisfaction || 0}/5`}
-                    />
-                  </ListItem>
-                  <Divider variant="inset" component="li" />
-                  <ListItem sx={{ py: 0.4 }}>
-                    <ListItemAvatar>
-                      <Avatar sx={{ bgcolor: 'info.main' }}>
-                        <CheckCircleIcon />
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary="First Contact Resolution"
-                      secondary={`${performanceData?.first_contact_resolution_rate || 0}%`}
-                    />
-                  </ListItem>
-                  <Divider variant="inset" component="li" />
-                  <ListItem sx={{ py: 0.4 }}>
-                    <ListItemAvatar>
-                      <Avatar sx={{ bgcolor: 'warning.main' }}>
-                        <WarningIcon />
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary="Escalation Rate"
-                      secondary={`${performanceData?.escalation_rate || 0}%`}
-                    />
-                  </ListItem>
-                </List>
-              </CardContent>
-            </Card>
+                      <Box sx={{ flex: '1 1 auto', minWidth: 0, height: '100%' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart margin={{ top: 0, right: 0, left: -12, bottom: 0 }}>
+                            <Pie
+                              data={userDistributionData}
+                              dataKey="value"
+                              nameKey="name"
+                              cx="43%"
+                              cy="50%"
+                              outerRadius={72}
+                              label={false}
+                              labelLine={false}
+                            >
+                              {userDistributionData.map((entry, index) => (
+                                <Cell key={`${entry.name}-${index}`} fill={userDistributionColors[index % userDistributionColors.length]} />
+                              ))}
+                            </Pie>
+                            <RechartsTooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </Box>
+
+                      <Box
+                        sx={{
+                          width: { xs: 138, sm: 154 },
+                          pr: { sm: 0.5 },
+                          pl: { sm: 0.25 },
+                          display: 'flex',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <Box sx={{ width: '100%' }}>
+                          <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: 'text.secondary', mb: 0.6 }}>
+                            Key
+                          </Typography>
+                          {userDistributionData.map((entry, index) => {
+                            const percentage = totalUsersInDistribution > 0
+                              ? Math.round((entry.value / totalUsersInDistribution) * 100)
+                              : 0;
+
+                            return (
+                              <Box
+                                key={`${entry.name}-legend-${index}`}
+                                sx={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  gap: 0.8,
+                                  py: 0.35,
+                                }}
+                              >
+                                <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
+                                  <Box
+                                    sx={{
+                                      width: 10,
+                                      height: 10,
+                                      borderRadius: '50%',
+                                      backgroundColor: userDistributionColors[index % userDistributionColors.length],
+                                      mr: 0.7,
+                                      flexShrink: 0,
+                                    }}
+                                  />
+                                  <Typography
+                                    sx={{
+                                      fontSize: '0.78rem',
+                                      color: 'text.secondary',
+                                      whiteSpace: 'nowrap',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                    }}
+                                  >
+                                    {entry.name}
+                                  </Typography>
+                                </Box>
+                                <Typography sx={{ fontSize: '0.78rem', fontWeight: 700, color: 'text.primary' }}>
+                                  {entry.value} ({percentage}%)
+                                </Typography>
+                              </Box>
+                            );
+                          })}
+                        </Box>
+                      </Box>
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card elevation={1} sx={{ borderRadius: 0.75, display: 'flex', flexDirection: 'column', flex: { lg: 1 } }}>
+                <CardHeader
+                  title="Average Resolution Time"
+                  subheader="Trend by time window"
+                  sx={overviewCardHeaderSx}
+                />
+                <CardContent sx={{ height: { xs: 198, lg: 'auto' }, flex: { lg: 1 }, minHeight: 0, pt: 0.5, pb: 0.25 }}>
+                  {resolutionTrend.length === 0 ? (
+                    <Typography color="text.secondary" textAlign="center" py={6}>
+                      No resolution trend data available.
+                    </Typography>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={resolutionTrend}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
+                          dataKey="period"
+                          tick={{ fontSize: 10 }}
+                          label={{ value: 'Time Window', position: 'insideBottom', offset: -3, style: { fontSize: 10 } }}
+                        />
+                        <YAxis
+                          tick={{ fontSize: 10 }}
+                          label={{ value: 'Hours', angle: -90, position: 'insideLeft', style: { fontSize: 10 } }}
+                        />
+                        <RechartsTooltip />
+                        <Line
+                          type="monotone"
+                          dataKey="avg_resolution_time_hours"
+                          stroke={theme.palette.primary.main}
+                          strokeWidth={3}
+                          dot={{ r: 4 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  )}
+                </CardContent>
+              </Card>
+            </Box>
           </Grid>
 
-          <Grid item xs={12} md={6}>
-            <Card elevation={1} sx={{ borderRadius: 2.5, height: '100%' }}>
-              <CardHeader title="System Status" />
-              <CardContent>
-                <Box mb={3}>
-                  <Box display="flex" justifyContent="space-between" mb={1}>
-                    <Typography variant="body2">System Uptime</Typography>
-                    <Typography variant="body2" fontWeight="bold">
-                      {dashboardData?.system_health.uptime || 'N/A'}
+          <Grid item xs={12} lg={5}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, height: '100%' }}>
+              <Card elevation={1} sx={{ borderRadius: 0.75, display: 'flex', flexDirection: 'column', flex: { lg: 1 } }}>
+                <CardHeader
+                  title="Issues Graph"
+                  subheader="Tickets created (last 14 records)"
+                  sx={overviewCardHeaderSx}
+                />
+                <CardContent sx={{ height: { xs: 198, lg: 'auto' }, flex: { lg: 1 }, minHeight: 0, pt: 0.5, pb: 0.25 }}>
+                  {issuesGraphData.length === 0 ? (
+                    <Typography color="text.secondary" textAlign="center" py={6}>
+                      No ticket issue data available.
                     </Typography>
-                  </Box>
-                  <LinearProgress variant="determinate" value={uptimePercent} color="success" />
-                </Box>
-                <Box mb={3}>
-                  <Box display="flex" justifyContent="space-between" mb={1}>
-                    <Typography variant="body2">AI Model Performance</Typography>
-                    <Typography variant="body2" fontWeight="bold">{aiModelPerformancePercent.toFixed(1)}%</Typography>
-                  </Box>
-                  <LinearProgress variant="determinate" value={aiModelPerformancePercent} color="primary" />
-                </Box>
-                <Box mb={3}>
-                  <Box display="flex" justifyContent="space-between" mb={1}>
-                    <Typography variant="body2">Total Messages Processed</Typography>
-                    <Typography variant="body2" fontWeight="bold">
-                      {dashboardData?.messages.total?.toLocaleString() || 0}
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={issuesGraphData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
+                          dataKey="date"
+                          tick={{ fontSize: 10 }}
+                          label={{ value: 'Date (MM-DD)', position: 'insideBottom', offset: -3, style: { fontSize: 10 } }}
+                        />
+                        <YAxis
+                          allowDecimals={false}
+                          tick={{ fontSize: 10 }}
+                          label={{ value: 'Issue Count', angle: -90, position: 'insideLeft', style: { fontSize: 10 } }}
+                        />
+                        <RechartsTooltip />
+                        <Bar dataKey="issues" fill={theme.palette.warning.main} radius={[6, 6, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card
+                elevation={1}
+                sx={{
+                  borderRadius: 0.75,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  flex: { lg: 1 },
+                  overflow: 'hidden',
+                  border: `1px solid ${alpha('#3f73ff', 0.32)}`,
+                  boxShadow: '0 8px 16px rgba(47, 95, 244, 0.12)',
+                }}
+              >
+                <CardHeader
+                  title="Customer Ratings Distribution"
+                  subheader="Ratings captured from ticket feedback"
+                  sx={overviewCardHeaderSx}
+                />
+                <CardContent
+                  sx={{
+                    height: { xs: 198, lg: 'auto' },
+                    flex: { lg: 1 },
+                    minHeight: 0,
+                    pt: 0.5,
+                    pb: 0.25,
+                    background: 'linear-gradient(180deg, rgba(234, 240, 255, 0.55) 0%, #ffffff 70%)',
+                  }}
+                >
+                  {ratingDistributionData.every((entry) => entry.count === 0) ? (
+                    <Typography color="text.secondary" textAlign="center" py={6}>
+                      No customer rating data available yet.
                     </Typography>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={ratingDistributionData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={alpha('#3f73ff', 0.22)} />
+                        <XAxis dataKey="rating" tick={{ fontSize: 10 }} />
+                        <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
+                        <RechartsTooltip />
+                        <Bar dataKey="count" fill="#3f73ff" radius={[6, 6, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </CardContent>
+              </Card>
+            </Box>
+          </Grid>
+
+          <Grid item xs={12} lg={3}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <Card elevation={1} sx={{ borderRadius: 0.75, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <CardHeader
+                  title="Performance Metrics"
+                  sx={overviewCardHeaderSx}
+                  action={
+                    <FormControl size="small" sx={{ minWidth: 96 }}>
+                      <InputLabel>Period</InputLabel>
+                      <Select
+                        value={performancePeriod}
+                        label="Period"
+                        onChange={(e) => setPerformancePeriod(e.target.value as number)}
+                      >
+                        <MenuItem value={7}>7d</MenuItem>
+                        <MenuItem value={14}>14d</MenuItem>
+                        <MenuItem value={30}>30d</MenuItem>
+                      </Select>
+                    </FormControl>
+                  }
+                />
+                <CardContent
+                  sx={{
+                    height: { xs: 'auto', lg: 420 },
+                    pt: 0.5,
+                    pb: 0.75,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 1.1,
+                  }}
+                >
+                  <List
+                    dense
+                    sx={{
+                      py: 0,
+                      '& .MuiListItemText-primary': { fontSize: '0.76rem' },
+                      '& .MuiListItemText-secondary': { fontSize: '0.7rem' },
+                    }}
+                  >
+                    <ListItem sx={{ py: 0 }}>
+                      <ListItemAvatar sx={{ minWidth: 30 }}>
+                        <Avatar sx={{ bgcolor: 'primary.main', width: 24, height: 24 }}>
+                          <SpeedIcon sx={{ fontSize: 14 }} />
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary="Avg. Resolution Time"
+                        secondary={`${performanceData?.average_resolution_time_hours || 0} hours`}
+                      />
+                    </ListItem>
+                    <Divider component="li" />
+                    <ListItem sx={{ py: 0 }}>
+                      <ListItemAvatar sx={{ minWidth: 30 }}>
+                        <Avatar sx={{ bgcolor: 'success.main', width: 24, height: 24 }}>
+                          <StarIcon sx={{ fontSize: 14 }} />
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary="Customer Satisfaction"
+                        secondary={`${performanceData?.average_customer_satisfaction || 0}/5`}
+                      />
+                    </ListItem>
+                    <Divider component="li" />
+                    <ListItem sx={{ py: 0 }}>
+                      <ListItemAvatar sx={{ minWidth: 30 }}>
+                        <Avatar sx={{ bgcolor: 'info.main', width: 24, height: 24 }}>
+                          <CheckCircleIcon sx={{ fontSize: 14 }} />
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary="First Contact Resolution"
+                        secondary={`${performanceData?.first_contact_resolution_rate || 0}%`}
+                      />
+                    </ListItem>
+                    <Divider component="li" />
+                    <ListItem sx={{ py: 0 }}>
+                      <ListItemAvatar sx={{ minWidth: 30 }}>
+                        <Avatar sx={{ bgcolor: 'warning.main', width: 24, height: 24 }}>
+                          <WarningIcon sx={{ fontSize: 14 }} />
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary="Escalation Rate"
+                        secondary={`${performanceData?.escalation_rate || 0}%`}
+                      />
+                    </ListItem>
+                  </List>
+
+                  <Box sx={{ pt: 0.85, borderTop: 1, borderColor: 'divider', display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography sx={{ fontSize: '0.82rem', fontWeight: 700, mb: 0.1 }}>System Health</Typography>
+                    <Box>
+                      <Box display="flex" justifyContent="space-between" mb={0.5}>
+                        <Typography sx={{ fontSize: '0.76rem', fontWeight: 500, color: 'text.secondary' }}>System Uptime</Typography>
+                        <Typography sx={{ fontSize: '0.82rem', fontWeight: 700 }}>
+                          {dashboardData?.system_health.uptime || 'N/A'}
+                        </Typography>
+                      </Box>
+                      <LinearProgress variant="determinate" value={uptimePercent} color="success" sx={{ height: 6, borderRadius: 6 }} />
+                    </Box>
+
+                    <Box>
+                      <Box display="flex" justifyContent="space-between" mb={0.5}>
+                        <Typography sx={{ fontSize: '0.76rem', fontWeight: 500, color: 'text.secondary' }}>AI Model Performance</Typography>
+                        <Typography sx={{ fontSize: '0.82rem', fontWeight: 700 }}>{aiModelPerformancePercent.toFixed(1)}%</Typography>
+                      </Box>
+                      <LinearProgress variant="determinate" value={aiModelPerformancePercent} color="primary" sx={{ height: 6, borderRadius: 6 }} />
+                    </Box>
+
+                    <Box sx={{ pt: 0.75, mt: 0.2, borderTop: 1, borderColor: 'divider' }}>
+                      <Box display="flex" justifyContent="space-between" mb={0.6}>
+                        <Typography sx={{ fontSize: '0.76rem', fontWeight: 500, color: 'text.secondary' }}>Total Messages Processed</Typography>
+                        <Typography sx={{ fontSize: '0.82rem', fontWeight: 700 }}>
+                          {dashboardData?.messages.total?.toLocaleString() || 0}
+                        </Typography>
+                      </Box>
+                      <LinearProgress
+                        variant="determinate"
+                        value={totalMessagesProcessedPercent}
+                        color="info"
+                        sx={{ height: 6, borderRadius: 6, mb: 0.9 }}
+                      />
+                      <Box display="flex" justifyContent="space-between" mb={0.6}>
+                        <Typography sx={{ fontSize: '0.76rem', fontWeight: 500, color: 'text.secondary' }}>AI Handled Messages</Typography>
+                        <Typography sx={{ fontSize: '0.82rem', fontWeight: 700, color: 'success.main' }}>
+                          {dashboardData?.messages.ai_handled?.toLocaleString() || 0}
+                        </Typography>
+                      </Box>
+                      <LinearProgress
+                        variant="determinate"
+                        value={aiHandledMessagesPercent}
+                        color="success"
+                        sx={{ height: 6, borderRadius: 6 }}
+                      />
+                    </Box>
                   </Box>
-                </Box>
-                <Box>
-                  <Box display="flex" justifyContent="space-between" mb={1}>
-                    <Typography variant="body2">AI Handled Messages</Typography>
-                    <Typography variant="body2" fontWeight="bold" color="success.main">
-                      {dashboardData?.messages.ai_handled?.toLocaleString() || 0}
-                    </Typography>
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </Box>
           </Grid>
         </Grid>
       </TabPanel>
@@ -1905,7 +2187,10 @@ export default function AdminPanel() {
           </Grid>
         </Grid>
 
-        {/* ── Row 2: three info cards, equal height ── */}
+      </TabPanel>
+
+      {/* Intergartions Tab */}
+      <TabPanel value={tabValue} index={7}>
         <Grid container spacing={3} alignItems="stretch" mt={0}>
           <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column' }}>
             <Card elevation={3} sx={{ flex: 1 }}>
@@ -1988,7 +2273,6 @@ export default function AdminPanel() {
             </Card>
           </Grid>
         </Grid>
-
       </TabPanel>
 
       {/* Users Tab */}
@@ -1996,7 +2280,7 @@ export default function AdminPanel() {
         <Card elevation={3}>
           <CardHeader 
             title="User Management" 
-            subheader={`Total: ${users.length} users`}
+            subheader={`Showing ${paginatedUsers.length} of ${filteredUsers.length} users`}
             avatar={<PeopleIcon color="primary" />}
             action={
               <Button 
@@ -2021,60 +2305,81 @@ export default function AdminPanel() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.id} sx={{ '&:nth-of-type(odd)': { backgroundColor: alpha(theme.palette.primary.main, 0.022) } }}>
-                      <TableCell>
-                        <Box display="flex" alignItems="center" sx={{ minWidth: 0 }}>
-                          <Avatar sx={{ mr: 2, bgcolor: user.is_active ? 'primary.main' : 'grey.400' }}>
-                            {user.name?.[0] || 'U'}
-                          </Avatar>
-                          <Typography sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {user.name}
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Tooltip title={user.email}>
-                          <Typography sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {user.email}
-                          </Typography>
-                        </Tooltip>
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={user.role}
-                          size="small"
-                          color={getRoleColor(user.role) as any}
-                          sx={{ textTransform: 'capitalize' }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={user.is_active ? 'Active' : 'Inactive'}
-                          size="small"
-                          color={user.is_active ? 'success' : 'default'}
-                          variant={user.is_active ? 'filled' : 'outlined'}
-                        />
-                      </TableCell>
-                      <TableCell>{formatDateOnly(user.created_at)}</TableCell>
-                      <TableCell align="center">
-                        <Box display="flex" justifyContent="center" alignItems="center" gap={0.5}>
-                          <Tooltip title={user.is_active ? 'Deactivate User' : 'Activate User'}>
-                            <IconButton
-                              size="small"
-                              onClick={() => handleToggleUserStatus(user.id)}
-                              color={user.is_active ? 'error' : 'success'}
-                            >
-                              {user.is_active ? <BlockIcon /> : <PersonOffIcon />}
-                            </IconButton>
-                          </Tooltip>
-                        </Box>
+                  {filteredUsers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} align="center">
+                        <Typography color="text.secondary" py={2.5}>
+                          No users match your search.
+                        </Typography>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    paginatedUsers.map((user) => (
+                      <TableRow key={user.id} sx={{ '&:nth-of-type(odd)': { backgroundColor: alpha(theme.palette.primary.main, 0.022) } }}>
+                        <TableCell>
+                          <Box display="flex" alignItems="center" sx={{ minWidth: 0 }}>
+                            <Avatar sx={{ mr: 2, bgcolor: user.is_active ? 'primary.main' : 'grey.400' }}>
+                              {user.name?.[0] || 'U'}
+                            </Avatar>
+                            <Typography sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {user.name}
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                        <TableCell>
+                          <Tooltip title={user.email}>
+                            <Typography sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {user.email}
+                            </Typography>
+                          </Tooltip>
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={user.role}
+                            size="small"
+                            color={getRoleColor(user.role) as any}
+                            sx={{ textTransform: 'capitalize' }}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={user.is_active ? 'Active' : 'Inactive'}
+                            size="small"
+                            color={user.is_active ? 'success' : 'default'}
+                            variant={user.is_active ? 'filled' : 'outlined'}
+                          />
+                        </TableCell>
+                        <TableCell>{formatDateOnly(user.created_at)}</TableCell>
+                        <TableCell align="center">
+                          <Box display="flex" justifyContent="center" alignItems="center" gap={0.5}>
+                            <Tooltip title={user.is_active ? 'Deactivate User' : 'Activate User'}>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleToggleUserStatus(user.id)}
+                                color={user.is_active ? 'error' : 'success'}
+                              >
+                                {user.is_active ? <BlockIcon /> : <PersonOffIcon />}
+                              </IconButton>
+                            </Tooltip>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>
+            <TablePagination
+              component="div"
+              count={filteredUsers.length}
+              page={usersPage}
+              onPageChange={handleUsersPageChange}
+              rowsPerPage={usersRowsPerPage}
+              onRowsPerPageChange={handleUsersRowsPerPageChange}
+              rowsPerPageOptions={[ADMIN_USERS_ROWS_PER_PAGE]}
+              showFirstButton
+              showLastButton
+            />
           </CardContent>
         </Card>
       </TabPanel>
@@ -2088,15 +2393,21 @@ export default function AdminPanel() {
                 title="Recent Escalations" 
                 subheader="Cases requiring human intervention"
                 avatar={<WarningIcon color="warning" />}
+                sx={{
+                  pb: 0.5,
+                  '& .MuiCardHeader-subheader': {
+                    mt: 0.25,
+                  },
+                }}
               />
-              <CardContent>
-                <List>
+              <CardContent sx={{ pt: 0.5 }}>
+                <List sx={{ pt: 0 }}>
                   {recentEscalations.length === 0 ? (
                     <Typography color="text.secondary" textAlign="center" py={2}>
                       No recent escalations
                     </Typography>
                   ) : (
-                    recentEscalations.map((escalation, index) => (
+                    paginatedEscalations.map((escalation, index) => (
                       <Box key={escalation.id}>
                         <ListItem
                           secondaryAction={
@@ -2122,11 +2433,22 @@ export default function AdminPanel() {
                             secondary={`${escalation.user_name || escalation.user_email} • ${formatDateTime(escalation.escalated_at)}`}
                           />
                         </ListItem>
-                        {index < recentEscalations.length - 1 && <Divider variant="inset" component="li" />}
+                        {index < paginatedEscalations.length - 1 && <Divider variant="inset" component="li" />}
                       </Box>
                     ))
                   )}
                 </List>
+                <TablePagination
+                  component="div"
+                  count={recentEscalations.length}
+                  page={escalationsPage}
+                  onPageChange={handleEscalationsPageChange}
+                  rowsPerPage={escalationsRowsPerPage}
+                  onRowsPerPageChange={handleEscalationsRowsPerPageChange}
+                  rowsPerPageOptions={[ADMIN_ESCALATIONS_ROWS_PER_PAGE]}
+                  showFirstButton
+                  showLastButton
+                />
               </CardContent>
             </Card>
           </Grid>
@@ -2174,13 +2496,8 @@ export default function AdminPanel() {
       {/* ═══════════════════════════════════════ TICKETS TAB ═══════════════════════════════════════ */}
       <TabPanel value={tabValue} index={4}>
         {(() => {
-          // Derive filtered tickets
-          const filtered = allTickets.filter((t) => {
-            if (ticketStatusFilter && t.status !== ticketStatusFilter) return false;
-            if (ticketPriorityFilter && t.priority !== ticketPriorityFilter) return false;
-            if (showOverdueOnly && !t.is_overdue) return false;
-            return true;
-          });
+          const filtered = filteredTickets;
+          const paginated = paginatedFilteredTickets;
 
           const totalCount = allTickets.length;
           const openCount = allTickets.filter((t) =>
@@ -2231,7 +2548,7 @@ export default function AdminPanel() {
           return (
             <>
               {/* Summary Mini-KPIs */}
-              <Grid container spacing={2.5} mb={3}>
+              <Grid container spacing={2} mb={2.5}>
                 {[
                   { label: 'Total Tickets', value: totalCount, color: theme.palette.primary.main },
                   { label: 'Open / Active', value: openCount, color: theme.palette.warning.main },
@@ -2241,8 +2558,8 @@ export default function AdminPanel() {
                   <Grid item xs={6} md={3} key={card.label}>
                     <Paper
                       sx={{
-                        p: 2.5,
-                        borderLeft: `4px solid ${card.color}`,
+                        p: 2,
+                        borderLeft: `3px solid ${card.color}`,
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
@@ -2252,11 +2569,11 @@ export default function AdminPanel() {
                         <Typography
                           variant="body2"
                           color="text.secondary"
-                          sx={{ textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.72rem', fontWeight: 500, mb: 0.5 }}
+                          sx={{ textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.68rem', fontWeight: 500, mb: 0.35 }}
                         >
                           {card.label}
                         </Typography>
-                        <Typography variant="h4" fontWeight={700} sx={{ color: card.color }}>
+                        <Typography variant="h5" fontWeight={700} sx={{ color: card.color }}>
                           {card.value}
                         </Typography>
                       </Box>
@@ -2266,13 +2583,13 @@ export default function AdminPanel() {
               </Grid>
 
               {/* Filter Toolbar */}
-              <Paper sx={{ p: 2, mb: 2.5, display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
-                <FilterIcon color="action" />
-                <Typography variant="body2" fontWeight={600} color="text.secondary" sx={{ mr: 1 }}>
+              <Paper sx={{ p: 1.5, mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1.5, alignItems: 'center' }}>
+                <FilterIcon color="action" sx={{ fontSize: 20 }} />
+                <Typography variant="body2" fontWeight={600} color="text.secondary" sx={{ mr: 0.75, fontSize: '0.85rem' }}>
                   Filters
                 </Typography>
 
-                <FormControl size="small" sx={{ minWidth: 160 }}>
+                <FormControl size="small" sx={{ minWidth: 150 }}>
                   <InputLabel>Status</InputLabel>
                   <Select
                     value={ticketStatusFilter}
@@ -2291,7 +2608,7 @@ export default function AdminPanel() {
                   </Select>
                 </FormControl>
 
-                <FormControl size="small" sx={{ minWidth: 140 }}>
+                <FormControl size="small" sx={{ minWidth: 130 }}>
                   <InputLabel>Priority</InputLabel>
                   <Select
                     value={ticketPriorityFilter}
@@ -2326,8 +2643,8 @@ export default function AdminPanel() {
                 </Button>
 
                 <Box ml="auto">
-                  <Typography variant="caption" color="text.secondary">
-                    Showing {filtered.length} of {totalCount} tickets
+                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.72rem' }}>
+                    Showing {paginated.length} of {filtered.length} tickets
                   </Typography>
                 </Box>
               </Paper>
@@ -2339,16 +2656,26 @@ export default function AdminPanel() {
                     {assignmentError}
                   </Alert>
                 )}
-                <TableContainer sx={{ borderRadius: 3 }}>
-                  <Table size="small" stickyHeader sx={{ tableLayout: 'fixed' }}>
+                <TableContainer sx={{ borderRadius: 2 }}>
+                  <Table
+                    size="small"
+                    stickyHeader
+                    sx={{
+                      tableLayout: 'fixed',
+                      '& .MuiTableCell-root': {
+                        py: 0.9,
+                        px: 1.2,
+                      },
+                    }}
+                  >
                     <TableHead>
                       <TableRow
                         sx={{
                           '& .MuiTableCell-head': {
                             fontWeight: 700,
-                            fontSize: '0.75rem',
+                            fontSize: '0.7rem',
                             textTransform: 'uppercase',
-                            letterSpacing: '0.05em',
+                            letterSpacing: '0.045em',
                             backgroundColor: alpha(theme.palette.primary.main, 0.07),
                           },
                         }}
@@ -2376,7 +2703,7 @@ export default function AdminPanel() {
                           </TableCell>
                         </TableRow>
                       )}
-                      {filtered.map((ticket) => {
+                      {paginated.map((ticket) => {
                         const rowTicketId = ticket.ticket_id || ticket.id;
                         const isFocusedFromNotification = rowTicketId === notificationFocusTicketId;
 
@@ -2404,7 +2731,7 @@ export default function AdminPanel() {
                             <Typography
                               variant="body2"
                               fontWeight={600}
-                              sx={{ fontFamily: 'monospace', color: 'primary.main', fontSize: '0.82rem' }}
+                              sx={{ fontFamily: 'monospace', color: 'primary.main', fontSize: '0.78rem' }}
                             >
                               {ticket.ticket_id}
                             </Typography>
@@ -2415,7 +2742,7 @@ export default function AdminPanel() {
                               <Typography
                                 variant="body2"
                                 fontWeight={500}
-                                sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 180 }}
+                                sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 170, fontSize: '0.84rem' }}
                               >
                                 {ticket.subject}
                               </Typography>
@@ -2423,11 +2750,11 @@ export default function AdminPanel() {
                           </TableCell>
 
                           <TableCell>
-                            <Typography variant="body2" fontWeight={500} sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <Typography variant="body2" fontWeight={500} sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '0.84rem' }}>
                               {ticket.customer_name || '—'}
                             </Typography>
                             {ticket.customer_email && (
-                              <Typography variant="caption" color="text.secondary" display="block" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              <Typography variant="caption" color="text.secondary" display="block" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '0.72rem' }}>
                                 {ticket.customer_email}
                               </Typography>
                             )}
@@ -2436,11 +2763,11 @@ export default function AdminPanel() {
                           <TableCell>
                             {ticket.agent_name ? (
                               <>
-                                <Typography variant="body2" fontWeight={500} sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                <Typography variant="body2" fontWeight={500} sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '0.84rem' }}>
                                   {ticket.agent_name}
                                 </Typography>
                                 {ticket.agent_email && (
-                                  <Typography variant="caption" color="text.secondary" display="block" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  <Typography variant="caption" color="text.secondary" display="block" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '0.72rem' }}>
                                     {ticket.agent_email}
                                   </Typography>
                                 )}
@@ -2457,7 +2784,7 @@ export default function AdminPanel() {
                           </TableCell>
 
                           <TableCell>
-                            <Typography variant="body2" sx={{ textTransform: 'capitalize', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <Typography variant="body2" sx={{ textTransform: 'capitalize', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '0.84rem' }}>
                               {(ticket.category || '').replace(/_/g, ' ')}
                             </Typography>
                           </TableCell>
@@ -2483,7 +2810,7 @@ export default function AdminPanel() {
 
                           <TableCell>
                             <Tooltip title={formatDate(ticket.created_at)}>
-                              <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                              <Typography variant="body2" sx={{ whiteSpace: 'nowrap', fontSize: '0.84rem' }}>
                                 {relativeDate(ticket.created_at)}
                               </Typography>
                             </Tooltip>
@@ -2496,6 +2823,7 @@ export default function AdminPanel() {
                                   variant="body2"
                                   sx={{
                                     whiteSpace: 'nowrap',
+                                    fontSize: '0.84rem',
                                     color: ticket.is_overdue ? 'error.main' : 'text.primary',
                                     fontWeight: ticket.is_overdue ? 600 : 400,
                                   }}
@@ -2504,7 +2832,7 @@ export default function AdminPanel() {
                                 </Typography>
                               </Tooltip>
                             ) : (
-                              <Typography variant="body2" color="text.secondary">—</Typography>
+                              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.84rem' }}>—</Typography>
                             )}
                           </TableCell>
 
@@ -2548,6 +2876,17 @@ export default function AdminPanel() {
                     </TableBody>
                   </Table>
                 </TableContainer>
+                <TablePagination
+                  component="div"
+                  count={filtered.length}
+                  page={ticketsPage}
+                  onPageChange={handleTicketsPageChange}
+                  rowsPerPage={ticketsRowsPerPage}
+                  onRowsPerPageChange={handleTicketsRowsPerPageChange}
+                  rowsPerPageOptions={[ADMIN_TICKETS_ROWS_PER_PAGE]}
+                  showFirstButton
+                  showLastButton
+                />
               </Paper>
             </>
           );
@@ -2769,7 +3108,6 @@ export default function AdminPanel() {
           }
         `}
       </style>
-    </Box>
-    </Box>
+    </DashboardShell>
   );
 }

@@ -4,7 +4,7 @@
  * correct intents, and feed corrections back into the retraining pipeline.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Box,
   Paper,
@@ -34,9 +34,9 @@ import {
   Badge,
   Tabs,
   Tab,
+  TablePagination,
 } from '@mui/material';
 import {
-  ArrowBack as BackIcon,
   CheckCircle as ReviewedIcon,
   PendingActions as PendingIcon,
   Save as SaveIcon,
@@ -47,9 +47,9 @@ import {
   Psychology as AIIcon,
 } from '@mui/icons-material';
 import { alpha, useTheme } from '@mui/material/styles';
-import { useNavigate } from 'react-router-dom';
 import { adminAPI } from '../../services/apiService';
 import { formatDateOnly } from '../../utils/dateUtils';
+import AdminPageChrome from './AdminPageChrome';
 
 const INTENT_OPTIONS = [
   'balance_inquiry',
@@ -102,13 +102,13 @@ interface EditState {
 
 export default function NLPFeedbackReview() {
   const theme = useTheme();
-  const navigate = useNavigate();
 
   const [items, setItems] = useState<FeedbackItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [tabValue, setTabValue] = useState(0); // 0=unreviewed, 1=reviewed, 2=all
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Filters
   const [intentFilter, setIntentFilter] = useState<string>('');
@@ -124,6 +124,8 @@ export default function NLPFeedbackReview() {
   // Retrain dialog
   const [retrainDialog, setRetrainDialog] = useState(false);
   const [retraining, setRetraining] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(6);
 
   const fetchFeedback = useCallback(async () => {
     setLoading(true);
@@ -149,6 +151,41 @@ export default function NLPFeedbackReview() {
   useEffect(() => {
     fetchFeedback();
   }, [fetchFeedback]);
+
+  const filteredItems = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return items;
+    }
+
+    return items.filter((item) => {
+      const noteText = item.reviewer_notes || '';
+      const correctedIntent = item.corrected_intent || '';
+      return (
+        item.message_text.toLowerCase().includes(query)
+        || item.predicted_intent.toLowerCase().includes(query)
+        || correctedIntent.toLowerCase().includes(query)
+        || noteText.toLowerCase().includes(query)
+        || item.language.toLowerCase().includes(query)
+      );
+    });
+  }, [items, searchQuery]);
+
+  const paginatedItems = useMemo(() => {
+    const start = page * rowsPerPage;
+    return filteredItems.slice(start, start + rowsPerPage);
+  }, [filteredItems, page, rowsPerPage]);
+
+  useEffect(() => {
+    const maxPage = Math.max(0, Math.ceil(filteredItems.length / rowsPerPage) - 1);
+    if (page > maxPage) {
+      setPage(maxPage);
+    }
+  }, [filteredItems.length, page, rowsPerPage]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [tabValue, intentFilter, languageFilter, confidenceRange, limit, searchQuery]);
 
   const startEditing = (item: FeedbackItem) => {
     setEditingId(item.id);
@@ -259,13 +296,43 @@ export default function NLPFeedbackReview() {
     return 'error';
   };
 
+  const handlePageChange = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(Number.parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const topActions = (
+    <>
+      <button type="button" className="btn" onClick={fetchFeedback}>
+        <RefreshIcon sx={{ fontSize: 12 }} /> Refresh
+      </button>
+      <button type="button" className="btn" onClick={() => handleExport('json')}>
+        <DownloadIcon sx={{ fontSize: 12 }} /> Export JSON
+      </button>
+      <button type="button" className="btn" onClick={() => handleExport('csv')}>
+        <DownloadIcon sx={{ fontSize: 12 }} /> Export CSV
+      </button>
+      <button type="button" className="btn btn-pu" onClick={() => setRetrainDialog(true)}>
+        <RetrainIcon sx={{ fontSize: 12 }} /> Retrain Model
+      </button>
+    </>
+  );
+
   return (
-    <Box sx={{ maxWidth: 1400, mx: 'auto', p: { xs: 1.5, sm: 3 } }}>
+    <AdminPageChrome
+      activePage="nlp-feedback"
+      searchValue={searchQuery}
+      onSearchChange={setSearchQuery}
+      searchPlaceholder="Search feedback messages, intents, languages, and notes..."
+      topActions={topActions}
+    >
+    <Box sx={{ px: { xs: 0.75, md: 1.25 }, pb: { xs: 0.75, md: 1.25 }, pt: 0 }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2, flexWrap: 'wrap' }}>
-        <IconButton onClick={() => navigate('/admin')} size="small">
-          <BackIcon />
-        </IconButton>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1.5, flexWrap: 'wrap' }}>
         <AIIcon sx={{ fontSize: 32, color: 'primary.main' }} />
         <Box sx={{ flex: 1 }}>
           <Typography variant="h5" fontWeight={700}>
@@ -275,39 +342,6 @@ export default function NLPFeedbackReview() {
             Review misclassified messages and correct intents to improve the AI model
           </Typography>
         </Box>
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={fetchFeedback}
-          size="small"
-        >
-          Refresh
-        </Button>
-        <Button
-          variant="outlined"
-          startIcon={<DownloadIcon />}
-          onClick={() => handleExport('json')}
-          size="small"
-        >
-          Export JSON
-        </Button>
-        <Button
-          variant="outlined"
-          startIcon={<DownloadIcon />}
-          onClick={() => handleExport('csv')}
-          size="small"
-        >
-          Export CSV
-        </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          startIcon={<RetrainIcon />}
-          onClick={() => setRetrainDialog(true)}
-          size="small"
-        >
-          Retrain Model
-        </Button>
       </Box>
 
       {/* Alerts */}
@@ -361,30 +395,73 @@ export default function NLPFeedbackReview() {
       </Paper>
 
       {/* Tabs */}
-      <Paper sx={{ mb: 2, borderRadius: 2 }}>
+      <Paper
+        sx={{
+          mb: 2,
+          borderRadius: 2,
+          p: 0.5,
+          border: 1,
+          borderColor: 'divider',
+          backgroundColor: 'background.paper',
+        }}
+      >
         <Tabs
           value={tabValue}
           onChange={(_, v) => setTabValue(v)}
-          indicatorColor="primary"
-          textColor="primary"
+          variant="fullWidth"
+          sx={{
+            minHeight: 44,
+            '& .MuiTabs-indicator': {
+              display: 'none',
+            },
+            '& .MuiTab-root': {
+              minHeight: 44,
+              borderRadius: 1.5,
+              textTransform: 'none',
+              fontWeight: 600,
+              color: 'text.secondary',
+              transition: 'all 160ms ease',
+              '&:hover': {
+                color: 'primary.main',
+                backgroundColor: alpha(theme.palette.primary.main, 0.08),
+              },
+            },
+            '& .MuiTab-root.Mui-selected': {
+              color: 'primary.main',
+              backgroundColor: alpha(theme.palette.primary.main, 0.14),
+              boxShadow: `inset 0 0 0 1px ${alpha(theme.palette.primary.main, 0.2)}`,
+            },
+          }}
         >
           <Tab
             label={
-              <Badge badgeContent={tabValue === 0 ? items.length : undefined} color="error" max={999}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <PendingIcon fontSize="small" /> Needs Review
+              <Badge
+                badgeContent={tabValue === 0 ? items.length : undefined}
+                color="error"
+                max={999}
+                sx={{
+                  '& .MuiBadge-badge': {
+                    fontWeight: 700,
+                    fontSize: '0.7rem',
+                  },
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <PendingIcon fontSize="small" />
+                  <Typography variant="body2" fontWeight={600}>Needs Review</Typography>
                 </Box>
               </Badge>
             }
           />
           <Tab
             label={
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <ReviewedIcon fontSize="small" /> Reviewed
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                <ReviewedIcon fontSize="small" />
+                <Typography variant="body2" fontWeight={600}>Reviewed</Typography>
               </Box>
             }
           />
-          <Tab label="All" />
+          <Tab label={<Typography variant="body2" fontWeight={600}>All</Typography>} />
         </Tabs>
       </Paper>
 
@@ -393,7 +470,7 @@ export default function NLPFeedbackReview() {
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
           <CircularProgress />
         </Box>
-      ) : items.length === 0 ? (
+      ) : filteredItems.length === 0 ? (
         <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 2 }}>
           <AIIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
           <Typography color="text.secondary">
@@ -401,154 +478,167 @@ export default function NLPFeedbackReview() {
           </Typography>
         </Paper>
       ) : (
-        <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
-          <Table size="small">
-            <TableHead>
-              <TableRow sx={{ '& th': { fontWeight: 700, backgroundColor: alpha(theme.palette.primary.main, 0.06) } }}>
-                <TableCell sx={{ minWidth: 250 }}>Message</TableCell>
-                <TableCell>Language</TableCell>
-                <TableCell>Predicted Intent</TableCell>
-                <TableCell>Confidence</TableCell>
-                <TableCell sx={{ minWidth: 180 }}>Corrected Intent</TableCell>
-                <TableCell sx={{ minWidth: 150 }}>Notes</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Date</TableCell>
-                <TableCell sx={{ minWidth: 120 }}>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {items.map(item => {
-                const conf = parseFloat(item.predicted_confidence);
-                const isEditing = editingId === item.id;
+        <>
+          <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow sx={{ '& th': { fontWeight: 700, backgroundColor: alpha(theme.palette.primary.main, 0.06) } }}>
+                  <TableCell sx={{ minWidth: 250 }}>Message</TableCell>
+                  <TableCell>Language</TableCell>
+                  <TableCell>Predicted Intent</TableCell>
+                  <TableCell>Confidence</TableCell>
+                  <TableCell sx={{ minWidth: 180 }}>Corrected Intent</TableCell>
+                  <TableCell sx={{ minWidth: 150 }}>Notes</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Date</TableCell>
+                  <TableCell sx={{ minWidth: 120 }}>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paginatedItems.map(item => {
+                  const conf = parseFloat(item.predicted_confidence);
+                  const isEditing = editingId === item.id;
 
-                return (
-                  <TableRow
-                    key={item.id}
-                    sx={{
-                      backgroundColor: item.reviewed
-                        ? alpha(theme.palette.success.main, 0.03)
-                        : alpha(theme.palette.warning.main, 0.04),
-                      '&:hover': { backgroundColor: alpha(theme.palette.primary.main, 0.06) },
-                    }}
-                  >
-                    <TableCell>
-                      <Typography variant="body2" sx={{ maxWidth: 300, wordBreak: 'break-word' }}>
-                        {item.message_text}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={item.language.toUpperCase()}
-                        size="small"
-                        variant="outlined"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={item.predicted_intent.replace(/_/g, ' ')}
-                        size="small"
-                        color="default"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={`${(conf * 100).toFixed(0)}%`}
-                        size="small"
-                        color={confidenceColor(conf)}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {isEditing ? (
-                        <Select
-                          value={editState.corrected_intent}
-                          onChange={e => setEditState(prev => ({ ...prev, corrected_intent: e.target.value }))}
-                          size="small"
-                          fullWidth
-                        >
-                          {INTENT_OPTIONS.map(i => (
-                            <MenuItem key={i} value={i}>{i.replace(/_/g, ' ')}</MenuItem>
-                          ))}
-                        </Select>
-                      ) : item.corrected_intent ? (
-                        <Chip
-                          label={item.corrected_intent.replace(/_/g, ' ')}
-                          size="small"
-                          color={item.corrected_intent !== item.predicted_intent ? 'warning' : 'success'}
-                        />
-                      ) : (
-                        <Typography variant="body2" color="text.disabled">—</Typography>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {isEditing ? (
-                        <TextField
-                          value={editState.reviewer_notes}
-                          onChange={e => setEditState(prev => ({ ...prev, reviewer_notes: e.target.value }))}
-                          size="small"
-                          fullWidth
-                          placeholder="Notes..."
-                          multiline
-                          maxRows={2}
-                        />
-                      ) : (
-                        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {item.reviewer_notes || '—'}
+                  return (
+                    <TableRow
+                      key={item.id}
+                      sx={{
+                        backgroundColor: item.reviewed
+                          ? alpha(theme.palette.success.main, 0.03)
+                          : alpha(theme.palette.warning.main, 0.04),
+                        '&:hover': { backgroundColor: alpha(theme.palette.primary.main, 0.06) },
+                      }}
+                    >
+                      <TableCell>
+                        <Typography variant="body2" sx={{ maxWidth: 300, wordBreak: 'break-word' }}>
+                          {item.message_text}
                         </Typography>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {item.reviewed ? (
-                        <Chip icon={<ReviewedIcon />} label="Reviewed" size="small" color="success" variant="outlined" />
-                      ) : (
-                        <Chip icon={<PendingIcon />} label="Pending" size="small" color="warning" variant="outlined" />
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="caption" color="text.secondary">
-                        {formatDateOnly(item.created_at)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      {isEditing ? (
-                        <Box sx={{ display: 'flex', gap: 0.5 }}>
-                          <Tooltip title="Save correction">
-                            <IconButton size="small" color="primary" onClick={() => saveCorrection(item.id)} disabled={saving}>
-                              {saving ? <CircularProgress size={18} /> : <SaveIcon fontSize="small" />}
-                            </IconButton>
-                          </Tooltip>
-                          <Button size="small" onClick={cancelEditing}>Cancel</Button>
-                        </Box>
-                      ) : (
-                        <Box sx={{ display: 'flex', gap: 0.5 }}>
-                          <Tooltip title="Correct intent">
-                            <Button size="small" variant="outlined" onClick={() => startEditing(item)}>
-                              Fix
-                            </Button>
-                          </Tooltip>
-                          {!item.reviewed && (
-                            <Tooltip title="Mark as correctly classified">
-                              <IconButton size="small" color="success" onClick={() => markCorrect(item)} disabled={saving}>
-                                <ReviewedIcon fontSize="small" />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={item.language.toUpperCase()}
+                          size="small"
+                          variant="outlined"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={item.predicted_intent.replace(/_/g, ' ')}
+                          size="small"
+                          color="default"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={`${(conf * 100).toFixed(0)}%`}
+                          size="small"
+                          color={confidenceColor(conf)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {isEditing ? (
+                          <Select
+                            value={editState.corrected_intent}
+                            onChange={e => setEditState(prev => ({ ...prev, corrected_intent: e.target.value }))}
+                            size="small"
+                            fullWidth
+                          >
+                            {INTENT_OPTIONS.map(i => (
+                              <MenuItem key={i} value={i}>{i.replace(/_/g, ' ')}</MenuItem>
+                            ))}
+                          </Select>
+                        ) : item.corrected_intent ? (
+                          <Chip
+                            label={item.corrected_intent.replace(/_/g, ' ')}
+                            size="small"
+                            color={item.corrected_intent !== item.predicted_intent ? 'warning' : 'success'}
+                          />
+                        ) : (
+                          <Typography variant="body2" color="text.disabled">—</Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {isEditing ? (
+                          <TextField
+                            value={editState.reviewer_notes}
+                            onChange={e => setEditState(prev => ({ ...prev, reviewer_notes: e.target.value }))}
+                            size="small"
+                            fullWidth
+                            placeholder="Notes..."
+                            multiline
+                            maxRows={2}
+                          />
+                        ) : (
+                          <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {item.reviewer_notes || '—'}
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {item.reviewed ? (
+                          <Chip icon={<ReviewedIcon />} label="Reviewed" size="small" color="success" variant="outlined" />
+                        ) : (
+                          <Chip icon={<PendingIcon />} label="Pending" size="small" color="warning" variant="outlined" />
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="caption" color="text.secondary">
+                          {formatDateOnly(item.created_at)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        {isEditing ? (
+                          <Box sx={{ display: 'flex', gap: 0.5 }}>
+                            <Tooltip title="Save correction">
+                              <IconButton size="small" color="primary" onClick={() => saveCorrection(item.id)} disabled={saving}>
+                                {saving ? <CircularProgress size={18} /> : <SaveIcon fontSize="small" />}
                               </IconButton>
                             </Tooltip>
-                          )}
-                        </Box>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                            <Button size="small" onClick={cancelEditing}>Cancel</Button>
+                          </Box>
+                        ) : (
+                          <Box sx={{ display: 'flex', gap: 0.5 }}>
+                            <Tooltip title="Correct intent">
+                              <Button size="small" variant="outlined" onClick={() => startEditing(item)}>
+                                Fix
+                              </Button>
+                            </Tooltip>
+                            {!item.reviewed && (
+                              <Tooltip title="Mark as correctly classified">
+                                <IconButton size="small" color="success" onClick={() => markCorrect(item)} disabled={saving}>
+                                  <ReviewedIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                          </Box>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            component="div"
+            count={filteredItems.length}
+            page={page}
+            onPageChange={handlePageChange}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleRowsPerPageChange}
+            rowsPerPageOptions={[6, 10, 25]}
+            showFirstButton
+            showLastButton
+          />
+        </>
       )}
 
       {/* Summary */}
-      {!loading && items.length > 0 && (
+      {!loading && filteredItems.length > 0 && (
         <Paper sx={{ p: 2, mt: 2, borderRadius: 2 }}>
           <Typography variant="body2" color="text.secondary">
-            Showing {items.length} items · {items.filter(i => i.reviewed).length} reviewed · {items.filter(i => !i.reviewed).length} pending ·{' '}
-            {items.filter(i => i.corrected_intent && i.corrected_intent !== i.predicted_intent).length} corrections made
+            Showing {paginatedItems.length} of {filteredItems.length} items · {filteredItems.filter(i => i.reviewed).length} reviewed · {filteredItems.filter(i => !i.reviewed).length} pending ·{' '}
+            {filteredItems.filter(i => i.corrected_intent && i.corrected_intent !== i.predicted_intent).length} corrections made
           </Typography>
         </Paper>
       )}
@@ -579,5 +669,6 @@ export default function NLPFeedbackReview() {
         </DialogActions>
       </Dialog>
     </Box>
+    </AdminPageChrome>
   );
 }

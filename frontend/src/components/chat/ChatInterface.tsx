@@ -64,7 +64,7 @@ import { chatAPI, ticketAPI, feedbackAPI } from '../../services/apiService'
 import { useAuth } from '../../services/authService'
 import { getDashboardRoute } from '../../utils/dashboardRoute'
 import { formatTime as formatTimeUtil, formatDate as formatDateUtil } from '../../utils/dateUtils'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import Menu from '@mui/material/Menu'
 import { alpha } from '@mui/material/styles'
 import NotificationBell from '../common/NotificationBell'
@@ -245,6 +245,7 @@ const ChatInterface: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const dashboardRoute = getDashboardRoute(user?.role)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   
@@ -331,6 +332,11 @@ const ChatInterface: React.FC = () => {
     () => availableProviders.find((item) => item.id === selectedProviderId) || availableProviders[0] || null,
     [availableProviders, selectedProviderId]
   )
+
+  const requestedSessionId = useMemo(() => {
+    const raw = new URLSearchParams(location.search).get('session')
+    return raw ? raw.trim() : ''
+  }, [location.search])
 
   const providerName = selectedProvider?.provider || ''
   const providerType = selectedProvider?.type || 'mno'
@@ -526,6 +532,23 @@ const ChatInterface: React.FC = () => {
 
     return () => clearInterval(interval)
   }, [sessionId, user?.id])
+
+  // Open a requested session when arriving through /chat?session=<session_id>
+  useEffect(() => {
+    if (!requestedSessionId || chatHistory.length === 0) {
+      return
+    }
+
+    const targetSession = chatHistory.find(
+      (session) => session.session_id === requestedSessionId || session.id === requestedSessionId
+    )
+
+    if (!targetSession || sessionId === targetSession.session_id) {
+      return
+    }
+
+    void loadSessionMessages(targetSession)
+  }, [requestedSessionId, chatHistory, sessionId])
 
   const loadChatHistory = async (
     activeSession: string | null = sessionId,

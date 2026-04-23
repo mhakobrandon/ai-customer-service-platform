@@ -3,7 +3,7 @@
  * Admin module for managing users, assigning roles, and approving registrations
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Box,
@@ -28,9 +28,6 @@ import {
   InputLabel,
   Select,
   Alert,
-  Tabs,
-  Tab,
-  Badge,
   Avatar,
   Tooltip,
   Grid,
@@ -38,18 +35,19 @@ import {
   CardContent,
   Divider,
   CircularProgress,
-  InputAdornment,
+  TablePagination,
 } from '@mui/material'
 import {
+  Dashboard as DashboardIcon,
+  ChatBubble as ChatIcon,
+  Logout as LogoutIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
   Check as ApproveIcon,
   ManageAccounts as ManageAccountsIcon,
   Block as BlockIcon,
   PersonAdd as PersonAddIcon,
-  Search as SearchIcon,
   Refresh as RefreshIcon,
-  ArrowBack as BackIcon,
   Person as PersonIcon,
   SupervisorAccount as SupervisorIcon,
   AdminPanelSettings as AdminIcon,
@@ -58,7 +56,7 @@ import {
 } from '@mui/icons-material'
 import { useAuth } from '../../services/authService'
 import { adminAPI } from '../../services/apiService'
-import PageHeader from '../common/PageHeader'
+import DashboardShell, { type DashboardShellNavSection, toInitials } from '../dashboard/DashboardShell'
 
 interface User {
   id: string
@@ -86,7 +84,7 @@ function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props
   return (
     <div role="tabpanel" hidden={value !== index} {...other}>
-      {value === index && <Box sx={{ py: 2 }}>{children}</Box>}
+      {value === index && <Box sx={{ py: 1 }}>{children}</Box>}
     </div>
   )
 }
@@ -121,9 +119,11 @@ const LANGUAGES = [
   { value: 'nd', label: 'Ndebele' },
 ]
 
+const USERS_TABLE_ROWS_PER_PAGE = 6
+
 export default function UserManagement() {
   const navigate = useNavigate()
-  const { user: currentUser } = useAuth()
+  const { user: currentUser, logout } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [pendingUsers, setPendingUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
@@ -132,6 +132,10 @@ export default function UserManagement() {
   const [tabValue, setTabValue] = useState(0)
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFilter, setRoleFilter] = useState('')
+  const [allUsersPage, setAllUsersPage] = useState(0)
+  const [allUsersRowsPerPage, setAllUsersRowsPerPage] = useState(USERS_TABLE_ROWS_PER_PAGE)
+  const [pendingUsersPage, setPendingUsersPage] = useState(0)
+  const [pendingUsersRowsPerPage, setPendingUsersRowsPerPage] = useState(USERS_TABLE_ROWS_PER_PAGE)
 
   // Dialog states
   const [assignRoleDialog, setAssignRoleDialog] = useState(false)
@@ -303,35 +307,185 @@ export default function UserManagement() {
     return <Chip label={roleConfig.label} color={roleConfig.color as any} size="small" />
   }
 
-  const filteredUsers = users.filter(user => {
+  const filteredUsers = useMemo(() => users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesRole = !roleFilter || user.role === roleFilter
     return matchesSearch && matchesRole
-  })
+  }), [users, searchTerm, roleFilter])
+
+  const paginatedFilteredUsers = useMemo(() => {
+    const start = allUsersPage * allUsersRowsPerPage
+    return filteredUsers.slice(start, start + allUsersRowsPerPage)
+  }, [filteredUsers, allUsersPage, allUsersRowsPerPage])
+
+  const paginatedPendingUsers = useMemo(() => {
+    const start = pendingUsersPage * pendingUsersRowsPerPage
+    return pendingUsers.slice(start, start + pendingUsersRowsPerPage)
+  }, [pendingUsers, pendingUsersPage, pendingUsersRowsPerPage])
+
+  useEffect(() => {
+    const maxPage = Math.max(0, Math.ceil(filteredUsers.length / allUsersRowsPerPage) - 1)
+    if (allUsersPage > maxPage) {
+      setAllUsersPage(maxPage)
+    }
+  }, [filteredUsers.length, allUsersPage, allUsersRowsPerPage])
+
+  useEffect(() => {
+    const maxPage = Math.max(0, Math.ceil(pendingUsers.length / pendingUsersRowsPerPage) - 1)
+    if (pendingUsersPage > maxPage) {
+      setPendingUsersPage(maxPage)
+    }
+  }, [pendingUsers.length, pendingUsersPage, pendingUsersRowsPerPage])
+
+  const handleAllUsersPageChange = (_event: unknown, page: number) => {
+    setAllUsersPage(page)
+  }
+
+  const handleAllUsersRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setAllUsersRowsPerPage(Number.parseInt(event.target.value, 10))
+    setAllUsersPage(0)
+  }
+
+  const handlePendingUsersPageChange = (_event: unknown, page: number) => {
+    setPendingUsersPage(page)
+  }
+
+  const handlePendingUsersRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setPendingUsersRowsPerPage(Number.parseInt(event.target.value, 10))
+    setPendingUsersPage(0)
+  }
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
+
+  const handleRefresh = () => {
+    fetchUsers()
+    fetchPendingUsers()
+  }
 
   const isStaffRole = (role: string) => ['agent', 'supervisor', 'admin'].includes(role)
 
+  const displayName = currentUser?.name || currentUser?.email || 'Admin User'
+
+  const sidebarSections: DashboardShellNavSection[] = [
+    {
+      id: 'main',
+      title: 'User Management',
+      items: [
+        {
+          id: 'all-users',
+          label: 'All Users',
+          icon: <ManageAccountsIcon sx={{ fontSize: 13 }} />,
+          active: tabValue === 0,
+          onClick: () => setTabValue(0),
+        },
+        {
+          id: 'pending-users',
+          label: 'Pending Approval',
+          icon: <PendingIcon sx={{ fontSize: 13 }} />,
+          active: tabValue === 1,
+          onClick: () => setTabValue(1),
+        },
+      ],
+    },
+    {
+      id: 'operations',
+      title: 'Operations',
+      items: [
+        {
+          id: 'admin-overview',
+          label: 'Admin Overview',
+          icon: <DashboardIcon sx={{ fontSize: 13 }} />,
+          onClick: () => navigate('/admin'),
+        },
+        {
+          id: 'agent-console',
+          label: 'Agent Console',
+          icon: <AgentIcon sx={{ fontSize: 13 }} />,
+          onClick: () => navigate('/agent/console'),
+        },
+        {
+          id: 'chat',
+          label: 'Chat',
+          icon: <ChatIcon sx={{ fontSize: 13 }} />,
+          onClick: () => navigate('/chat'),
+        },
+      ],
+    },
+    {
+      id: 'account',
+      title: 'Account',
+      items: [
+        {
+          id: 'logout',
+          label: 'Logout',
+          icon: <LogoutIcon sx={{ fontSize: 13 }} />,
+          onClick: handleLogout,
+        },
+      ],
+    },
+  ]
+
+  const topActions = (
+    <>
+      <FormControl
+        size="small"
+        sx={{
+          minWidth: 140,
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 2,
+            height: 38,
+          },
+        }}
+      >
+        <InputLabel id="topbar-role-filter-label">Role</InputLabel>
+        <Select
+          labelId="topbar-role-filter-label"
+          value={roleFilter}
+          onChange={(event) => setRoleFilter(event.target.value)}
+          label="Role"
+        >
+          <MenuItem value="">All Roles</MenuItem>
+          {ROLES.map((role) => (
+            <MenuItem key={role.value} value={role.value}>{role.label}</MenuItem>
+          ))}
+          <MenuItem value="pending">Pending</MenuItem>
+        </Select>
+      </FormControl>
+      <button type="button" className="btn" onClick={() => navigate('/admin')}>
+        <DashboardIcon sx={{ fontSize: 12 }} /> Admin Panel
+      </button>
+      <button type="button" className="btn" onClick={() => setCreateUserDialog(true)}>
+        <PersonAddIcon sx={{ fontSize: 12 }} /> Create User
+      </button>
+      <button type="button" className="btn" onClick={handleRefresh}>
+        <RefreshIcon sx={{ fontSize: 12 }} /> Refresh
+      </button>
+      <button type="button" className="btn" onClick={handleLogout}>
+        <LogoutIcon sx={{ fontSize: 12 }} /> Logout
+      </button>
+    </>
+  )
+
   return (
-    <Box sx={{ p: 3, minHeight: '100vh', bgcolor: 'background.default' }}>
-      <PageHeader
-        title="User Management"
-        subtitle="Manage users, approvals, roles, and account status"
-        actions={
-          <>
-            <Button variant="outlined" startIcon={<BackIcon />} onClick={() => navigate('/admin')}>
-              Back to Admin
-            </Button>
-            <Button
-              variant="contained"
-              startIcon={<PersonAddIcon />}
-              onClick={() => setCreateUserDialog(true)}
-            >
-              Create User
-            </Button>
-          </>
-        }
-      />
+    <DashboardShell
+      roleClassName="role-dashboard-admin"
+      brandLabel="Taur.ai Admin"
+      brandIcon={<DashboardIcon sx={{ fontSize: 13 }} />}
+      sidebarSections={sidebarSections}
+      searchValue={searchTerm}
+      onSearchChange={setSearchTerm}
+      searchPlaceholder="Search users by name or email..."
+      topActions={topActions}
+      userName={displayName}
+      userMeta="Full user management"
+      userInitials={toInitials(displayName, 'AD')}
+      onUserCardClick={() => setCreateUserDialog(true)}
+    >
+      <Box sx={{ p: { xs: 0.5, md: 0.75 } }}>
 
       {/* Alerts */}
       {error && (
@@ -345,31 +499,27 @@ export default function UserManagement() {
         </Alert>
       )}
 
-      <Alert severity="info" sx={{ mb: 2.5 }}>
-        To change a user's role, click <strong>Edit Role</strong> in the Actions column.
-      </Alert>
-
       {/* Stats Cards */}
-      <Grid container spacing={2.5} sx={{ mb: 3 }}>
+      <Grid container spacing={1.5} sx={{ mb: 2 }}>
         <Grid item xs={6} md={2}>
-          <Card>
-            <CardContent sx={{ textAlign: 'center', py: 2.5 }}>
+        <Card sx={{ borderRadius: 1 }}>
+            <CardContent sx={{ textAlign: 'center', py: 1.5 }}>
               <Typography variant="h4" color="primary">{users.length}</Typography>
               <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Users</Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={6} md={2}>
-          <Card>
-            <CardContent sx={{ textAlign: 'center', py: 2.5 }}>
+        <Card sx={{ borderRadius: 1 }}>
+            <CardContent sx={{ textAlign: 'center', py: 1.5 }}>
               <Typography variant="h4" color="warning.main">{pendingUsers.length}</Typography>
               <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pending</Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={6} md={2}>
-          <Card>
-            <CardContent sx={{ textAlign: 'center', py: 2.5 }}>
+        <Card sx={{ borderRadius: 1 }}>
+            <CardContent sx={{ textAlign: 'center', py: 1.5 }}>
               <Typography variant="h4" color="info.main">
                 {users.filter(u => u.role === 'agent').length}
               </Typography>
@@ -378,8 +528,8 @@ export default function UserManagement() {
           </Card>
         </Grid>
         <Grid item xs={6} md={2}>
-          <Card>
-            <CardContent sx={{ textAlign: 'center', py: 2.5 }}>
+        <Card sx={{ borderRadius: 1 }}>
+            <CardContent sx={{ textAlign: 'center', py: 1.5 }}>
               <Typography variant="h4" color="success.main">
                 {users.filter(u => u.role === 'customer').length}
               </Typography>
@@ -388,8 +538,8 @@ export default function UserManagement() {
           </Card>
         </Grid>
         <Grid item xs={6} md={2}>
-          <Card>
-            <CardContent sx={{ textAlign: 'center', py: 2.5 }}>
+        <Card sx={{ borderRadius: 1 }}>
+            <CardContent sx={{ textAlign: 'center', py: 1.5 }}>
               <Typography variant="h4" color="secondary.main">
                 {users.filter(u => u.role === 'supervisor').length}
               </Typography>
@@ -398,8 +548,8 @@ export default function UserManagement() {
           </Card>
         </Grid>
         <Grid item xs={6} md={2}>
-          <Card>
-            <CardContent sx={{ textAlign: 'center', py: 2.5 }}>
+        <Card sx={{ borderRadius: 1 }}>
+            <CardContent sx={{ textAlign: 'center', py: 1.5 }}>
               <Typography variant="h4" color="error.main">
                 {users.filter(u => u.role === 'admin').length}
               </Typography>
@@ -409,60 +559,10 @@ export default function UserManagement() {
         </Grid>
       </Grid>
 
-      {/* Tabs */}
-      <Paper sx={{ mb: 3, borderRadius: 3 }}>
-        <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)}>
-          <Tab label="All Users" />
-          <Tab 
-            label={
-              <Badge badgeContent={pendingUsers.length} color="warning">
-                Pending Approval
-              </Badge>
-            } 
-          />
-        </Tabs>
-      </Paper>
-
       {/* All Users Tab */}
       <TabPanel value={tabValue} index={0}>
-        {/* Search and Filter */}
-        <Paper sx={{ p: 2.5, mb: 2.5, borderRadius: 3 }}>
-          <Box display="flex" gap={2}>
-          <TextField
-            placeholder="Search users..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-            sx={{ flexGrow: 1 }}
-          />
-          <FormControl sx={{ minWidth: 150 }}>
-            <InputLabel>Role</InputLabel>
-            <Select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              label="Role"
-            >
-              <MenuItem value="">All Roles</MenuItem>
-              {ROLES.map(role => (
-                <MenuItem key={role.value} value={role.value}>{role.label}</MenuItem>
-              ))}
-              <MenuItem value="pending">Pending</MenuItem>
-            </Select>
-          </FormControl>
-          <IconButton onClick={() => { fetchUsers(); fetchPendingUsers(); }}>
-            <RefreshIcon />
-          </IconButton>
-          </Box>
-        </Paper>
-
         {/* Users Table */}
-        <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
+        <TableContainer component={Paper} sx={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 0 }}>
           <Table size="small" stickyHeader>
             <TableHead>
               <TableRow>
@@ -488,7 +588,7 @@ export default function UserManagement() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredUsers.map(user => (
+                paginatedFilteredUsers.map(user => (
                   <TableRow key={user.id} hover>
                     <TableCell>
                       <Box display="flex" alignItems="center" gap={2}>
@@ -553,6 +653,17 @@ export default function UserManagement() {
             </TableBody>
           </Table>
         </TableContainer>
+        <TablePagination
+          component="div"
+          count={filteredUsers.length}
+          page={allUsersPage}
+          onPageChange={handleAllUsersPageChange}
+          rowsPerPage={allUsersRowsPerPage}
+          onRowsPerPageChange={handleAllUsersRowsPerPageChange}
+          rowsPerPageOptions={[USERS_TABLE_ROWS_PER_PAGE]}
+          showFirstButton
+          showLastButton
+        />
       </TabPanel>
 
       {/* Pending Users Tab */}
@@ -560,7 +671,7 @@ export default function UserManagement() {
         <Alert severity="info" sx={{ mb: 2 }}>
           These users have registered and are waiting for role assignment. Assign a role to allow them to log in.
         </Alert>
-        <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
+        <TableContainer component={Paper} sx={{ border: '1px solid rgba(15,23,42,0.08)', borderRadius: 0 }}>
           <Table size="small" stickyHeader sx={{ tableLayout: 'fixed' }}>
             <TableHead>
               <TableRow>
@@ -580,7 +691,7 @@ export default function UserManagement() {
                   </TableCell>
                 </TableRow>
               ) : (
-                pendingUsers.map(user => (
+                paginatedPendingUsers.map(user => (
                   <TableRow key={user.id} hover sx={{ '&:nth-of-type(odd)': { backgroundColor: 'action.hover' } }}>
                     <TableCell>
                       <Box display="flex" alignItems="center" gap={2} sx={{ minWidth: 0 }}>
@@ -626,6 +737,17 @@ export default function UserManagement() {
             </TableBody>
           </Table>
         </TableContainer>
+        <TablePagination
+          component="div"
+          count={pendingUsers.length}
+          page={pendingUsersPage}
+          onPageChange={handlePendingUsersPageChange}
+          rowsPerPage={pendingUsersRowsPerPage}
+          onRowsPerPageChange={handlePendingUsersRowsPerPageChange}
+          rowsPerPageOptions={[USERS_TABLE_ROWS_PER_PAGE]}
+          showFirstButton
+          showLastButton
+        />
       </TabPanel>
 
       {/* Assign Role Dialog */}
@@ -870,6 +992,7 @@ export default function UserManagement() {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+      </Box>
+    </DashboardShell>
   )
 }

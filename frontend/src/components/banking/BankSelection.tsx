@@ -13,8 +13,6 @@ import {
   CardActionArea,
   Grid,
   Typography,
-  TextField,
-  InputAdornment,
   Chip,
   Tabs,
   Tab,
@@ -25,7 +23,6 @@ import {
   Fade,
 } from '@mui/material';
 import {
-  Search as SearchIcon,
   AccountBalance as BankIcon,
   PhoneAndroid as MobileIcon,
   AccountBalanceWallet as WalletIcon,
@@ -41,6 +38,8 @@ import { bankingPlatforms } from '../../data/bankingPlatforms';
 interface BankSelectionProps {
   onSelect: (platform: BankingPlatform) => void;
   selectedPlatformId?: string;
+  searchQuery?: string;
+  onSearchQueryChange?: (value: string) => void;
 }
 
 const getTypeIcon = (type: BankingPlatformType) => {
@@ -69,10 +68,15 @@ const getTypeLabel = (type: BankingPlatformType) => {
   }
 };
 
-const BankSelection: React.FC<BankSelectionProps> = ({ onSelect, selectedPlatformId }) => {
+const BankSelection: React.FC<BankSelectionProps> = ({
+  onSelect,
+  selectedPlatformId,
+  searchQuery,
+}) => {
   const theme = useTheme();
-  const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState(0);
+
+  const effectiveSearchQuery = searchQuery || '';
 
   const filteredPlatforms = useMemo(() => {
     let platforms = bankingPlatforms;
@@ -87,8 +91,8 @@ const BankSelection: React.FC<BankSelectionProps> = ({ onSelect, selectedPlatfor
     }
 
     // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    if (effectiveSearchQuery) {
+      const query = effectiveSearchQuery.toLowerCase();
       platforms = platforms.filter(
         p =>
           p.name.toLowerCase().includes(query) ||
@@ -99,7 +103,7 @@ const BankSelection: React.FC<BankSelectionProps> = ({ onSelect, selectedPlatfor
     }
 
     return platforms;
-  }, [searchQuery, activeTab]);
+  }, [effectiveSearchQuery, activeTab]);
 
   const platformCounts = useMemo(() => ({
     all: bankingPlatforms.length,
@@ -110,61 +114,37 @@ const BankSelection: React.FC<BankSelectionProps> = ({ onSelect, selectedPlatfor
 
   return (
     <Box>
-      {/* Header Section */}
-      <Paper 
-        elevation={0} 
-        sx={{ 
-          p: 3.5,
-          mb: 3.5,
-          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.92)} 0%, ${alpha(theme.palette.secondary.main, 0.88)} 100%)`,
-          color: 'common.white',
-          borderRadius: 3,
-          boxShadow: theme.palette.mode === 'dark' ? '0 14px 30px rgba(2,6,23,0.42)' : '0 12px 26px rgba(15,23,42,0.12)',
-        }}
-      >
-        <Typography variant="h4" fontWeight="bold" gutterBottom>
-          Banking Platform Selector
-        </Typography>
-          <Typography variant="body1" sx={{ opacity: 0.92, mb: 2.25 }}>
-          Select a financial institution to view integration details, USSD codes, and API information
-        </Typography>
-        
-        {/* Search Bar */}
-        <TextField
-          fullWidth
-          placeholder="Search by name, USSD code, or service..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{
-            backgroundColor: alpha(theme.palette.background.paper, 0.96),
-            borderRadius: 3,
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': { border: 'none' },
-            },
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="action" />
-              </InputAdornment>
-            ),
-          }}
-        />
-      </Paper>
-
       {/* Platform Type Tabs */}
-      <Paper sx={{ mb: 3.5, borderRadius: 3 }}>
+      <Paper sx={{ mb: 2.5, borderRadius: 2, overflow: 'hidden', mt: 0.5 }}>
         <Tabs
           value={activeTab}
           onChange={(_, newValue) => setActiveTab(newValue)}
           variant="fullWidth"
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
+          sx={{
+            borderBottom: 1,
+            borderColor: 'divider',
+            '& .MuiTabs-indicator': {
+              height: 2,
+              borderRadius: '2px 2px 0 0',
+            },
+            '& .MuiTab-root': {
+              minHeight: 52,
+              textTransform: 'none',
+              color: 'text.secondary',
+              fontWeight: 600,
+              fontSize: '0.92rem',
+            },
+            '& .MuiTab-root.Mui-selected': {
+              color: 'primary.main',
+              bgcolor: alpha(theme.palette.primary.main, 0.05),
+            },
+          }}
         >
           <Tab 
             label={
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <span>All Platforms</span>
-                <Chip label={platformCounts.all} size="small" color="primary" />
+                <Chip label={platformCounts.all} size="small" color="primary" sx={{ fontWeight: 600, height: 24 }} />
               </Box>
             } 
           />
@@ -198,177 +178,180 @@ const BankSelection: React.FC<BankSelectionProps> = ({ onSelect, selectedPlatfor
         </Tabs>
       </Paper>
 
-      {/* Platform Grid */}
-      <Grid container spacing={2.5}>
-        {filteredPlatforms.map((platform) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={platform.id}>
-            <Fade in timeout={300}>
-              <Card
-                sx={{
-                  height: '100%',
-                  border: selectedPlatformId === platform.id ? 3 : 1,
-                  borderColor: selectedPlatformId === platform.id ? platform.color : 'divider',
-                  transition: 'all 0.2s ease-in-out',
-                  '&:hover': {
-                    transform: 'translateY(-5px)',
-                    boxShadow: 8,
-                    borderColor: platform.color,
-                  },
-                }}
-              >
-                <CardActionArea 
-                  onClick={() => onSelect(platform)}
-                  sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
+      <Box sx={{ pr: 0.5 }}>
+        {/* Platform Grid */}
+        <Grid container spacing={2}>
+          {filteredPlatforms.map((platform) => (
+            <Grid item xs={12} sm={6} md={4} lg={3} key={platform.id}>
+              <Fade in timeout={300}>
+                <Card
+                  sx={{
+                    height: '100%',
+                    border: selectedPlatformId === platform.id ? 3 : 1,
+                    borderColor: selectedPlatformId === platform.id ? platform.color : 'divider',
+                    transition: 'all 0.2s ease-in-out',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: 4,
+                      borderColor: platform.color,
+                    },
+                  }}
                 >
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    {/* Platform Header */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                      <Badge
-                        overlap="circular"
-                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                        badgeContent={
-                          platform.apiIntegration.available && (
-                            <Tooltip title="API Available">
-                              <ActiveIcon 
-                                sx={{ 
-                                  width: 16, 
-                                  height: 16, 
-                                  color: 'success.main',
-                                    backgroundColor: 'background.paper',
-                                  borderRadius: '50%'
-                                }} 
-                              />
-                            </Tooltip>
-                          )
-                        }
-                      >
-                        <Avatar
-                          sx={{
-                            width: 56,
-                            height: 56,
-                            backgroundColor: platform.color,
-                            fontSize: '1.2rem',
-                            fontWeight: 'bold',
-                          }}
+                  <CardActionArea 
+                    onClick={() => onSelect(platform)}
+                    sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
+                  >
+                    <CardContent sx={{ flexGrow: 1 }}>
+                      {/* Platform Header */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.6 }}>
+                        <Badge
+                          overlap="circular"
+                          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                          badgeContent={
+                            platform.apiIntegration.available && (
+                              <Tooltip title="API Available">
+                                <ActiveIcon 
+                                  sx={{ 
+                                    width: 16, 
+                                    height: 16, 
+                                    color: 'success.main',
+                                      backgroundColor: 'background.paper',
+                                    borderRadius: '50%'
+                                  }} 
+                                />
+                              </Tooltip>
+                            )
+                          }
                         >
-                          {platform.shortName.substring(0, 2).toUpperCase()}
-                        </Avatar>
-                      </Badge>
-                      <Box sx={{ ml: 2 }}>
-                        <Typography variant="h6" fontWeight="bold" noWrap>
-                          {platform.shortName}
-                        </Typography>
-                        <Chip
-                          icon={getTypeIcon(platform.type)}
-                          label={getTypeLabel(platform.type)}
-                          size="small"
-                          variant="outlined"
-                          sx={{ height: 20, fontSize: '0.7rem' }}
-                        />
-                      </Box>
-                    </Box>
-
-                    {/* Main USSD Code */}
-                    <Paper
-                      elevation={0}
-                      sx={{
-                        p: 1.5,
-                        mb: 2,
-                        backgroundColor: `${platform.color}15`,
-                        border: `1px solid ${platform.color}40`,
-                        borderRadius: 1,
-                      }}
-                    >
-                      <Typography variant="caption" color="text.secondary" display="block">
-                        Main USSD
-                      </Typography>
-                      <Typography variant="h6" fontWeight="bold" sx={{ color: platform.color }}>
-                        {platform.mainUSSD}
-                      </Typography>
-                    </Paper>
-
-                    {/* Available Channels */}
-                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 2 }}>
-                      <Tooltip title="USSD Available">
-                        <Chip
-                          icon={<USSDIcon sx={{ fontSize: 14 }} />}
-                          label="USSD"
-                          size="small"
-                          color="success"
-                          variant="outlined"
-                          sx={{ height: 24 }}
-                        />
-                      </Tooltip>
-                      {platform.whatsappBot?.available && (
-                        <Tooltip title="WhatsApp Bot">
+                          <Avatar
+                            sx={{
+                              width: 52,
+                              height: 52,
+                              backgroundColor: platform.color,
+                              fontSize: '1.1rem',
+                              fontWeight: 'bold',
+                            }}
+                          >
+                            {platform.shortName.substring(0, 2).toUpperCase()}
+                          </Avatar>
+                        </Badge>
+                        <Box sx={{ ml: 1.5 }}>
+                          <Typography variant="h6" fontWeight="bold" noWrap sx={{ fontSize: '1.05rem' }}>
+                            {platform.shortName}
+                          </Typography>
                           <Chip
-                            icon={<WhatsAppIcon sx={{ fontSize: 14 }} />}
-                            label="WhatsApp"
+                            icon={getTypeIcon(platform.type)}
+                            label={getTypeLabel(platform.type)}
+                            size="small"
+                            variant="outlined"
+                            sx={{ height: 19, fontSize: '0.65rem' }}
+                          />
+                        </Box>
+                      </Box>
+
+                      {/* Main USSD Code */}
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 1.3,
+                          mb: 1.6,
+                          backgroundColor: `${platform.color}15`,
+                          border: `1px solid ${platform.color}40`,
+                          borderRadius: 1,
+                        }}
+                      >
+                        <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.72rem' }}>
+                          Main USSD
+                        </Typography>
+                        <Typography variant="h6" fontWeight="bold" sx={{ color: platform.color, fontSize: '1.08rem' }}>
+                          {platform.mainUSSD}
+                        </Typography>
+                      </Paper>
+
+                      {/* Available Channels */}
+                      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1.6 }}>
+                        <Tooltip title="USSD Available">
+                          <Chip
+                            icon={<USSDIcon sx={{ fontSize: 13 }} />}
+                            label="USSD"
                             size="small"
                             color="success"
                             variant="outlined"
-                            sx={{ height: 24 }}
+                            sx={{ height: 22, fontSize: '0.75rem' }}
                           />
                         </Tooltip>
-                      )}
-                      {platform.webApplications.length > 0 && (
-                        <Tooltip title="Web Portal">
-                          <Chip
-                            icon={<WebIcon sx={{ fontSize: 14 }} />}
-                            label="Web"
-                            size="small"
-                            color="info"
-                            variant="outlined"
-                            sx={{ height: 24 }}
-                          />
-                        </Tooltip>
-                      )}
-                      {platform.apiIntegration.available && (
-                        <Tooltip title="API Integration">
-                          <Chip
-                            icon={<ApiIcon sx={{ fontSize: 14 }} />}
-                            label="API"
-                            size="small"
-                            color="secondary"
-                            variant="outlined"
-                            sx={{ height: 24 }}
-                          />
-                        </Tooltip>
-                      )}
-                    </Box>
+                        {platform.whatsappBot?.available && (
+                          <Tooltip title="WhatsApp Bot">
+                            <Chip
+                              icon={<WhatsAppIcon sx={{ fontSize: 13 }} />}
+                              label="WhatsApp"
+                              size="small"
+                              color="success"
+                              variant="outlined"
+                              sx={{ height: 22, fontSize: '0.75rem' }}
+                            />
+                          </Tooltip>
+                        )}
+                        {platform.webApplications.length > 0 && (
+                          <Tooltip title="Web Portal">
+                            <Chip
+                              icon={<WebIcon sx={{ fontSize: 13 }} />}
+                              label="Web"
+                              size="small"
+                              color="info"
+                              variant="outlined"
+                              sx={{ height: 22, fontSize: '0.75rem' }}
+                            />
+                          </Tooltip>
+                        )}
+                        {platform.apiIntegration.available && (
+                          <Tooltip title="API Integration">
+                            <Chip
+                              icon={<ApiIcon sx={{ fontSize: 13 }} />}
+                              label="API"
+                              size="small"
+                              color="secondary"
+                              variant="outlined"
+                              sx={{ height: 22, fontSize: '0.75rem' }}
+                            />
+                          </Tooltip>
+                        )}
+                      </Box>
 
-                    {/* Description */}
-                    <Typography 
-                      variant="body2" 
-                      color="text.secondary"
-                      sx={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                      }}
-                    >
-                      {platform.description}
-                    </Typography>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Fade>
-          </Grid>
-        ))}
-      </Grid>
+                      {/* Description */}
+                      <Typography 
+                        variant="body2" 
+                        color="text.secondary"
+                        sx={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          fontSize: '0.82rem',
+                        }}
+                      >
+                        {platform.description}
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              </Fade>
+            </Grid>
+          ))}
+        </Grid>
 
-      {/* No Results */}
-      {filteredPlatforms.length === 0 && (
-        <Paper sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h6" color="text.secondary">
-            No platforms found matching "{searchQuery}"
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Try a different search term or category
-          </Typography>
-        </Paper>
-      )}
+        {/* No Results */}
+        {filteredPlatforms.length === 0 && (
+          <Paper sx={{ p: 3, textAlign: 'center' }}>
+            <Typography variant="subtitle1" color="text.secondary">
+              No platforms found matching "{effectiveSearchQuery}"
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.84rem' }}>
+              Try a different search term or category
+            </Typography>
+          </Paper>
+        )}
+      </Box>
     </Box>
   );
 };
