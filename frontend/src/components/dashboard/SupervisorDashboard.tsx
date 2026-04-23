@@ -765,7 +765,7 @@ export default function SupervisorDashboard({ view = 'dashboard' }: SupervisorDa
     <>
       <DashboardShell
         roleClassName="role-dashboard-supervisor"
-        brandLabel="BotAssist Supervisor"
+        brandLabel="Taur.ai Supervisor"
         brandIcon={<AgentsIcon sx={{ fontSize: 13 }} />}
         sidebarSections={sidebarSections}
         searchValue={searchQuery}

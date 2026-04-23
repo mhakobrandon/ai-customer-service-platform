@@ -53,7 +53,7 @@ export const toInitials = (name: string, fallback = 'US'): string => {
 
 export default function DashboardShell({
   roleClassName,
-  brandLabel = 'BotAssist',
+  brandLabel = 'Taur.ai',
   brandIcon,
   sidebarSections,
   showTopbar = true,

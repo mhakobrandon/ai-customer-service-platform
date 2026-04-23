@@ -112,7 +112,7 @@ export default function AdminPageChrome({
   return (
     <DashboardShell
       roleClassName="role-dashboard-admin"
-      brandLabel="BotAssist Admin"
+      brandLabel="Taur.ai Admin"
       brandIcon={<DashboardIcon sx={{ fontSize: 13 }} />}
       sidebarSections={sidebarSections}
       searchValue={searchValue}

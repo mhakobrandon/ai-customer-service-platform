@@ -300,7 +300,7 @@ export default function AgentReportsPage() {
   return (
     <DashboardShell
       roleClassName="role-dashboard-agent"
-      brandLabel="BotAssist Agent"
+      brandLabel="Taur.ai Agent"
       brandIcon={<SupportAgentIcon sx={{ fontSize: 13 }} />}
       sidebarSections={sidebarSections}
       searchValue={searchQuery}

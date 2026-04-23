@@ -884,7 +884,7 @@ export default function Dashboard() {
             <div className="sb-dot">
               <ChatIcon sx={{ fontSize: 13 }} />
             </div>
-            BotAssist
+            Taur.ai
           </div>
 
           <div className="sb-sec">Main</div>
@@ -908,7 +908,7 @@ export default function Dashboard() {
           <button type="button" className="sb-item" onClick={() => window.open(whatsappUrl, '_blank', 'noopener,noreferrer')}>
             <WhatsAppIcon sx={{ fontSize: 13 }} /> WhatsApp
           </button>
-          <button type="button" className="sb-item" onClick={() => { window.location.href = 'mailto:support@botassist.ai' }}>
+          <button type="button" className="sb-item" onClick={() => { window.location.href = 'mailto:support@taur.ai' }}>
             <EmailIcon sx={{ fontSize: 13 }} /> Email
           </button>
 
@@ -1112,7 +1112,7 @@ export default function Dashboard() {
                   <div className="welcome-copy">
                     <h2 className="welcome-title">Welcome Back, {displayName}!</h2>
                     <p className="welcome-subtitle">
-                      Your 24/7 chat assistant is here to help you with all your queries.
+                      Taur.ai helps you with chat, WhatsApp, tickets, and wallets in English, Shona, and Ndebele.
                     </p>
                     <div className="welcome-actions">
                       <button
@@ -1135,8 +1135,8 @@ export default function Dashboard() {
                   </div>
                   <div className="welcome-avatar-wrap">
                     <img
-                      src="/chatbot-head.jpg"
-                      alt="Real chatbot head"
+                      src="/taur-ai-face.png"
+                      alt="Taur.ai multilingual support specialist"
                       className="welcome-avatar-image"
                     />
                   </div>

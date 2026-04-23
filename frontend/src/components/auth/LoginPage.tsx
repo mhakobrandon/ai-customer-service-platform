@@ -287,12 +287,15 @@ const LoginPage: React.FC = () => {
               >
                 <Box
                   component="img"
-                  src="/chatbot-head.jpg"
-                  alt="Chatbot assistant"
+                  src="/taur-ai-face.png"
+                  alt="Taur.ai multilingual support specialist"
                   sx={{
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',
+                    objectPosition: '63% 18%',
+                    transform: 'scale(2.25)',
+                    transformOrigin: '63% 18%',
                   }}
                 />
               </Box>
