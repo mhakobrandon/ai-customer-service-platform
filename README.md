@@ -15,7 +15,7 @@
 
 ## Executive Summary
 
-This project develops a comprehensive AI-powered customer service platform specifically designed for Zimbabwe's financial services sector, addressing critical challenges in customer support delivery for banks and mobile network operators (MNOs) such as EcoCash, OneMoney, and Telecash. The platform provides multilingual support (English, Shona, Ndebele), intelligent query processing, automated ticketing, and seamless escalation protocols.
+This project develops a comprehensive AI-powered customer service platform specifically designed for Zimbabwe's financial services sector, addressing critical challenges in customer support delivery for banks and mobile Finacial Services such as EcoCash, OneMoney, and Telecash. The platform provides multilingual support (English, Shona, Ndebele), intelligent query processing, automated ticketing, and seamless escalation protocols.
 
 ## Key Features
 
