@@ -96,7 +96,7 @@ export default function LocationManagement() {
   const [searchQuery, setSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState<string>('')
   const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(6)
+  const [rowsPerPage, setRowsPerPage] = useState(8)
 
   const [openDialog, setOpenDialog] = useState(false)
   const [editingItem, setEditingItem] = useState<LocationItem | null>(null)
@@ -492,7 +492,7 @@ export default function LocationManagement() {
         onPageChange={handlePageChange}
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleRowsPerPageChange}
-        rowsPerPageOptions={[6, 10, 25]}
+        rowsPerPageOptions={[8, 16, 24]}
         showFirstButton
         showLastButton
       />

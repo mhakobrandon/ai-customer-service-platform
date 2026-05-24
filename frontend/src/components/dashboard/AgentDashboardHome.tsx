@@ -458,7 +458,7 @@ export default function AgentDashboardHome() {
           border: '1px solid #e3e9f4',
           borderRadius: '14px',
           background: 'linear-gradient(180deg, #f8faff 0%, #f2f5fc 100%)',
-          minHeight: { xs: 'auto', lg: 'calc(100dvh - 150px)' },
+          height: '100%',
           display: 'flex',
           flexDirection: 'column',
           '@keyframes syncedCardFlash': {

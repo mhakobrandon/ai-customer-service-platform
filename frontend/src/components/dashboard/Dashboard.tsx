@@ -47,7 +47,7 @@ import {
 } from '@mui/icons-material'
 import { matchPath, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../services/authService'
-import { chatAPI, ticketAPI } from '../../services/apiService'
+import { chatAPI, ticketAPI, usersAPI } from '../../services/apiService'
 import { formatDateTime } from '../../utils/dateUtils'
 import { LinkAccountModal } from '../banking'
 import type { BalanceInquiry, LinkedPlatformAccount } from '../../types/banking'
@@ -309,8 +309,12 @@ export default function Dashboard() {
   const [ticketDetailsLoading, setTicketDetailsLoading] = useState(false)
   const [ticketDetailsError, setTicketDetailsError] = useState<string | null>(null)
   const [selectedTicket, setSelectedTicket] = useState<TicketDetailsData | null>(null)
+  const [userPhoneFallback, setUserPhoneFallback] = useState<string | null>(null)
 
   const whatsappUrl = 'https://wa.me/15551578991'
+
+  const getWalletBalanceKey = (accountId: string, currency?: string): string =>
+    `${accountId}:${String(currency || '').toUpperCase()}`
 
   const displayName = user?.name || user?.email?.split('@')[0] || 'Customer User'
   const displayRole = user?.role || 'customer'
@@ -387,6 +391,20 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => {
+    const loadCurrentProfilePhone = async () => {
+      try {
+        const response = await usersAPI.getCurrentProfile()
+        const phoneValue = String(response.data?.phone_number || '').trim()
+        setUserPhoneFallback(phoneValue || null)
+      } catch {
+        setUserPhoneFallback(null)
+      }
+    }
+
+    void loadCurrentProfilePhone()
+  }, [])
+
+  useEffect(() => {
     if (!selectedTicketId) {
       setSelectedTicket(null)
       setTicketDetailsError(null)
@@ -441,21 +459,38 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => {
-    const nextBalances: Record<string, BalanceInquiry | null> = {}
+    setWalletBalances((previous) => {
+      const nextBalances = { ...previous }
+      let changed = false
 
-    linkedAccounts.forEach((account) => {
-      nextBalances[account.id] = account.cachedBalance
-        ? {
-            platformId: account.platformId,
-            accountIdentifier: account.accountIdentifier,
-            balance: account.cachedBalance.amount,
-            currency: account.cachedBalance.currency,
-            lastUpdated: account.cachedBalance.updatedAt,
-          }
-        : null
+      linkedAccounts.forEach((account) => {
+        const currency = account.cachedBalance?.currency
+        if (!currency) {
+          return
+        }
+
+        const key = getWalletBalanceKey(account.id, currency)
+        // Only update if we don't already have it or if the cached one is newer
+        const existing = nextBalances[key]
+        const cachedTime = account.cachedBalance ? new Date(account.cachedBalance.updatedAt).getTime() : 0
+        const existingTime = existing ? new Date(existing.lastUpdated).getTime() : 0
+
+        if (!existing || cachedTime > existingTime) {
+          nextBalances[key] = account.cachedBalance
+            ? {
+              platformId: account.platformId,
+              accountIdentifier: account.accountIdentifier,
+              balance: account.cachedBalance.amount,
+              currency: account.cachedBalance.currency,
+              lastUpdated: account.cachedBalance.updatedAt,
+            }
+            : null
+          changed = true
+        }
+      })
+
+      return changed ? nextBalances : previous
     })
-
-    setWalletBalances(nextBalances)
   }, [linkedAccounts])
 
   useEffect(() => {
@@ -683,28 +718,34 @@ export default function Dashboard() {
   const hasVisibleWallets = filteredAccounts.length > 0
   const selectedProviderName = primaryAccount?.platformName || defaultEcoCashAccount?.platformName || 'EcoCash'
 
-  const handleCheckWalletBalance = async (account?: LinkedPlatformAccount) => {
+  const handleCheckWalletBalance = async (account?: LinkedPlatformAccount, preferredCurrency?: string) => {
     const targetAccount = account || defaultEcoCashAccount || primaryAccount || orderedAccounts[0]
     if (!targetAccount) {
       return
     }
+    const targetCurrency = String(preferredCurrency || targetAccount.cachedBalance?.currency || '').toUpperCase()
+    const balanceKey = getWalletBalanceKey(targetAccount.id, targetCurrency)
 
-    setWalletBalanceLoading((previous) => ({ ...previous, [targetAccount.id]: true }))
-    setWalletBalanceErrors((previous) => ({ ...previous, [targetAccount.id]: null }))
+    setWalletBalanceLoading((previous) => ({ ...previous, [balanceKey]: true }))
+    setWalletBalanceErrors((previous) => ({ ...previous, [balanceKey]: null }))
 
     try {
-      const balance = await getAccountBalance(targetAccount.id)
-      setWalletBalances((previous) => ({ ...previous, [targetAccount.id]: balance }))
+      const balance = await getAccountBalance(
+        targetAccount.id,
+        preferredCurrency || targetAccount.cachedBalance?.currency,
+        userPhoneFallback ? [userPhoneFallback] : []
+      )
+      setWalletBalances((previous) => ({ ...previous, [balanceKey]: balance }))
       loadLinkedAccounts()
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to check balance.'
-      setWalletBalanceErrors((previous) => ({ ...previous, [targetAccount.id]: message }))
+      setWalletBalanceErrors((previous) => ({ ...previous, [balanceKey]: message }))
     } finally {
-      setWalletBalanceLoading((previous) => ({ ...previous, [targetAccount.id]: false }))
+      setWalletBalanceLoading((previous) => ({ ...previous, [balanceKey]: false }))
     }
   }
 
-  const handleWalletCardClick = (account?: LinkedPlatformAccount) => {
+  const handleWalletCardClick = (account?: LinkedPlatformAccount, preferredCurrency?: string) => {
     const targetAccount = account || defaultEcoCashAccount || primaryAccount || orderedAccounts[0]
     if (!targetAccount) {
       return
@@ -712,7 +753,7 @@ export default function Dashboard() {
 
     setPrimaryAccount(targetAccount.id)
     loadLinkedAccounts()
-    void handleCheckWalletBalance(targetAccount)
+    void handleCheckWalletBalance(targetAccount, preferredCurrency)
   }
 
   const latestActiveSession =
@@ -881,10 +922,7 @@ export default function Dashboard() {
       <div className="shell">
         <aside className="sidebar">
           <div className="sb-logo">
-            <div className="sb-dot">
-              <ChatIcon sx={{ fontSize: 13 }} />
-            </div>
-            Taur.ai
+            <img src="/taur-logo-new.png" alt="Taur.ai Logo" className="sb-logo-img" />
           </div>
 
           <div className="sb-sec">Main</div>
@@ -1080,9 +1118,8 @@ export default function Dashboard() {
                       className="tk-row tk-row-btn"
                       onClick={() => handleOpenTicket(ticket)}
                     >
-                      <div className={`tk-ic ${
-                        tone === 'open' ? 'tk-open' : tone === 'prog' ? 'tk-prog' : tone === 'esc' ? 'tk-esc' : 'tk-res'
-                      }`}>
+                      <div className={`tk-ic ${tone === 'open' ? 'tk-open' : tone === 'prog' ? 'tk-prog' : tone === 'esc' ? 'tk-esc' : 'tk-res'
+                        }`}>
                         {tone === 'open' && <OpenIcon sx={{ fontSize: 12 }} />}
                         {tone === 'prog' && <ProgressIcon sx={{ fontSize: 12 }} />}
                         {tone === 'esc' && <EscalatedIcon sx={{ fontSize: 12 }} />}
@@ -1107,352 +1144,352 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="two-col">
-              <div className="left-col">
-                <div className="welcome-assistant-card">
-                  <div className="welcome-copy">
-                    <h2 className="welcome-title">Welcome Back, {displayName}!</h2>
-                    <p className="welcome-subtitle">
-                      Taur.ai helps you with chat, WhatsApp, tickets, and wallets in English, Shona, and Ndebele.
-                    </p>
-                    <div className="welcome-actions">
-                      <button
-                        type="button"
-                        className="welcome-action-btn welcome-action-btn-chat"
-                        onClick={() => navigate('/chat')}
-                      >
+                <div className="left-col">
+                  <div className="welcome-assistant-card">
+                    <div className="welcome-copy">
+                      <h2 className="welcome-title">Greetings, {displayName}!</h2>
+                      <p className="welcome-subtitle">
+                        Taur.ai helps you with chat, WhatsApp, tickets, and wallets in English, Shona, and Ndebele.
+                      </p>
+                      <div className="welcome-actions">
+                        <button
+                          type="button"
+                          className="welcome-action-btn welcome-action-btn-chat"
+                          onClick={() => navigate('/chat')}
+                        >
+                          <ChatIcon sx={{ fontSize: 14 }} />
+                          Chat Now
+                        </button>
+                        <button
+                          type="button"
+                          className="welcome-action-btn welcome-action-btn-whatsapp"
+                          onClick={() => window.open(whatsappUrl, '_blank', 'noopener,noreferrer')}
+                        >
+                          <WhatsAppIcon sx={{ fontSize: 14 }} />
+                          WhatsApp
+                        </button>
+                      </div>
+                    </div>
+                    <div className="welcome-avatar-wrap">
+                      <img
+                        src="/taur-ai-face.png"
+                        alt="Taur.ai multilingual support specialist"
+                        className="welcome-avatar-image"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="stats-row">
+                    <div className="sc sc-total">
+                      <div className="sc-ic">
+                        <SessionsIcon sx={{ fontSize: 14 }} />
+                      </div>
+                      <div className="sc-body">
+                        <div className="sv sv-pu">{stats.totalSessions}</div>
+                        <div className="sl">Total sessions</div>
+                      </div>
+                    </div>
+                    <div className="sc sc-active">
+                      <div className="sc-ic">
                         <ChatIcon sx={{ fontSize: 14 }} />
-                        Chat Now
+                      </div>
+                      <div className="sc-body">
+                        <div className="sv sv-g">{stats.activeSessions}</div>
+                        <div className="sl">Active sessions</div>
+                      </div>
+                    </div>
+                    <div className="sc sc-open">
+                      <div className="sc-ic">
+                        <TicketIcon sx={{ fontSize: 14 }} />
+                      </div>
+                      <div className="sc-body">
+                        <div className="sv sv-a">{stats.openTickets}</div>
+                        <div className="sl">Open tickets</div>
+                      </div>
+                    </div>
+                    <div className="sc sc-rate">
+                      <div className="sc-ic">
+                        <TrendingIcon sx={{ fontSize: 14 }} />
+                      </div>
+                      <div className="sc-body">
+                        <div className="sv sv-b">{stats.resolutionRate.toFixed(1)}%</div>
+                        <div className="sl">Resolution rate</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="card">
+                    <div className="section-header-row">
+                      <div className="ctitle section-inline-title">
+                        <TicketIcon sx={{ fontSize: 12 }} /> Recent tickets
+                      </div>
+                      <button type="button" className="view-all" onClick={handleViewAllTickets}>
+                        View all
                       </button>
-                      <button
-                        type="button"
-                        className="welcome-action-btn welcome-action-btn-whatsapp"
-                        onClick={() => window.open(whatsappUrl, '_blank', 'noopener,noreferrer')}
+                    </div>
+
+                    {visibleTickets.length === 0 && (
+                      <div className="empty-note">No tickets found for the current filter.</div>
+                    )}
+
+                    {visibleTickets.map((ticket, index) => {
+                      const tone = statusTone(ticket.status)
+
+                      return (
+                        <button
+                          key={`${ticket.id}-${index}`}
+                          type="button"
+                          className="tk-row tk-row-btn"
+                          onClick={() => handleOpenTicket(ticket)}
+                        >
+                          <div className={`tk-ic ${tone === 'open' ? 'tk-open' : tone === 'prog' ? 'tk-prog' : tone === 'esc' ? 'tk-esc' : 'tk-res'
+                            }`}>
+                            {tone === 'open' && <OpenIcon sx={{ fontSize: 12 }} />}
+                            {tone === 'prog' && <ProgressIcon sx={{ fontSize: 12 }} />}
+                            {tone === 'esc' && <EscalatedIcon sx={{ fontSize: 12 }} />}
+                            {tone === 'res' && <ResolvedIcon sx={{ fontSize: 12 }} />}
+                          </div>
+                          <div className="tk-body">
+                            <div className="tk-name">
+                              <span className="tk-subject">{ticket.subject || 'Untitled ticket'}</span>
+                              <span className={`pill ${tone === 'open' ? 'p-open' : tone === 'prog' ? 'p-prog' : tone === 'esc' ? 'p-esc' : 'p-res'}`}>
+                                {toLabel(ticket.status)}
+                              </span>
+                            </div>
+                            <div className="tk-meta">
+                              Priority: {toLabel(ticket.priority)}
+                            </div>
+                            <div className="tk-time">
+                              {formatRelativeTime(ticket.created_at)}
+                              {ticket.ticket_id ? ` - #${ticket.ticket_id}` : ''}
+                            </div>
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  <div className="card">
+                    <div className="ctitle">
+                      <SessionsIcon sx={{ fontSize: 12 }} /> Recent activity
+                    </div>
+
+                    {visibleSessions.length === 0 && (
+                      <div className="empty-note">No recent sessions found for the current filter.</div>
+                    )}
+
+                    {visibleSessions.map((session, index) => {
+                      const tone = statusTone(session.status)
+
+                      return (
+                        <button
+                          key={`${session.id}-${index}`}
+                          type="button"
+                          className="act-row act-row-btn"
+                          onClick={() => handleOpenSession(session)}
+                        >
+                          <div className={`av ${tone === 'esc' ? 'av-gr' : 'av-g'}`}>CS</div>
+                          <div className="ab">
+                            <div className="at">
+                              Chat session
+                              <span className={`pill ${tone === 'open' ? 'p-open' : tone === 'prog' ? 'p-prog' : tone === 'esc' ? 'p-esc' : 'p-res'}`}>
+                                {toLabel(session.status)}
+                              </span>
+                            </div>
+                            <div className="as">{session.last_message || 'No preview available.'}</div>
+                            <div className="am">{formatRelativeTime(session.updated_at || session.created_at)} - {session.message_count} msgs</div>
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <div className="right-col">
+                  <div className="card card-activity-trend">
+                    <div className="ctitle">
+                      <TrendingIcon sx={{ fontSize: 12 }} /> Activity trend - {monthLabel}
+                    </div>
+
+                    <div className="balance-graph-card">
+                      <div className="activity-summary-row">
+                        <div className="activity-summary-card activity-summary-ticket">
+                          <span>Raised tickets</span>
+                          <strong>{formatCompactNumber(activityGraph.totalTickets)}</strong>
+                          <em>
+                            {activityGraph.focusMonthLabel}: {activityGraph.focusTickets}
+                            {' '}({formatSignedCount(activityGraph.ticketsDelta)} vs {activityGraph.previousMonthLabel})
+                          </em>
+                        </div>
+                        <div className="activity-summary-card activity-summary-session">
+                          <span>Conversations started</span>
+                          <strong>{formatCompactNumber(activityGraph.totalSessions)}</strong>
+                          <em>
+                            {activityGraph.focusMonthLabel}: {activityGraph.focusSessions}
+                            {' '}({formatSignedCount(activityGraph.sessionsDelta)} vs {activityGraph.previousMonthLabel})
+                          </em>
+                        </div>
+                      </div>
+
+                      <div className="balance-graph-tooltip" style={{ left: `${activityGraph.tooltipLeft}px` }}>
+                        <span>{activityGraph.focusMonthLabel} snapshot</span>
+                        <strong>Tickets: {activityGraph.focusTickets}</strong>
+                        <strong className="balance-tooltip-secondary">Conversations: {activityGraph.focusSessions}</strong>
+                      </div>
+
+                      <svg
+                        className="balance-chart-svg"
+                        viewBox={`0 0 ${activityGraph.viewWidth} ${activityGraph.viewHeight}`}
+                        preserveAspectRatio="none"
                       >
-                        <WhatsAppIcon sx={{ fontSize: 14 }} />
-                        WhatsApp
-                      </button>
-                    </div>
-                  </div>
-                  <div className="welcome-avatar-wrap">
-                    <img
-                      src="/taur-ai-face.png"
-                      alt="Taur.ai multilingual support specialist"
-                      className="welcome-avatar-image"
-                    />
-                  </div>
-                </div>
+                        {activityGraph.gridLines.map((lineY, index) => (
+                          <line
+                            key={`graph-grid-${index}`}
+                            x1="0"
+                            y1={lineY}
+                            x2={activityGraph.viewWidth}
+                            y2={lineY}
+                            className="balance-grid-line"
+                          />
+                        ))}
 
-                <div className="stats-row">
-                  <div className="sc sc-total">
-                    <div className="sc-ic">
-                      <SessionsIcon sx={{ fontSize: 14 }} />
-                    </div>
-                    <div className="sc-body">
-                      <div className="sv sv-pu">{stats.totalSessions}</div>
-                      <div className="sl">Total sessions</div>
-                    </div>
-                  </div>
-                  <div className="sc sc-active">
-                    <div className="sc-ic">
-                      <ChatIcon sx={{ fontSize: 14 }} />
-                    </div>
-                    <div className="sc-body">
-                      <div className="sv sv-g">{stats.activeSessions}</div>
-                      <div className="sl">Active sessions</div>
-                    </div>
-                  </div>
-                  <div className="sc sc-open">
-                    <div className="sc-ic">
-                      <TicketIcon sx={{ fontSize: 14 }} />
-                    </div>
-                    <div className="sc-body">
-                      <div className="sv sv-a">{stats.openTickets}</div>
-                      <div className="sl">Open tickets</div>
-                    </div>
-                  </div>
-                  <div className="sc sc-rate">
-                    <div className="sc-ic">
-                      <TrendingIcon sx={{ fontSize: 14 }} />
-                    </div>
-                    <div className="sc-body">
-                      <div className="sv sv-b">{stats.resolutionRate.toFixed(1)}%</div>
-                      <div className="sl">Resolution rate</div>
-                    </div>
-                  </div>
-                </div>
+                        <path d={activityGraph.ticketsPath} className="balance-line balance-line-ticket" />
+                        <path d={activityGraph.sessionsPath} className="balance-line balance-line-session" />
 
-                <div className="card">
-                  <div className="section-header-row">
-                    <div className="ctitle section-inline-title">
-                      <TicketIcon sx={{ fontSize: 12 }} /> Recent tickets
+                        <circle
+                          cx={activityGraph.focusPointTickets.x}
+                          cy={activityGraph.focusPointTickets.y}
+                          r="3"
+                          className="balance-point balance-point-ticket"
+                        />
+                        <circle
+                          cx={activityGraph.focusPointSessions.x}
+                          cy={activityGraph.focusPointSessions.y}
+                          r="4"
+                          className="balance-point balance-point-session"
+                        />
+                      </svg>
+
+                      <div className="balance-months-row">
+                        {activityGraph.months.map((month, index) => (
+                          <span
+                            key={`graph-month-${month}`}
+                            className={`balance-month ${index === activityGraph.focusIndex ? 'balance-month-focus' : ''}`}
+                          >
+                            {month}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="activity-legend-row">
+                        <span className="activity-legend-item">
+                          <i className="activity-legend-dot activity-legend-dot-ticket" />
+                          Raised tickets
+                        </span>
+                        <span className="activity-legend-item">
+                          <i className="activity-legend-dot activity-legend-dot-session" />
+                          Conversations started
+                        </span>
+                      </div>
                     </div>
-                    <button type="button" className="view-all" onClick={handleViewAllTickets}>
-                      View all
+
+                  </div>
+
+                  <div className="card" id="customer-wallets-card">
+                    <div className="ctitle">
+                      <WalletIcon sx={{ fontSize: 12 }} /> My wallets
+                    </div>
+
+                    {!hasVisibleWallets && (
+                      <div className="empty-wallet">
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                          No linked wallets found.
+                        </Typography>
+                        <button type="button" className="chg-btn" onClick={() => setLinkAccountOpen(true)}>
+                          <AddIcon sx={{ fontSize: 10 }} /> Link your first provider
+                        </button>
+                      </div>
+                    )}
+
+                    {hasVisibleWallets && (
+                      <div className="cg cg-wallet-two">
+                        {walletCards.map(({ currency, account }) => {
+                          const walletKey = account ? getWalletBalanceKey(account.id, currency) : ''
+                          const checkedBalance = account ? walletBalances[walletKey] || null : null
+                          const hasBalance = Boolean(checkedBalance)
+                          const balanceText = hasBalance && checkedBalance
+                            ? formatCurrency(checkedBalance.balance, checkedBalance.currency)
+                            : ''
+                          const isChecking = account ? Boolean(walletBalanceLoading[walletKey]) : false
+                          const balanceError = account ? walletBalanceErrors[walletKey] : null
+                          const balanceHint = account
+                            ? (balanceError
+                              ? 'Unable to fetch balance. Tap to retry.'
+                              : (hasBalance && checkedBalance?.lastUpdated
+                                ? `Updated ${formatRelativeTime(checkedBalance.lastUpdated)}`
+                                : 'Tap card to fetch live balance.'))
+                            : 'Balance unavailable right now.'
+                          const toneClass = currency === 'ZIG' ? 'cc-style-zig' : 'cc-style-usd'
+
+                          return (
+                            <button
+                              key={`${currency}-${account?.id || 'placeholder'}`}
+                              type="button"
+                              className="wallet-card-button"
+                              onClick={() => handleWalletCardClick(account, currency)}
+                              title={account
+                                ? (account.isPrimary ? `Primary ${currency} wallet` : `Set ${currency} wallet as primary provider`)
+                                : `Check ${currency} balance`}
+                            >
+                              <div className={`cc ${toneClass} ${account?.isPrimary ? 'cc-primary' : ''}`}>
+                                <div className="cc-d1" />
+                                <div className="cc-d2" />
+                                {account?.isPrimary && (
+                                  <span className="cc-primary-badge">Primary</span>
+                                )}
+                                <div>
+                                  <div className="cc-lbl">Main Balance</div>
+                                  {hasBalance ? (
+                                    <div className="cc-bal">{balanceText}</div>
+                                  ) : (
+                                    <div className="cc-bal-cta" aria-hidden="true">
+                                      <RefreshIcon sx={{ fontSize: 12 }} /> Check balance
+                                    </div>
+                                  )}
+                                  <div className={`cc-check ${balanceError ? 'cc-check-error' : ''}`}>
+                                    {isChecking ? 'Checking balance...' : balanceHint}
+                                  </div>
+                                </div>
+                                <div className="cc-bot">
+                                  <div>
+                                    <div className="cc-ml">Selected provider</div>
+                                    <div className="cc-mv">{truncate(selectedProviderName, 16)}</div>
+                                  </div>
+                                  <span className="wallet-provider">{currency}</span>
+                                </div>
+                              </div>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      className="chg-btn provider-select-btn"
+                      onClick={handleOpenProviderMenu}
+                      aria-haspopup="menu"
+                      aria-expanded={Boolean(providerAnchorEl)}
+                    >
+                      <span className="provider-select-label">
+                        <ExchangeIcon sx={{ fontSize: 10 }} /> Choose your provider
+                      </span>
+                      <span className="provider-select-value">{truncate(selectedProviderName, 16)}</span>
+                      <ExpandMoreIcon sx={{ fontSize: 15 }} />
                     </button>
                   </div>
-
-                  {visibleTickets.length === 0 && (
-                    <div className="empty-note">No tickets found for the current filter.</div>
-                  )}
-
-                  {visibleTickets.map((ticket, index) => {
-                    const tone = statusTone(ticket.status)
-
-                    return (
-                      <button
-                        key={`${ticket.id}-${index}`}
-                        type="button"
-                        className="tk-row tk-row-btn"
-                        onClick={() => handleOpenTicket(ticket)}
-                      >
-                        <div className={`tk-ic ${
-                          tone === 'open' ? 'tk-open' : tone === 'prog' ? 'tk-prog' : tone === 'esc' ? 'tk-esc' : 'tk-res'
-                        }`}>
-                          {tone === 'open' && <OpenIcon sx={{ fontSize: 12 }} />}
-                          {tone === 'prog' && <ProgressIcon sx={{ fontSize: 12 }} />}
-                          {tone === 'esc' && <EscalatedIcon sx={{ fontSize: 12 }} />}
-                          {tone === 'res' && <ResolvedIcon sx={{ fontSize: 12 }} />}
-                        </div>
-                        <div className="tk-body">
-                          <div className="tk-name">
-                            <span className="tk-subject">{ticket.subject || 'Untitled ticket'}</span>
-                            <span className={`pill ${tone === 'open' ? 'p-open' : tone === 'prog' ? 'p-prog' : tone === 'esc' ? 'p-esc' : 'p-res'}`}>
-                              {toLabel(ticket.status)}
-                            </span>
-                          </div>
-                          <div className="tk-meta">
-                            Priority: {toLabel(ticket.priority)}
-                          </div>
-                          <div className="tk-time">
-                            {formatRelativeTime(ticket.created_at)}
-                            {ticket.ticket_id ? ` - #${ticket.ticket_id}` : ''}
-                          </div>
-                        </div>
-                      </button>
-                    )
-                  })}
-                </div>
-
-                <div className="card">
-                  <div className="ctitle">
-                    <SessionsIcon sx={{ fontSize: 12 }} /> Recent activity
-                  </div>
-
-                  {visibleSessions.length === 0 && (
-                    <div className="empty-note">No recent sessions found for the current filter.</div>
-                  )}
-
-                  {visibleSessions.map((session, index) => {
-                    const tone = statusTone(session.status)
-
-                    return (
-                      <button
-                        key={`${session.id}-${index}`}
-                        type="button"
-                        className="act-row act-row-btn"
-                        onClick={() => handleOpenSession(session)}
-                      >
-                        <div className={`av ${tone === 'esc' ? 'av-gr' : 'av-g'}`}>CS</div>
-                        <div className="ab">
-                          <div className="at">
-                            Chat session
-                            <span className={`pill ${tone === 'open' ? 'p-open' : tone === 'prog' ? 'p-prog' : tone === 'esc' ? 'p-esc' : 'p-res'}`}>
-                              {toLabel(session.status)}
-                            </span>
-                          </div>
-                          <div className="as">{session.last_message || 'No preview available.'}</div>
-                          <div className="am">{formatRelativeTime(session.updated_at || session.created_at)} - {session.message_count} msgs</div>
-                        </div>
-                      </button>
-                    )
-                  })}
                 </div>
               </div>
-
-              <div className="right-col">
-                <div className="card card-activity-trend">
-                  <div className="ctitle">
-                    <TrendingIcon sx={{ fontSize: 12 }} /> Activity trend - {monthLabel}
-                  </div>
-
-                  <div className="balance-graph-card">
-                    <div className="activity-summary-row">
-                      <div className="activity-summary-card activity-summary-ticket">
-                        <span>Raised tickets</span>
-                        <strong>{formatCompactNumber(activityGraph.totalTickets)}</strong>
-                        <em>
-                          {activityGraph.focusMonthLabel}: {activityGraph.focusTickets}
-                          {' '}({formatSignedCount(activityGraph.ticketsDelta)} vs {activityGraph.previousMonthLabel})
-                        </em>
-                      </div>
-                      <div className="activity-summary-card activity-summary-session">
-                        <span>Conversations started</span>
-                        <strong>{formatCompactNumber(activityGraph.totalSessions)}</strong>
-                        <em>
-                          {activityGraph.focusMonthLabel}: {activityGraph.focusSessions}
-                          {' '}({formatSignedCount(activityGraph.sessionsDelta)} vs {activityGraph.previousMonthLabel})
-                        </em>
-                      </div>
-                    </div>
-
-                    <div className="balance-graph-tooltip" style={{ left: `${activityGraph.tooltipLeft}px` }}>
-                      <span>{activityGraph.focusMonthLabel} snapshot</span>
-                      <strong>Tickets: {activityGraph.focusTickets}</strong>
-                      <strong className="balance-tooltip-secondary">Conversations: {activityGraph.focusSessions}</strong>
-                    </div>
-
-                    <svg
-                      className="balance-chart-svg"
-                      viewBox={`0 0 ${activityGraph.viewWidth} ${activityGraph.viewHeight}`}
-                      preserveAspectRatio="none"
-                    >
-                      {activityGraph.gridLines.map((lineY, index) => (
-                        <line
-                          key={`graph-grid-${index}`}
-                          x1="0"
-                          y1={lineY}
-                          x2={activityGraph.viewWidth}
-                          y2={lineY}
-                          className="balance-grid-line"
-                        />
-                      ))}
-
-                      <path d={activityGraph.ticketsPath} className="balance-line balance-line-ticket" />
-                      <path d={activityGraph.sessionsPath} className="balance-line balance-line-session" />
-
-                      <circle
-                        cx={activityGraph.focusPointTickets.x}
-                        cy={activityGraph.focusPointTickets.y}
-                        r="3"
-                        className="balance-point balance-point-ticket"
-                      />
-                      <circle
-                        cx={activityGraph.focusPointSessions.x}
-                        cy={activityGraph.focusPointSessions.y}
-                        r="4"
-                        className="balance-point balance-point-session"
-                      />
-                    </svg>
-
-                    <div className="balance-months-row">
-                      {activityGraph.months.map((month, index) => (
-                        <span
-                          key={`graph-month-${month}`}
-                          className={`balance-month ${index === activityGraph.focusIndex ? 'balance-month-focus' : ''}`}
-                        >
-                          {month}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="activity-legend-row">
-                      <span className="activity-legend-item">
-                        <i className="activity-legend-dot activity-legend-dot-ticket" />
-                        Raised tickets
-                      </span>
-                      <span className="activity-legend-item">
-                        <i className="activity-legend-dot activity-legend-dot-session" />
-                        Conversations started
-                      </span>
-                    </div>
-                  </div>
-
-                </div>
-
-                <div className="card" id="customer-wallets-card">
-                  <div className="ctitle">
-                    <WalletIcon sx={{ fontSize: 12 }} /> My wallets
-                  </div>
-
-                  {!hasVisibleWallets && (
-                    <div className="empty-wallet">
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        No linked wallets found.
-                      </Typography>
-                      <button type="button" className="chg-btn" onClick={() => setLinkAccountOpen(true)}>
-                        <AddIcon sx={{ fontSize: 10 }} /> Link your first provider
-                      </button>
-                    </div>
-                  )}
-
-                  {hasVisibleWallets && (
-                    <div className="cg cg-wallet-two">
-                      {walletCards.map(({ currency, account }) => {
-                        const checkedBalance = account ? walletBalances[account.id] || null : null
-                        const hasBalance = Boolean(checkedBalance)
-                        const balanceText = hasBalance && checkedBalance
-                          ? formatCurrency(checkedBalance.balance, checkedBalance.currency)
-                          : ''
-                        const isChecking = account ? Boolean(walletBalanceLoading[account.id]) : false
-                        const balanceError = account ? walletBalanceErrors[account.id] : null
-                        const balanceHint = account
-                          ? (balanceError
-                            ? 'Unable to fetch balance. Tap to retry.'
-                            : (hasBalance && checkedBalance?.lastUpdated
-                              ? `Updated ${formatRelativeTime(checkedBalance.lastUpdated)}`
-                              : 'Tap card to fetch live balance.'))
-                          : 'Balance unavailable right now.'
-                        const toneClass = currency === 'ZIG' ? 'cc-style-zig' : 'cc-style-usd'
-
-                        return (
-                          <button
-                            key={`${currency}-${account?.id || 'placeholder'}`}
-                            type="button"
-                            className="wallet-card-button"
-                            onClick={() => handleWalletCardClick(account)}
-                            title={account
-                              ? (account.isPrimary ? `Primary ${currency} wallet` : `Set ${currency} wallet as primary provider`)
-                              : `Check ${currency} balance`}
-                          >
-                            <div className={`cc ${toneClass} ${account?.isPrimary ? 'cc-primary' : ''}`}>
-                              <div className="cc-d1" />
-                              <div className="cc-d2" />
-                              {account?.isPrimary && (
-                                <span className="cc-primary-badge">Primary</span>
-                              )}
-                              <div>
-                                <div className="cc-lbl">Main Balance</div>
-                                {hasBalance ? (
-                                  <div className="cc-bal">{balanceText}</div>
-                                ) : (
-                                  <div className="cc-bal-cta" aria-hidden="true">
-                                    <RefreshIcon sx={{ fontSize: 12 }} /> Check balance
-                                  </div>
-                                )}
-                                <div className={`cc-check ${balanceError ? 'cc-check-error' : ''}`}>
-                                  {isChecking ? 'Checking balance...' : balanceHint}
-                                </div>
-                              </div>
-                              <div className="cc-bot">
-                                <div>
-                                  <div className="cc-ml">Selected provider</div>
-                                  <div className="cc-mv">{truncate(selectedProviderName, 16)}</div>
-                                </div>
-                                <span className="wallet-provider">{currency}</span>
-                              </div>
-                            </div>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  )}
-
-                  <button
-                    type="button"
-                    className="chg-btn provider-select-btn"
-                    onClick={handleOpenProviderMenu}
-                    aria-haspopup="menu"
-                    aria-expanded={Boolean(providerAnchorEl)}
-                  >
-                    <span className="provider-select-label">
-                      <ExchangeIcon sx={{ fontSize: 10 }} /> Choose your provider
-                    </span>
-                    <span className="provider-select-value">{truncate(selectedProviderName, 16)}</span>
-                    <ExpandMoreIcon sx={{ fontSize: 15 }} />
-                  </button>
-                </div>
-              </div>
-            </div>
             )}
           </div>
         </div>

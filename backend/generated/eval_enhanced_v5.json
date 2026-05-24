@@ -1,0 +1,48 @@
+{
+  "tag": "",
+  "model_path": "backend\\trained_model_enhanced_v5",
+  "tokenizer_path": "backend\\trained_model_enhanced_v5",
+  "dataset": "backend\\generated\\retraining_dataset_FINAL_CONSOLIDATED.json",
+  "test_size": 0.2,
+  "random_state": 42,
+  "split_stats": {
+    "usable_rows": 16088,
+    "filtered_out_rows": 0,
+    "val_rows": 3218
+  },
+  "label_space_size": 23,
+  "label_distribution_val": {
+    "18": 128,
+    "14": 235,
+    "5": 232,
+    "19": 225,
+    "4": 439,
+    "15": 143,
+    "21": 412,
+    "12": 68,
+    "20": 385,
+    "1": 125,
+    "17": 123,
+    "11": 64,
+    "7": 111,
+    "13": 189,
+    "0": 43,
+    "2": 28,
+    "16": 69,
+    "10": 65,
+    "22": 24,
+    "8": 38,
+    "6": 20,
+    "9": 24,
+    "3": 28
+  },
+  "metrics": {
+    "accuracy": 0.99161,
+    "precision_weighted": 0.991892,
+    "recall_weighted": 0.99161,
+    "f1_weighted": 0.991661,
+    "precision_macro": 0.982799,
+    "recall_macro": 0.987631,
+    "f1_macro": 0.984987
+  }
+}

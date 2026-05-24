@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "generated_at_utc": "2026-05-14T15:15:58.121879+00:00",
+    "augmentation_version": "phase4_language_balanced",
+    "source_dataset": "generated\\retraining_dataset_phase4_10k_balanced.json",
+    "output_dataset": "generated\\retraining_dataset_phase4_final_10k.json",
+    "target_per_language": 10000
+  },
+  "augmentation_config": {
+    "technique": "language_balanced_multi_strategy",
+    "strategies": [
+      "paraphrase_pool_sampling (40%)",
+      "synonym_replacement (30%)",
+      "syntactic_variation (30%)"
+    ],
+    "per_language_multipliers": {
+      "en": 1.35,
+      "sn": 2.03,
+      "nd": 2.48
+    }
+  },
+  "original_stats": {
+    "total_records": 16364,
+    "by_language": {
+      "en": 7400,
+      "sn": 4938,
+      "nd": 4026
+    }
+  },
+  "augmented_stats": {
+    "total_records": 25284,
+    "by_language": {
+      "en": 7400,
+      "sn": 9848,
+      "nd": 8036
+    },
+    "growth_factor": 1.55
+  }
+}

@@ -79,8 +79,7 @@ export default function DashboardShell({
       <div className="shell">
         <aside className="sidebar">
           <div className="sb-logo">
-            <div className="sb-dot">{brandIcon || <ChatIcon sx={{ fontSize: 13 }} />}</div>
-            {brandLabel}
+            <img src="/taur-logo-new.png" alt="Taur.ai Logo" className="sb-logo-img" />
           </div>
 
           {sidebarSections.map((section) => (
@@ -131,7 +130,9 @@ export default function DashboardShell({
           )}
 
           <div className="content">
-            {children}
+            <div className="fill-page">
+              {children}
+            </div>
           </div>
         </div>
       </div>

@@ -248,6 +248,9 @@ const ChatInterface: React.FC = () => {
   const location = useLocation()
   const dashboardRoute = getDashboardRoute(user?.role)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const activeSessionIdRef = useRef<string | null>(null)
+  const sessionLoadRequestRef = useRef(0)
+  const handledRequestedSessionRef = useRef('')
   
   const [messages, setMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState('')
@@ -472,13 +475,24 @@ const ChatInterface: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
 
+  useEffect(() => {
+    activeSessionIdRef.current = sessionId
+  }, [sessionId])
+
   // Poll active session for new messages (supports human-agent replies)
   useEffect(() => {
     if (!sessionId) return
 
+    const polledSessionId = sessionId
+
     const interval = setInterval(async () => {
       try {
-        const response = await chatAPI.getMessages(sessionId)
+        const response = await chatAPI.getMessages(polledSessionId)
+
+        if (activeSessionIdRef.current !== polledSessionId) {
+          return
+        }
+
         const loadedMessages: Message[] = response.data.map((msg: any) => ({
           id: msg.id,
           content: msg.content,
@@ -500,7 +514,7 @@ const ChatInterface: React.FC = () => {
           if (newAgentReplies.length > 0) {
             setAgentReplyUnreadBySession((map) => ({
               ...map,
-              [sessionId]: (map[sessionId] || 0) + newAgentReplies.length,
+              [polledSessionId]: (map[polledSessionId] || 0) + newAgentReplies.length,
             }))
             setAgentReplyNotifications((existing) => {
               const next = [...existing]
@@ -511,9 +525,9 @@ const ChatInterface: React.FC = () => {
                     id: notificationId,
                     title: 'Agent replied to your chat',
                     description: reply.content,
-                    route: `/chat?session=${sessionId}`,
+                    route: `/chat?session=${polledSessionId}`,
                     createdAt: reply.timestamp,
-                    meta: { session_id: sessionId },
+                    meta: { session_id: polledSessionId },
                   })
                 }
               })
@@ -523,8 +537,8 @@ const ChatInterface: React.FC = () => {
 
           return loadedMessages.length !== prev.length ? loadedMessages : prev
         })
-        markCustomerSessionRead(user?.id, sessionId, loadedMessages.length)
-        await loadChatHistory(sessionId, { silent: true })
+        markCustomerSessionRead(user?.id, polledSessionId, loadedMessages.length)
+        await loadChatHistory(polledSessionId, { silent: true })
       } catch {
         // ignore polling errors
       }
@@ -535,6 +549,15 @@ const ChatInterface: React.FC = () => {
 
   // Open a requested session when arriving through /chat?session=<session_id>
   useEffect(() => {
+    if (!requestedSessionId) {
+      handledRequestedSessionRef.current = ''
+      return
+    }
+
+    if (handledRequestedSessionRef.current === requestedSessionId) {
+      return
+    }
+
     if (!requestedSessionId || chatHistory.length === 0) {
       return
     }
@@ -544,9 +567,13 @@ const ChatInterface: React.FC = () => {
     )
 
     if (!targetSession || sessionId === targetSession.session_id) {
+      if (sessionId === targetSession?.session_id) {
+        handledRequestedSessionRef.current = requestedSessionId
+      }
       return
     }
 
+    handledRequestedSessionRef.current = requestedSessionId
     void loadSessionMessages(targetSession)
   }, [requestedSessionId, chatHistory, sessionId])
 
@@ -638,6 +665,10 @@ const ChatInterface: React.FC = () => {
       setPostCloseAction('new_session')
       setResolutionDialogOpen(true)
       return
+    }
+
+    if (requestedSessionId) {
+      handledRequestedSessionRef.current = requestedSessionId
     }
 
     try {
@@ -751,6 +782,7 @@ const ChatInterface: React.FC = () => {
   const isStaffRole = user?.role === 'agent' || user?.role === 'supervisor' || user?.role === 'admin'
 
   const loadSessionMessages = async (session: ChatSession) => {
+    const requestId = ++sessionLoadRequestRef.current
     setLoading(true)
     try {
       const response = await chatAPI.getMessages(session.session_id)
@@ -767,6 +799,10 @@ const ChatInterface: React.FC = () => {
         confidence: msg.confidence_score ? parseFloat(msg.confidence_score) : undefined,
         ticket_id: extractTicketId(msg.content),
       }))
+
+      if (requestId !== sessionLoadRequestRef.current) {
+        return
+      }
       
       setSessionId(session.session_id)
       setMessages(loadedMessages.length > 0 ? loadedMessages : [{
@@ -791,11 +827,23 @@ const ChatInterface: React.FC = () => {
         setHistoryOpen(false)
       }
     } catch (error) {
+      if (requestId !== sessionLoadRequestRef.current) {
+        return
+      }
       console.error('Failed to load session messages:', error)
       setConnectionError(true)
     } finally {
-      setLoading(false)
+      if (requestId === sessionLoadRequestRef.current) {
+        setLoading(false)
+      }
     }
+  }
+
+  const handleSelectSession = (session: ChatSession) => {
+    if (requestedSessionId) {
+      handledRequestedSessionRef.current = requestedSessionId
+    }
+    void loadSessionMessages(session)
   }
 
   const handleSendMessage = async () => {
@@ -816,7 +864,14 @@ const ChatInterface: React.FC = () => {
     setConnectionError(false)
 
     try {
-      const response = await chatAPI.sendMessage(sessionId, inputMessage, language, providerName || undefined, providerType)
+      const response = await chatAPI.sendMessage(
+        sessionId,
+        inputMessage,
+        language,
+        providerName || undefined,
+        providerType,
+        selectedProvider?.accountIdentifier
+      )
       const aiMessage: Message = {
         id: response.data.message_id || Date.now().toString() + '_ai',
         content: response.data.content || response.data.response,
@@ -975,7 +1030,7 @@ const ChatInterface: React.FC = () => {
               <ListItemButton
                 key={session.id}
                 selected={sessionId === session.session_id}
-                onClick={() => loadSessionMessages(session)}
+                onClick={() => handleSelectSession(session)}
                 sx={{
                   borderBottom: '1px solid',
                   borderColor: 'divider',

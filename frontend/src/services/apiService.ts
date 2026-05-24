@@ -64,6 +64,12 @@ export const authAPI = {
     apiClient.get(`/auth/phone-otp-status/${encodeURIComponent(phone_number)}`),
 }
 
+// User profile endpoints
+export const usersAPI = {
+  getCurrentProfile: () =>
+    apiClient.get('/users/me'),
+}
+
 // Chat endpoints
 export const chatAPI = {
   createSession: () =>
@@ -72,13 +78,21 @@ export const chatAPI = {
   getSessions: () =>
     apiClient.get('/chat/sessions'),
   
-  sendMessage: (sessionId: string, content: string, language?: string, providerName?: string, providerType?: string) =>
+  sendMessage: (
+    sessionId: string,
+    content: string,
+    language?: string,
+    providerName?: string,
+    providerType?: string,
+    providerAccountIdentifier?: string
+  ) =>
     apiClient.post('/chat/messages', {
       session_id: sessionId,
       content,
       language,
       provider_name: providerName,
       provider_type: providerType,
+      provider_account_identifier: providerAccountIdentifier,
     }),
   
   getMessages: (sessionId: string) =>
@@ -107,6 +121,17 @@ export const chatAPI = {
 
   getNearbyLocations: (query: string, locationType: string, limit: number = 5) =>
     apiClient.post('/chat/locations/nearby', { query, location_type: locationType, limit }),
+}
+
+// Banking mock endpoints
+export const bankingAPI = {
+  getBalance: (phone: string, providerCode?: string) =>
+    apiClient.get('/banking/balance', {
+      params: {
+        phone,
+        provider_code: providerCode || undefined,
+      },
+    }),
 }
 
 // Ticket endpoints

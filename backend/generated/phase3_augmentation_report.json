@@ -1,0 +1,85 @@
+{
+  "metadata": {
+    "generated_at_utc": "2026-05-14T15:05:59.483652+00:00",
+    "augmentation_version": "phase3_3x",
+    "source_dataset": "generated\\retraining_dataset_phase2_cleaned.json",
+    "output_dataset": "generated\\retraining_dataset_phase3_3x.json"
+  },
+  "augmentation_config": {
+    "multiplier": 3,
+    "technique": "hybrid_paraphrase_synonym",
+    "language_aware": true
+  },
+  "original_stats": {
+    "total_records": 1623,
+    "intent_distribution": {
+      "balance_inquiry": 95,
+      "transaction_history": 71,
+      "transfer_money": 162,
+      "password_reset": 27,
+      "loan_inquiry": 30,
+      "bill_payment": 76,
+      "mobile_money": 140,
+      "account_statement": 17,
+      "transaction_dispute": 182,
+      "complaint": 26,
+      "account_opening": 43,
+      "card_request": 142,
+      "atm_location": 23,
+      "greeting": 30,
+      "goodbye": 36,
+      "escalation_request": 18,
+      "general_inquiry": 61,
+      "update_profile": 15,
+      "account_closure": 12,
+      "security_pin": 177,
+      "network_connectivity": 82,
+      "mobile_wallet_fees": 149,
+      "branch_location": 9
+    },
+    "language_distribution": {
+      "en": 1199,
+      "sn": 285,
+      "nd": 139
+    }
+  },
+  "augmented_stats": {
+    "total_records": 3475,
+    "intent_distribution": {
+      "balance_inquiry": 283,
+      "transaction_history": 115,
+      "transfer_money": 486,
+      "password_reset": 31,
+      "loan_inquiry": 32,
+      "bill_payment": 79,
+      "mobile_money": 225,
+      "account_statement": 23,
+      "transaction_dispute": 546,
+      "complaint": 29,
+      "account_opening": 104,
+      "card_request": 228,
+      "atm_location": 23,
+      "greeting": 89,
+      "goodbye": 108,
+      "escalation_request": 20,
+      "general_inquiry": 67,
+      "update_profile": 17,
+      "account_closure": 30,
+      "security_pin": 531,
+      "network_connectivity": 92,
+      "mobile_wallet_fees": 308,
+      "branch_location": 9
+    },
+    "language_distribution": {
+      "en": 2639,
+      "sn": 568,
+      "nd": 268
+    },
+    "growth_factor": 2.14
+  },
+  "improvements": {
+    "total_new_records": 1852,
+    "shona_growth_percent": 99.3,
+    "ndebele_growth_percent": 92.8
+  }
+}

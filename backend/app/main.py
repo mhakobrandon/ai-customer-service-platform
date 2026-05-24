@@ -14,8 +14,9 @@ import logging
 from typing import List
 
 from app.core.config import settings
-from app.api.endpoints import auth, chat, tickets, users, analytics, admin, integrations
+from app.api.endpoints import auth, chat, tickets, users, analytics, admin, integrations, banking
 from app.database.session import engine, Base, async_session_maker
+from app.database.banking_session import banking_engine, BankingBase
 from app.services.websocket_manager import WebSocketManager
 from app.services.ticket_resolution_scheduler import ticket_resolution_scheduler
 from app.models.user import User, UserRole
@@ -41,11 +42,15 @@ async def lifespan(app: FastAPI):
     logger.info(f"Supported Languages: {settings.SUPPORTED_LANGUAGES}")
     logger.info(f"NLP Confidence Threshold: {settings.NLP_CONFIDENCE_THRESHOLD}")
     
-    # Create database tables
+    # Create main database tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
-    logger.info("Database tables created successfully")
+    logger.info("Main database tables created successfully")
+
+    # Create banking mock database tables
+    async with banking_engine.begin() as conn:
+        await conn.run_sync(BankingBase.metadata.create_all)
+    logger.info("Banking mock database tables created successfully")
     
     # Create default admin user if no users exist
     async with async_session_maker() as db:
@@ -178,6 +183,7 @@ app.include_router(tickets.router, prefix=f"{settings.API_V1_PREFIX}/tickets", t
 app.include_router(analytics.router, prefix=f"{settings.API_V1_PREFIX}/analytics", tags=["Analytics"])
 app.include_router(admin.router, prefix=f"{settings.API_V1_PREFIX}/admin", tags=["Admin"])
 app.include_router(integrations.router, prefix=f"{settings.API_V1_PREFIX}/integrations", tags=["Integrations"])
+app.include_router(banking.router,      prefix=f"{settings.API_V1_PREFIX}/banking",      tags=["Banking Mock"])
 
 
 # Global exception handler

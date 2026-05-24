@@ -89,7 +89,7 @@ const RegisterPage: React.FC = () => {
     try {
       const { confirmPassword, ...submitData } = formData
       const response = await authAPI.register(submitData)
-      
+
       // Check if verification is required
       if (response.data.requires_verification) {
         setStep('email-otp')

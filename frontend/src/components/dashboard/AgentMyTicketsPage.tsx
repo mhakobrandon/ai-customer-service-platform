@@ -235,6 +235,7 @@ export default function AgentMyTicketsPage() {
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
+          height: '100%',
           border: '1px solid',
           borderColor: 'divider',
         }}

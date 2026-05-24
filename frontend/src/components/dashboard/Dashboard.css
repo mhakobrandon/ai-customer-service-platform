@@ -108,7 +108,7 @@ body {
 }
 
 .customer-dashboard .sb-logo {
-  padding: 0 1rem 1.25rem;
+  padding: 0 1rem 0 0;
   font-size: 14px;
   font-weight: 500;
   color: var(--color-text-primary);
@@ -117,16 +117,12 @@ body {
   gap: 7px;
 }
 
-.customer-dashboard .sb-dot {
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
-  background: linear-gradient(135deg, var(--color-sidebar-blue-start) 0%, var(--color-sidebar-blue-end) 100%);
-  color: var(--color-sidebar-blue-text);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+.customer-dashboard .sb-logo-img {
+  height: 64px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .customer-dashboard .sb-sec {
@@ -224,6 +220,9 @@ body {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  overflow: hidden;
+  /* Fill the grid column so children can stretch to full height */
+  height: 100%;
 }
 
 .customer-dashboard .topbar {
@@ -329,6 +328,30 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.625rem;
+  overflow: auto;
+  /* Stretch to fill .main so there is no dead space at the bottom */
+  flex: 1;
+  min-height: 0;
+}
+
+/* Children of .content passed in from pages fill the full area */
+.customer-dashboard .content > * {
+  flex-shrink: 0;
+}
+
+/* A page that wants to fill the entire content area (dashboards, record pages) */
+.customer-dashboard .content > .fill-page {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* The direct page root inside fill-page stretches to fill */
+.customer-dashboard .content > .fill-page > * {
+  flex: 1;
+  min-height: 0;
   overflow: auto;
 }
 
@@ -1513,11 +1536,7 @@ body {
   transition: background-color 150ms ease;
 }
 
-.customer-dashboard .view-all::after {
-  content: "->";
-  font-size: 9px;
-  opacity: 0.85;
-}
+
 
 .customer-dashboard .view-all:hover {
   background: #f3f0ff;

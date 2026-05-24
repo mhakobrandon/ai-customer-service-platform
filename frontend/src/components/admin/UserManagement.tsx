@@ -485,7 +485,7 @@ export default function UserManagement() {
       userInitials={toInitials(displayName, 'AD')}
       onUserCardClick={() => setCreateUserDialog(true)}
     >
-      <Box sx={{ p: { xs: 0.5, md: 0.75 } }}>
+      <Box sx={{ p: { xs: 0.5, md: 0.75 }, display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
 
       {/* Alerts */}
       {error && (

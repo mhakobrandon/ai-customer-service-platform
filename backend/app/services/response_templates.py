@@ -1,4 +1,4 @@
-"""
+﻿"""
 Comprehensive Response Templates for Zimbabwe Financial Services Chatbot
 Multi-language support: English (en), Shona (sn), Ndebele (nd)
 
@@ -563,12 +563,12 @@ Phendula ngo:
 I can help you with EcoCash transactions. What would you like to do?
 
 💸 **Send Money**
-• To EcoCash: *151*1*{number}*{amount}#
+• To EcoCash: *151*1*<recipient_number>*<amount>#
 • Fee: 1-2% of amount
 • IMTT Tax: 2% on amounts over $10
 
 💵 **Cash Out**
-• At Agent: *151*3*{agent_code}*{amount}#
+• At Agent: *151*3*<agent_code>*<amount>#
 • Fee: 2-3% of amount
 • ATM: Available at selected ATMs
 
@@ -599,12 +599,12 @@ I can help you with EcoCash transactions. What would you like to do?
 Ndinogona kukubatsira neEcoCash. Chii chaunoda kuita?
 
 💸 **Tumira Mari**
-• Ku EcoCash: *151*1*{nhamba}*{mari}#
+• Ku EcoCash: *151*1*<nhamba_yemunhu>*<mari>#
 • Muripo: 1-2% yemari
 • IMTT Tax: 2% pamari inopfuura $10
 
 💵 **Budisa Mari (Cash Out)**
-• Ku Agent: *151*3*{agent_code}*{mari}#
+• Ku Agent: *151*3*<agent_code>*<mari>#
 • Muripo: 2-3% yemari
 • ATM: Inowanikwa kuma ATM akasarudzwa
 
@@ -635,12 +635,12 @@ Ndinogona kukubatsira neEcoCash. Chii chaunoda kuita?
 Ngingakusiza ngokuthengiselana nge-EcoCash. Yini ongathanda ukuyenza?
 
 💸 **Thumela Imali**
-• Ku-EcoCash: *151*1*{inombolo}*{inani}#
+• Ku-EcoCash: *151*1*<inombolo_yomamukeli>*<inani>#
 • Imali yokuthumela: 1-2% yenani
 • I-IMTT Tax: 2% emaniini edlula u-$10
 
 💵 **Khipha Imali (Cash Out)**
-• Ku-Agent: *151*3*{agent_code}*{inani}#
+• Ku-Agent: *151*3*<agent_code>*<inani>#
 • Imali: 2-3% yenani
 • I-ATM: Iyatholakala kuma-ATM akhethiwe
 
@@ -685,11 +685,6 @@ I understand you want to dispute a transaction. I'm here to help.
 • Card transactions: 7-14 business days
 • International: 30-45 days
 
-📞 **For Urgent Disputes:**
-• EcoCash: Call 114 or visit nearest agent
-• Bank: Visit any branch with your ID
-• WhatsApp: +263 78 222 4444
-
 ⚠️ **Important Notes:**
 • Reversals only possible if recipient hasn't withdrawn
 • Wrong number transfers: We'll contact the recipient
@@ -714,10 +709,6 @@ Ndinonzwisisa kuti unoda kupikisa transaction. Ndiri pano kukubatsira.
 • Card transactions: Mazuva 7-14
 • International: Mazuva 30-45
 
-📞 **Kana Uchida Rubatsiro Nekukurumidza:**
-• EcoCash: Fona 114 kana enda ku agent
-• Bank: Enda ku branch uine ID yako
-• WhatsApp: +263 78 222 4444
 
 ⚠️ **Zvakakosha:**
 • Kudzosera kunogoneka chete kana asina kuburitsa mari
@@ -767,7 +758,6 @@ I can help you with security-related matters.
 • **Forgot PIN:** Visit any agent with your ID
 
 🚫 **Block/Unblock Account:**
-• **Emergency Block:** Call 114 immediately
 • **Block via USSD:** *151*0# > Security > Block
 • **Unblock:** Visit branch or call customer care
 
@@ -783,7 +773,6 @@ I can help you with security-related matters.
 • Use the mobile app for extra security
 
 ⚠️ **If you suspect fraud:**
-1. Call 114 immediately
 2. Block your account
 3. Visit nearest branch with ID
 4. File a police report
@@ -1159,12 +1148,8 @@ Ngingakusiza kanjani namhlanje?"""
 
 Before you go:
 📝 Your conversation reference: #{reference_id}
-📞 Need more help? Call 114 (24/7)
-📱 WhatsApp: +263 78 222 4444
-🏦 Visit any branch for in-person assistance
 
-💡 **Quick Tips:**
-• Download our mobile app for easy banking
+ **Quick Tips:**
 • Enable SMS alerts for transaction notifications
 • Check our website for latest updates
 
@@ -1177,9 +1162,7 @@ Have a wonderful day! 🌟""",
 
 Usati waenda:
 📝 Reference yekutaura kwako: #{reference_id}
-📞 Unoda rubatsiro? Fona 114 (24/7)
-📱 WhatsApp: +263 78 222 4444
-🏦 Enda ku branch kana uchida kubatsirwa
+💬 Ndiri pano 24/7 kana uchida rubatsiro rwimwe chete
 
 💡 **Mazano:**
 • Dhawunirodha mobile app yedu
@@ -1195,8 +1178,6 @@ Chisarai zvakanaka! 🌟""",
 
 Ngaphambi kokuthi uhambe:
 📝 Ireferensi yengxoxo yakho: #{reference_id}
-📞 Udinga usizo olwengeziwe? Shaya 114 (24/7)
-📱 WhatsApp: +263 78 222 4444
 🏦 Hamba kunoma yiliphi igatsha ukuthola usizo ngobuqu
 
 💡 **Amacebo Asheshayo:**
@@ -1226,12 +1207,6 @@ I understand you're facing an issue, and I want to help resolve it.
 • Urgent matters: 4-8 hours
 • Fraud/Security: Immediate escalation
 
-📞 **For immediate assistance:**
-• Call: 114 (24/7 helpline)
-• WhatsApp: +263 78 222 4444
-• Email: complaints@bank.co.zw
-• Visit: Any branch
-
 🎯 **Our Commitment:**
 • Every complaint gets a reference number
 • We'll keep you updated via SMS
@@ -1253,12 +1228,6 @@ Ndinonzwisisa kuti uri kusangana nedambudziko, uye ndinoda kukubatsira kurigadzi
 • Maguun'un'a akajairika: Maawa 24-48
 • Nyaya dzinokurumidza: Maawa 4-8
 • Kuba/Security: Kuendeswa pakarepo
-
-📞 **Rubatsiro rwekukurumidza:**
-• Fona: 114 (24/7)
-• WhatsApp: +263 78 222 4444
-• Email: complaints@bank.co.zw
-• Enda: Ku branch
 
 🎯 **Vimbiso Yedu:**
 • Gunun'una rega rega rinowana reference number
@@ -1282,12 +1251,6 @@ Ngiyaqonda ukuthi ubhekene nenkinga, futhi ngifuna ukusiza ukuyixazulula.
 • Izindaba eziphuthumayo: Amahora ayi-4-8
 • Ukukhwabanisa/Ukuphepha: Ukudlulisela ngokushesha
 
-📞 **Usizo olusheshayo:**
-• Shaya: 114 (umugqa wokusiza 24/7)
-• WhatsApp: +263 78 222 4444
-• I-imeyili: complaints@bank.co.zw
-• Vakashela: Noma yiliphi igatsha
-
 🎯 **Ukuzibophezela Kwethu:**
 • Zonke izikhalazo zithola inombolo yereferensi
 • Sizokugcina wazi nge-SMS
@@ -1308,10 +1271,6 @@ Thank you for providing those details. We've logged your complaint.
 • You'll receive an SMS confirmation shortly
 • Resolution target: 5 working days
 
-📞 **For urgent follow-up:**
-• Call: 114 (24/7 helpline) and quote your reference **{complaint_ref}**
-• Email: complaints@bank.co.zw
-
 We apologise for the inconvenience and will work to resolve this promptly.""",
 
         "sn": """✅ **Gunun'una Ranyorwa**
@@ -1324,10 +1283,6 @@ Mazvita nekupa ruzivo urwu. Takanyora gunun'una rako.
 • Mutauri achiona nyaya yako mumaawa 4-8
 • Uchagamuchira SMS yekusimbisa munguva pfupi
 • Target yekugadzirisa: Mazuva mashanu ekushanda
-
-📞 **Kudaidzira nekukurumidza:**
-• Fona: 114 (24/7) uchipa reference **{complaint_ref}**
-• Email: complaints@bank.co.zw
 
 Tinozvidemba pamusoro pematambudziko uye tichashanda kugadzirisa munguva pfupi.""",
 
@@ -1361,10 +1316,6 @@ Thank you for providing those details. We've registered your dispute.
 • ZIPIT Disputes: 3-5 business days
 • Card Transactions: 7-14 business days
 
-📞 **For urgent follow-up:**
-• Call: 114 (24/7) and quote reference **{complaint_ref}**
-• WhatsApp: +263 78 222 4444
-
 We will investigate and keep you updated via SMS.""",
 
         "sn": """✅ **Nyaya Yekupikisa Yanyorwa**
@@ -1377,10 +1328,6 @@ Mazvita nekupa ruzivo urwu. Takanyora kupikisa kwako.
 • EcoCash Reversals: Maawa 24-48
 • ZIPIT Disputes: Mazuva 3-5 ebhizinesi
 • Card Transactions: Mazuva 7-14 ebhizinesi
-
-📞 **Kutevera kwekukurumidza:**
-• Fona: 114 (24/7) uchipa reference **{complaint_ref}**
-• WhatsApp: +263 78 222 4444
 
 Tichaongorora uye tichakuudza neSMS.""",
 
@@ -1608,13 +1555,10 @@ I can help you with debit/credit card services.
 
 🆕 **New Card Request:**
 • Processing time: 5-7 business days
-• Collection: At your branch
+• Collection: We will notify you when your card is ready for digital activation
 • Required: ID and $10 card fee
 
-📢 **Report Lost/Stolen Card:**
-⚠️ **URGENT:** Call 114 immediately to block your card
-• After hours emergency: +263 78 222 4444
-• Visit branch next day with ID for replacement
+📢 **Report Lost/Stolen Card:*
 
 🔄 **Card Replacement:**
 • Fee: $10
@@ -1622,8 +1566,8 @@ I can help you with debit/credit card services.
 • Ready in 5-7 days
 
 🔓 **Unblock Card:**
-• If blocked due to wrong PIN: Visit branch
-• If blocked due to suspicious activity: Call 114
+• If blocked due to wrong PIN: Reply **"unblock card"** and I will resolve it for you
+• If blocked due to suspicious activity: Reply **"block card"** — I will lock it immediately
 
 📱 **Card Controls (via Mobile App):**
 • Temporarily block card
@@ -1644,13 +1588,12 @@ Ndinogona kukubatsira nekadhi yako.
 
 🆕 **Kukumbira Kadhi Itsva:**
 • Nguva yekuita: Mazuva 5-7
-• Kutora: Ku branch yako
+• Ndichakutumira confirmation message kadhi yako ikagadzirirwa
 • Unoda: ID ne$10 ye fee
 
 📢 **Raporti Kadhi Yakarasika/Yakabiwa:**
-⚠️ **KUKURUMIDZA:** Fona 114 pakarepo kuti uvhare kadhi
-• Usiku emergency: +263 78 222 4444
-• Enda ku branch nezuva rinotevera neID
+⚠️ **KUKURUMIDZA:** Pindura **"block card"** uye ndichakuvhara kadhi yako pakarepo
+• Taura neni uye ndichakugadzirira pakarepo
 
 🔄 **Kutsiva Kadhi:**
 • Fee: $10
@@ -1658,8 +1601,8 @@ Ndinogona kukubatsira nekadhi yako.
 • Inenge yakagadzirira mumazuva 5-7
 
 🔓 **Kuvhura Kadhi:**
-• Kana yakavharwa nePIN isiri iyo: Enda ku branch
-• Kana yakavharwa nekutyira: Fona 114
+• Kana yakavharwa nePIN isiri iyo: Pindura **"unblock card"** ndichakugadzirira
+• Kana yakavharwa nekutyira: Pindura **"block card"** — ndichakuvhara pakarepo
 
 📱 **Kukonzera Kadhi (pa Mobile App):**
 • Vhara kadhi kwenguva
@@ -1841,7 +1784,7 @@ I'm sorry to hear you want to close your account. Before proceeding, please cons
 If there's an issue we can resolve, please let us know!
 
 📋 **To close your account:**
-1. Visit any branch with your ID
+1. Complete your application right here via chat
 2. Surrender debit card and checkbook
 3. Clear any outstanding balance
 4. Sign account closure form
@@ -1874,7 +1817,7 @@ Ndinozvidemba kuzvinzwa kuti unoda kuvhara account yako. Usati wapfuurira, ndapo
 Kana paine dambudziko tingagadzirisa, ndapota tiudze!
 
 📋 **Kuvhara account yako:**
-1. Enda ku branch uine ID
+1. Pedza application yako pano pano pachati
 2. Dzosera debit card ne checkbook
 3. Bhadhara zviri kupera
 4. Saina form yekuvhara account
@@ -2053,14 +1996,13 @@ I understand you'd like to speak with a human representative.
 • Reference number: #{reference_id}
 
 📱 **Alternative Contact Options:**
-• Call: 114 (24/7 helpline)
+• Chat: I am available 24/7 right here
 • WhatsApp: +263 78 222 4444
 • Email: support@bank.co.zw
-• Visit: Any branch during banking hours
 
 👤 **You will be connected to:**
 • A trained customer service representative
-• Operating hours: 24/7 for phone support
+• Operating hours: 24/7 — I am always here
 • Response time: Usually under 5 minutes
 
 Thank you for your patience. An agent will be with you shortly.""",
@@ -2082,7 +2024,6 @@ Ndinonzwisisa kuti unoda kutaura nemunhu chaiye.
 • Fona: 114 (24/7)
 • WhatsApp: +263 78 222 4444
 • Email: support@bank.co.zw
-• Enda: Ku branch
 
 👤 **Uchazobataniswa na:**
 • Mushandi akadzidza kubatsira vatengi
@@ -2182,3 +2123,4 @@ Nxa ufuna, ngingakuxhumanisa lo-agent womuntu khathesi — vele uthi "agent"."""
 
 # Export for use in nlp_service.py
 __all__ = ['RESPONSE_TEMPLATES']
+

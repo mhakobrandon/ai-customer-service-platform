@@ -1321,6 +1321,7 @@ export default function AdminPanel({ defaultTab = 0 }: AdminPanelProps) {
       userInitials={toInitials(displayName, 'AD')}
       onUserCardClick={handleOpenProfileDialog}
     >
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
       <Menu
         anchorEl={profileAnchorEl}
         open={Boolean(profileAnchorEl)}
@@ -3108,6 +3109,7 @@ export default function AdminPanel({ defaultTab = 0 }: AdminPanelProps) {
           }
         `}
       </style>
+      </Box>
     </DashboardShell>
   );
 }

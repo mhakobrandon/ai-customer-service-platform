@@ -20,8 +20,8 @@ import {
   InputAdornment,
   Stack,
 } from '@mui/material'
-import { 
-  HourglassEmpty as PendingIcon, 
+import {
+  HourglassEmpty as PendingIcon,
   Warning as WarningIcon,
   MailOutline as MailIcon,
   LockOutlined as LockIcon,
@@ -60,8 +60,8 @@ const LoginPage: React.FC = () => {
       // Check if the error is about pending approval
       if (result.error?.toLowerCase().includes('pending')) {
         setIsPending(true)
-      } else if (result.error?.toLowerCase().includes('not verified') || 
-                 result.error?.toLowerCase().includes('verification otp')) {
+      } else if (result.error?.toLowerCase().includes('not verified') ||
+        result.error?.toLowerCase().includes('verification otp')) {
         // User needs to verify email
         setRequiresVerification(true)
       } else {

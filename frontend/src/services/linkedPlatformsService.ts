@@ -6,6 +6,7 @@
 
 import { LinkedPlatformAccount, BalanceInquiry, QueryIntent, SHONA_BANKING_PHRASES, PLATFORM_SHONA_NAMES } from '../types/banking';
 import { getPlatformById } from '../data/bankingPlatforms';
+import { bankingAPI } from './apiService';
 
 // Storage key for linked accounts
 export const LINKED_ACCOUNTS_KEY = 'user_linked_platforms';
@@ -61,6 +62,52 @@ const getChatProviderType = (account: LinkedPlatformAccount): LinkedChatProvider
     return 'mno';
   }
   return 'fintech';
+};
+
+const PLATFORM_PROVIDER_CODE_MAP: Record<string, string> = {
+  ecocash: 'ECOCASH',
+  onemoney: 'ONEMONEY',
+  telecash: 'TELECASH',
+  innbucks: 'INNBUCKS',
+  cbz: 'CBZ',
+  steward: 'STEWARD',
+  stanbic: 'STANBIC',
+  nmb: 'NMB',
+  fbc: 'FBC',
+  zb: 'ZB',
+  cabs: 'CABS',
+};
+
+const buildPhoneCandidates = (rawIdentifier: string): string[] => {
+  const trimmed = String(rawIdentifier || '').trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  const digitsOnly = trimmed.replace(/\D/g, '');
+  const variants = new Set<string>([trimmed]);
+
+  if (digitsOnly) {
+    variants.add(digitsOnly);
+  }
+
+  // Zimbabwe local number format helpers.
+  if (digitsOnly.startsWith('0') && digitsOnly.length >= 10) {
+    const international = `263${digitsOnly.slice(1)}`;
+    variants.add(international);
+    variants.add(`+${international}`);
+  }
+
+  if (digitsOnly.startsWith('263')) {
+    variants.add(`+${digitsOnly}`);
+    variants.add(`0${digitsOnly.slice(3)}`);
+  }
+
+  if (trimmed.startsWith('+') && digitsOnly.startsWith('263')) {
+    variants.add(trimmed.slice(1));
+  }
+
+  return Array.from(variants);
 };
 
 /**
@@ -184,23 +231,85 @@ export const setPrimaryAccount = (id: string): boolean => {
  * Returns cached real values if available.
  * Live provider sync is only performed when backend/provider integration exists.
  */
-export const getAccountBalance = async (accountId: string): Promise<BalanceInquiry | null> => {
+export const getAccountBalance = async (
+  accountId: string,
+  preferredCurrency?: string,
+  fallbackIdentifiers: string[] = []
+): Promise<BalanceInquiry | null> => {
   const accounts = getLinkedAccounts();
-  const account = accounts.find(a => a.id === accountId);
+  const accountIndex = accounts.findIndex(a => a.id === accountId);
+  const account = accountIndex >= 0 ? accounts[accountIndex] : null;
   
   if (!account) return null;
 
-  if (account.cachedBalance) {
-    return {
+  try {
+    const providerCode = PLATFORM_PROVIDER_CODE_MAP[account.platformId];
+    const candidateIdentifiers = [account.accountIdentifier, ...fallbackIdentifiers].filter(Boolean);
+    const phoneCandidates = Array.from(
+      new Set(candidateIdentifiers.flatMap((identifier) => buildPhoneCandidates(identifier)))
+    );
+    let accountsFromApi: Array<{ currency?: string; provider_code?: string; balance?: number }> = [];
+
+    for (const phoneCandidate of phoneCandidates) {
+      try {
+        const response = await bankingAPI.getBalance(phoneCandidate);
+        accountsFromApi = response.data?.accounts || [];
+        if (accountsFromApi.length > 0) {
+          break;
+        }
+      } catch {
+        // Try next phone format candidate
+      }
+    }
+
+    const normalizedPreferredCurrency = String(preferredCurrency || '').toUpperCase();
+    const matchedAccount = (
+      accountsFromApi.find((entry: { currency?: string }) =>
+        normalizedPreferredCurrency && String(entry.currency || '').toUpperCase() === normalizedPreferredCurrency
+      )
+      || accountsFromApi.find((entry: { provider_code?: string }) =>
+        providerCode && String(entry.provider_code || '').toUpperCase() === providerCode
+      )
+      || (normalizedPreferredCurrency ? undefined : accountsFromApi[0])
+    );
+
+    if (!matchedAccount) {
+      throw new Error('No account balance found in mock banking API');
+    }
+
+    const refreshedBalance: BalanceInquiry = {
       platformId: account.platformId,
       accountIdentifier: account.accountIdentifier,
-      balance: account.cachedBalance.amount,
-      currency: account.cachedBalance.currency,
-      lastUpdated: account.cachedBalance.updatedAt,
+      balance: Number(matchedAccount.balance || 0),
+      currency: String(matchedAccount.currency || 'USD'),
+      lastUpdated: new Date().toISOString(),
     };
-  }
 
-  throw new Error('Live balance sync is not configured for this account yet. Use provider USSD/app for current balance.');
+    const updatedAccounts = [...accounts];
+    updatedAccounts[accountIndex] = {
+      ...account,
+      lastBalanceCheck: refreshedBalance.lastUpdated,
+      cachedBalance: {
+        amount: refreshedBalance.balance,
+        currency: refreshedBalance.currency,
+        updatedAt: refreshedBalance.lastUpdated,
+      },
+    };
+    persistLinkedAccounts(updatedAccounts);
+
+    return refreshedBalance;
+  } catch (apiError) {
+    if (account.cachedBalance) {
+      return {
+        platformId: account.platformId,
+        accountIdentifier: account.accountIdentifier,
+        balance: account.cachedBalance.amount,
+        currency: account.cachedBalance.currency,
+        lastUpdated: account.cachedBalance.updatedAt,
+      };
+    }
+    throw apiError instanceof Error ? apiError : new Error('Failed to fetch balance');
+  }
 };
 
 /**

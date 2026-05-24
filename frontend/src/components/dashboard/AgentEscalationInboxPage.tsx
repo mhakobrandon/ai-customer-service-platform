@@ -233,6 +233,7 @@ export default function AgentEscalationInboxPage() {
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
+          height: '100%',
           border: '1px solid',
           borderColor: 'divider',
         }}

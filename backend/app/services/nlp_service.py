@@ -1,4 +1,4 @@
-﻿"""
+"""
 NLP Service for multilingual customer service chatbot.
 Handles language detection, intent classification, and response generation
 for English, Shona, and Ndebele languages.
@@ -48,9 +48,27 @@ class NLPService:
     # Response templates for each intent in all supported languages
     RESPONSE_TEMPLATES = {
         "balance_inquiry": {
-            "en": "Your current account balance is ${balance}. Last transaction: ${last_transaction}",
-            "sn": "Mari yako iri ${balance}. Chiitiko chekupedzisira: ${last_transaction}",
-            "nd": "Imali yakho ngu ${balance}. Okwenzeke ekugcineni: ${last_transaction}"
+            "en": (
+                "📊 **Account Balance**\n\n"
+                "To check your EcoCash balance instantly, dial:\n"
+                "> **\u2731151\u22172#** (FREE)\n\n"
+                "Or visit the EcoCash app \u2192 **Dashboard** to see your balance.\n\n"
+                "If you believe your balance is incorrect, reply **\"dispute\"** and I will open a case for you."
+            ),
+            "sn": (
+                "📊 **Kutarisa Balan7ce Yako**\n\n"
+                "Kuti uone balance yako ye EcoCash pakarepo, daira:\n"
+                "> **\u2731151\u22172#** (MAHARA)\n\n"
+                "Kana ushandise app ye EcoCash \u2192 **Dashboard** kuona mari yako.\n\n"
+                "Kana uchifunga kuti balance yako haina kurongeka, pindura **\"dispute\"** uye ndichavhura kesi kwauri."
+            ),
+            "nd": (
+                "📊 **Ukubheka Ibhalansi Yakho**\n\n"
+                "Ukubheka ibhalansi yakho ye-EcoCash masinyane, shaya:\n"
+                "> **\u2731151\u22172#** (MAHHALA)\n\n"
+                "Noma sebenzisa i-app ye-EcoCash \u2192 **Dashboard** ukubona imali yakho.\n\n"
+                "Uma ucabanga ukuthi ibhalansi yakho ayilungile, phendula **\"dispute\"** ngizovula icala lakho."
+            ),
         },
         "transaction_history": {
             "en": "Here are your recent transactions:\n${transactions}",
@@ -300,33 +318,33 @@ class NLPService:
                 "internal_transfer": {
                     "keywords": ["1", "internal", "own account", "between my accounts"],
                     "responses": {
-                        "en": "You selected Internal Transfer. Please provide source account, destination account, and amount.",
-                        "sn": "Wasarudza Internal Transfer. Ndapota tipa account yekubva, yekuenda, nemari.",
-                        "nd": "Ukhethe i-Internal Transfer. Sicela unikeze i-account esuka kuyo, eya kuyo, kanye lenani."
+                        "en": "You selected Internal Transfer. Please provide:\n\u2022 Source account\n\u2022 Destination account\n\u2022 Amount\n\u2022 Currency (USD or ZiG)\n\nExample: *ACC001, ACC002, 500, USD*",
+                        "sn": "Wasarudza Internal Transfer. Ndapota tipa:\n\u2022 Account yekubva\n\u2022 Account yekuenda\n\u2022 Mari\n\u2022 Mari mhando (USD kana ZiG)\n\nMuenzaniso: *ACC001, ACC002, 500, USD*",
+                        "nd": "Ukhethe i-Internal Transfer. Sicela unikeze:\n\u2022 I-account esuka kuyo\n\u2022 I-account eya kuyo\n\u2022 Inani\n\u2022 Uhlobo lwemali (USD noma ZiG)\n\nIsibonelo: *ACC001, ACC002, 500, USD*"
                     }
                 },
                 "ecocash_transfer": {
                     "keywords": ["2", "ecocash", "mobile money", "wallet"],
                     "responses": {
-                        "en": "You selected EcoCash transfer. Please share recipient mobile number and amount.",
-                        "sn": "Wasarudza EcoCash transfer. Ndapota tumira nhamba yefoni yemunhu nemari.",
-                        "nd": "Ukhethe i-EcoCash transfer. Sicela unikeze inombolo yocingo yomamukeli kanye lenani."
+                        "en": "You selected EcoCash transfer. Please provide:\n\u2022 Recipient mobile number\n\u2022 Amount\n\u2022 Currency (USD or ZiG)\n\nExample: *0771234567, 50, USD*",
+                        "sn": "Wasarudza EcoCash transfer. Ndapota tipa:\n\u2022 Nhamba yefoni yemunhu\n\u2022 Mari\n\u2022 Mhando yemari (USD kana ZiG)\n\nMuenzaniso: *0771234567, 50, USD*",
+                        "nd": "Ukhethe i-EcoCash transfer. Sicela unikeze:\n\u2022 Inombolo yocingo yomamukeli\n\u2022 Inani\n\u2022 Uhlobo lwemali (USD noma ZiG)\n\nIsibonelo: *0771234567, 50, USD*"
                     }
                 },
                 "zipit_transfer": {
                     "keywords": ["3", "zipit", "other bank"],
                     "responses": {
-                        "en": "You selected ZIPIT transfer. Please provide recipient bank name, account number, and amount.",
-                        "sn": "Wasarudza ZIPIT transfer. Ndapota tumira zita rebhangi, nhamba yeaccount, nemari.",
-                        "nd": "Ukhethe i-ZIPIT transfer. Sicela unikeze ibhange lomamukeli, inombolo ye-account, kanye lenani."
+                        "en": "You selected ZIPIT transfer. Please provide:\n\u2022 Recipient bank name\n\u2022 Account number\n\u2022 Amount\n\u2022 Currency (USD or ZiG)\n\nExample: *CBZ, 12345678, 100, USD*",
+                        "sn": "Wasarudza ZIPIT transfer. Ndapota tipa:\n\u2022 Zita rebhangi\n\u2022 Nhamba yeaccount\n\u2022 Mari\n\u2022 Mhando yemari (USD kana ZiG)\n\nMuenzaniso: *CBZ, 12345678, 100, USD*",
+                        "nd": "Ukhethe i-ZIPIT transfer. Sicela unikeze:\n\u2022 Ibhange lomamukeli\n\u2022 Inombolo ye-account\n\u2022 Inani\n\u2022 Uhlobo lwemali (USD noma ZiG)\n\nIsibonelo: *CBZ, 12345678, 100, USD*"
                     }
                 },
                 "rtgs_transfer": {
                     "keywords": ["4", "rtgs", "large amount"],
                     "responses": {
-                        "en": "You selected RTGS transfer. Please provide recipient bank details, amount, and transfer reason.",
-                        "sn": "Wasarudza RTGS transfer. Ndapota tumira details dzebhangi remugamuchiri, mari, nechikonzero chekutumira.",
-                        "nd": "Ukhethe i-RTGS transfer. Sicela unikeze imininingwane yebhange lomamukeli, inani, lesizathu sokuthumela."
+                        "en": "You selected RTGS transfer. Please provide:\n\u2022 Recipient bank details\n\u2022 Account number\n\u2022 Amount\n\u2022 Currency (USD or ZiG)\n\u2022 Transfer reason\n\nExample: *Stanbic, 987654321, 5000, USD, school fees*",
+                        "sn": "Wasarudza RTGS transfer. Ndapota tipa:\n\u2022 Details dzebhangi\n\u2022 Nhamba yeaccount\n\u2022 Mari\n\u2022 Mhando yemari (USD kana ZiG)\n\u2022 Chikonzero chekutumira\n\nMuenzaniso: *Stanbic, 987654321, 5000, USD, mafees echikoro*",
+                        "nd": "Ukhethe i-RTGS transfer. Sicela unikeze:\n\u2022 Imininingwane yebhange\n\u2022 Inombolo ye-account\n\u2022 Inani\n\u2022 Uhlobo lwemali (USD noma ZiG)\n\u2022 Isizathu sokuthumela\n\nIsibonelo: *Stanbic, 987654321, 5000, USD, imali yesikole*"
                     }
                 }
             }
@@ -679,16 +697,27 @@ class NLPService:
 
         text_lower = text.lower().strip()
 
-        for choice_data in flow.get("choices", {}).values():
+        # Phone numbers / amounts can contain single digits like "1", "2", "3".
+        # Use word-boundary regex for single-char keywords so "0778055631" does NOT
+        # match keyword "1".  Multi-char keywords still use substring matching.
+        def _keyword_matches(kw: str, text_l: str) -> bool:
+            kw_l = kw.lower()
+            if len(kw_l) == 1:          # single char: require word boundary
+                return bool(re.search(rf"(?<![\d])\b{re.escape(kw_l)}\b(?![\d])", text_l))
+            return text_l == kw_l or kw_l in text_l  # multi-char: substring ok
+
+        for choice_key, choice_data in flow.get("choices", {}).items():
             for keyword in choice_data.get("keywords", []):
-                keyword_lower = keyword.lower()
-                if text_lower == keyword_lower or keyword_lower in text_lower:
+                if _keyword_matches(keyword, text_lower):
                     responses = choice_data.get("responses", {})
                     response_text = responses.get(language) or responses.get("en")
                     if response_text:
+                        base_intent = flow.get("intent", previous_intent)
+                        sub_intent = f"{base_intent}_{choice_key}_pending"
                         return {
                             "language": language,
-                            "intent": flow.get("intent", previous_intent),
+                            "intent": base_intent,
+                            "session_intent": sub_intent,
                             "confidence": 0.99,
                             "entities": {},
                             "response": response_text,
@@ -793,6 +822,125 @@ class NLPService:
     def _classify_with_rules(self, text: str, previous_intent: Optional[str] = None) -> Tuple[str, float]:
         """Classify intent using rule-based approach."""
         text_lower = text.lower().strip()
+
+        # ── HIGHEST PRIORITY: "Sent money but it hasn't arrived/been received" ──────
+        # This MUST come before transfer_money rules because past-tense Shona send
+        # verbs (nda-tumira, ndaka-tumira) contain 'tumira' as a substring and would
+        # otherwise falsely trigger the transfer_money intent.
+        _sent_not_arrived_sn = [
+            # past-tense send + not-arrived combos (Shona)
+            "ndatumira", "ndakamutumira", "ndakatumira",
+            "haina kusvika", "haana kusvika", "haisi kusvika",
+            "haina kupinda", "haisi kupinda", "haana kupinda",
+            "haina kufikira", "haisi kufikira",
+            "mari yangu haina", "mari yangu haisi",
+            "asi haina", "asi haisi", "asi haana",
+            "yakatumirwa asi", "yatumirwa asi",
+        ]
+        _sent_not_arrived_nd = [
+            # Ndebele: sent but not received
+            "ngathumela", "ngathumele", "ngithumele",
+            "ayifikanga", "ayikafikanga", "ayifikanga",
+            "ayifika", "kodwa ayifika", "kodwa ayifikanga",
+            "imali ayifikanga", "imali ayifika",
+            "ithunywe kodwa", "ithumele kodwa",
+        ]
+        _sent_not_arrived_en = [
+            "sent money but", "i sent money", "money not received",
+            "money hasn't arrived", "money has not arrived",
+            "transfer not received", "transfer didn't arrive",
+            "payment not received", "payment didn't go through",
+            "sent but not received", "sent but not arrived",
+            "money not arrived", "money not delivered",
+        ]
+        # Combinatorial: past-tense send + failure signal
+        _past_send_sn = ["ndatumira", "ndakamutumira", "ndakatumira", "yatumirwa", "yakatumirwa"]
+        _not_arrived_generic = [
+            "haina kusvika", "haisi kusvika", "haana kusvika",
+            "haina kupinda", "haisi kupinda",
+            "haina kufikira", "haisi kufikira",
+            "asi haina", "asi haisi", "asi haana",
+            "ayifika", "ayifikanga", "ayikafikanga",
+            "not arrived", "not received", "hasn't arrived", "has not arrived",
+            "didn't arrive", "did not arrive", "never arrived",
+        ]
+        _has_past_send = any(v in text_lower for v in _past_send_sn)
+        _has_not_arrived = any(v in text_lower for v in _not_arrived_generic)
+        if (_has_past_send and _has_not_arrived
+                or any(p in text_lower for p in _sent_not_arrived_sn)
+                or any(p in text_lower for p in _sent_not_arrived_nd)
+                or any(p in text_lower for p in _sent_not_arrived_en)):
+            logger.info("[Rules] 'Sent but not arrived' pattern → transaction_dispute")
+            return "transaction_dispute", 0.97
+        # ── END sent-not-arrived detection ────────────────────────────────────────
+
+        # ── HIGH PRIORITY: Transfer money detection ──────────────────────────────
+        # 1. ZIPIT / RTGS / explicit transfer method keyword
+        _transfer_method_kws = ["zipit", "rtgs", "internal transfer", "ecocash transfer"]
+        _bank_kws = ["cbz", "stanbic", "nmb", "steward bank", "agribank", "fbc",
+                     "zb bank", "bancabc", "posb", "cabs", "metbank"]
+        if any(m in text_lower for m in _transfer_method_kws):
+            logger.info("[Rules] Transfer method keyword → transfer_money")
+            return "transfer_money", 0.97
+
+        # 2. Bank name + transfer verb
+        _transfer_verbs = [
+            "transfer", "send", "tumira", "kutumira", "thumela", "ukuthumela",
+            "kuita", "ndirikuda", "ndinoda", "yekuenda", "kuenda",
+        ]
+        if any(b in text_lower for b in _bank_kws) and any(v in text_lower for v in _transfer_verbs):
+            logger.info("[Rules] Bank + transfer verb → transfer_money")
+            return "transfer_money", 0.96
+
+        # 3. Shona/Ndebele send/move verb + dollar amount
+        # Exclude past-tense Shona prefixes (nda-, ndaka-) — those are already-sent complaints.
+        _shona_send_verbs = [
+            "kutumira", "ndirikuda kutumira", "ndinoda kutumira",
+            "ndoda kutumira", "tuma mari", "tumira mari", "tuma kuna",
+            "kufambisa", "kufambisa mari", "ndinoda kufambisa", "ndirikuda kufambisa",
+            "kubvisa", "kubvisa mari", "ndinoda kubvisa",
+            "kusendesa", "kusendesa mari",
+        ]
+        _nd_send_verbs = [
+            "thumela", "ukuthumela", "ngifuna ukuthumela", "ngithanda ukuthumela",
+        ]
+        _has_send_verb = (
+            any(v in text_lower for v in _shona_send_verbs)
+            or any(v in text_lower for v in _nd_send_verbs)
+        )
+        _has_amount = bool(re.search(r"\$\d+|\d+\s*(?:dollars?|usd|zig|zwg)", text_lower))
+        if _has_send_verb and _has_amount:
+            logger.info("[Rules] Shona/Ndebele send verb + amount → transfer_money")
+            return "transfer_money", 0.97
+
+        # 4. Standalone Shona/Ndebele send verb (shows transfer menu)
+        # Uses word-boundary-safe patterns to avoid matching past-tense 'ndatumira'.
+        _strong_send_verbs_exact = [
+            "kutumira", "ndirikuda kutumira", "ndinoda kutumira",
+            "ndoda kutumira", "ngifuna ukuthumela", "ngithanda ukuthumela",
+            "kufambisa", "ndinoda kufambisa", "ndirikuda kufambisa",
+            "kubvisa", "ndinoda kubvisa", "kusendesa",
+        ]
+        # 'tumira' and 'thumela' are allowed only as whole words (not substrings of ndatumira etc.)
+        _bare_send_verbs = ["tumira", "thumela"]
+        _has_strong_send = any(v in text_lower for v in _strong_send_verbs_exact)
+        _has_bare_send = any(
+            bool(re.search(rf"(?<![a-z]){re.escape(v)}(?![a-z])", text_lower))
+            for v in _bare_send_verbs
+        )
+        if _has_strong_send or _has_bare_send:
+            logger.info("[Rules] Standalone Shona/Ndebele send verb → transfer_money")
+            return "transfer_money", 0.95
+
+        # 5. from-account / to-person structural pattern
+        _from_acct_kws = ["kubva kuaccount", "kubva ku account", "kubva paccount",
+                          "from my account", "kubva kune account", "kubva kuaccount mangu"]
+        _to_person_kws = ["kuenda kune", "kuenda kwamumwe", "kune mumwe munhu",
+                          "to another person", "kune mumwe", "kuenda kune munhu"]
+        if any(f in text_lower for f in _from_acct_kws) or any(t in text_lower for t in _to_person_kws):
+            logger.info("[Rules] from-account / to-person pattern → transfer_money")
+            return "transfer_money", 0.96
+        # ── END transfer money detection ───────────────────────────────────────
 
         # Explicit profile update requests should not be confused with security/PIN intent.
         profile_update_terms = [
@@ -939,12 +1087,31 @@ class NLPService:
         if any(term in text_lower for term in shona_login_terms):
             return "password_reset", 0.95
 
-        # Shona: asking about my money / balance inquiry
+        # ── Balance inquiry detection ─────────────────────────────────
         shona_balance_terms = [
-            "nezvemari yangu", "kubvunza nezvemari", "mari yangu iri papi",
-            "mari yangu yakamira", "kuona mari yangu",
+            "kwasara mari", "kwasara marii", "kusara kwemari",
+            "mari yangu irini", "ndine mari ingani", "ndine mari ngani",
+            "ndiona balance", "ndione balance", "check balance", "ndone balance",
+            "balance yangu irini", "balance yako irini", "tarisa balance",
+            "ndiona mari yangu", "ndione mari yangu", "kuona balance",
+            "kuona mari yangu", "ndaona balance", "balance yangu",
+            "mari yangu iri papi", "mari yangu yakamira",
+            "nezvemari yangu", "kubvunza nezvemari",
+            "ibhalansi yami", "ibhalansi yami iyi", "ngangakanani imali yami",
+            "imali engisayo", "bheka ibhalansi", "bona ibhalansi",
+            "ibhalansi yakho", "imali ekhona",
+            "how much do i have", "how much is left", "whats my balance",
+            "what is my balance", "check my balance", "see my balance", "my balance",
         ]
         if any(term in text_lower for term in shona_balance_terms):
+            return "balance_inquiry", 0.95
+
+        # Combinatorial: balance word + query word
+        _balance_words = ["balance", "mari", "marii", "imali", "ibhalansi", "kwasara", "remaining"]
+        _balance_query_words = ["irini", "imomo", "ingani", "ngani", "papi", "left", "have",
+                                "check", "see", "view", "tarisa", "ona", "bheka"]
+        if (any(bw in text_lower for bw in _balance_words)
+                and any(qw in text_lower for qw in _balance_query_words)):
             return "balance_inquiry", 0.93
 
         # Shona: generic help request → general_inquiry
@@ -1120,7 +1287,23 @@ class NLPService:
             "balance_inquiry": ["balance", "mari yangu", "imali yami", "how much do i have", "how much money", "ndine", "nginalo", "kuona mari", "account balance", "check balance", "show balance", "my money", "money in my account", "my account balance"],
             "account_statement": ["account statement", "bank statement", "mini statement", "email statement", "statement of account", "monthly statement", "statement copy", "last 7 days", "last 30 days", "last 60 days", "last 90 days", "7 days", "30 days", "60 days", "90 days"],
             "transaction_history": ["transaction history", "recent transactions", "past transactions", "last five", "what i spent", "zvandakaita", "imisebenzi", "record", "transactions did i make", "transactions this week", "transactions today"],
-            "transfer_money": ["transfer", "send money", "tumira", "thumela", "kutumira", "wire", "send to", "pay someone", "ecocash send", "ukuthumela imali", "ngifuna ukuthumela"],
+            "transfer_money": [
+                "transfer", "send money", "tumira", "thumela", "kutumira", "wire",
+                "send to", "pay someone", "ecocash send", "ukuthumela imali",
+                "ngifuna ukuthumela", "zipit", "rtgs", "internal transfer",
+                "i want to send", "i want to transfer", "move money", "move funds",
+                "cbz", "stanbic", "nmb", "steward bank", "agribank", "fbc",
+                "zb bank", "bancabc", "posb",
+                "ndatumira", "ndirikuda kutumira", "ndinoda kutumira", "ndoda kutumira",
+                "tumira mari", "kutumira mari", "ndirikuda kuita zipit",
+                "ndinoda kuita zipit", "zipit yekuenda", "kuita rtgs",
+                "tumira kuna", "tuma kuna", "tuma mari kuna",
+                "kufambisa", "kufambisa mari", "ndinoda kufambisa",
+                "kubvisa", "kubvisa mari", "kusendesa", "kusendesa mari",
+                "kubva kuaccount", "kuenda kune mumwe", "kune mumwe munhu",
+                "ngifuna ukwenza i-zipit", "ngifuna ukwenza i-rtgs",
+                "ngithanda ukuthumela",
+            ],
             "password_reset": ["password", "forgot", "reset", "kanganwa", "libala", "change password", "login problem", "can't login", "cannot login"],
             "loan_inquiry": ["loan", "borrow", "chikwereti", "imboleko", "mikwereti", "student loan", "interest rate", "lend me", "credit", "interest rates for loans"],
             "bill_payment": ["bill", "pay bill", "bhadhara", "khokhela", "zesa", "dstv", "airtime", "electricity", "water bill", "bundles", "pay for", "recharge", "magetsi", "kubhadhara"],

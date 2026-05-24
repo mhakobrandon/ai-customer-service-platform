@@ -13,6 +13,7 @@ import uuid
 import re
 
 from app.database.session import get_db
+from app.database.banking_session import banking_session_maker
 from app.core.config import settings
 from app.core.security import get_current_active_user, require_agent
 from app.models.user import User
@@ -22,6 +23,7 @@ from app.models.nlp_feedback import NLPFeedback
 from app.models.ticket import Ticket, TicketCategory, TicketPriority, TicketStatus
 from app.models.customer_rating import CustomerRating
 from app.models.chat_handoff import ChatHandoff
+from app.models.banking import BankingAccount, BankingProvider, BankingTransaction
 from app.services.nlp_service import nlp_service
 from app.services.llm_service import llm_service
 from app.services.market_intelligence import SUPPORTED_PROVIDERS
@@ -63,17 +65,418 @@ def _is_airtime_dispute_message(text: str) -> bool:
     text_lower = (text or "").lower()
     airtime_keywords = [
         "airtime", "airtme", "top up", "topup", "bundle", "recharge", "bought airtime",
-        "mhepo", "recharge card"
+        "mhepo", "recharge card",
+        # Shona: "I bought airtime" / "buying airtime"
+        "ndatenga airtime", "ndichitenga airtime", "ndakatenga airtime",
+        "kutenga airtime", "ndatenga mhepo", "ndakatenga mhepo",
     ]
     dispute_keywords = [
+        # English
         "deducted", "debited", "not received", "not recieved", "did not receive",
         "didnt receive", "didn't receive", "did not recieve", "didnt recieve", "didn't recieve",
-        "failed", "missing", "yakabviswa", "haina kupinda", "handina kuwana", "isina kupinda",
-        "ikhutshwe", "angikatholi", "angitholanga"
+        "failed", "missing", "nothing came", "airtime not come",
+        # Shona full forms
+        "yakabviswa", "haina kupinda", "handina kuwana", "isina kupinda",
+        "haina kusvika", "haisina kusvika", "haisina kupinda",
+        # Shona SHORTENED / colloquial forms (most common in real messages)
+        "yabviswa",          # short for yakabviswa (deducted)
+        "mabviswa",          # plural/generic deducted
+        "hapana airtime",    # no airtime
+        "hapana mhepo",      # no airtime (slang)
+        "yapinda",           # came in  — used in negative: hapana yapinda
+        "haisika",           # didn't arrive (short form)
+        "haina kuuya",       # didn't come
+        "haisisika",         # didn't reach
+        # Ndebele
+        "ikhutshwe", "angikatholi", "angitholanga",
+        "ayifikanga", "ayibonakali",
     ]
     has_airtime = any(keyword in text_lower for keyword in airtime_keywords)
     has_dispute = any(keyword in text_lower for keyword in dispute_keywords)
     return has_airtime and has_dispute
+
+
+# ── Bundle dispute helpers (data / SMS / voice / WhatsApp / Facebook) ─────────
+
+_BUNDLE_TYPES = {
+    "whatsapp": {
+        "keywords": ["whatsapp", "wa bundle", "wtsapp", "whatsap", "wasap"],
+        "en": "WhatsApp bundle",
+        "sn": "WhatsApp bundle",
+        "nd": "i-WhatsApp bundle",
+    },
+    "facebook": {
+        "keywords": ["facebook", "fb bundle", "fb data", "facebook bundle"],
+        "en": "Facebook bundle",
+        "sn": "Facebook bundle",
+        "nd": "i-Facebook bundle",
+    },
+    "sms": {
+        "keywords": ["sms bundle", "sms", "text bundle", "mazwi bundle"],
+        "en": "SMS bundle",
+        "sn": "SMS bundle",
+        "nd": "i-SMS bundle",
+    },
+    "voice": {
+        "keywords": [
+            "voice bundle", "call minutes", "minutes bundle", "voice minutes",
+            "mazana", "maminitsi", "kufonera bundle", "voice",
+        ],
+        "en": "voice/minutes bundle",
+        "sn": "bundle yemaminitsi/voice",
+        "nd": "i-bundle yamazwi/minutes",
+    },
+    "data": {
+        "keywords": [
+            "data bundle", "internet bundle", "1gb", "2gb", "500mb", "250mb",
+            "weekly bundle", "daily bundle", "monthly bundle", "data",
+            "ndatenga bundle", "ndakatenga bundle", "ibundle",
+        ],
+        "en": "data bundle",
+        "sn": "data bundle",
+        "nd": "i-data bundle",
+    },
+}
+
+_BUNDLE_DISPUTE_NON_RECEIPT_KEYWORDS = [
+    # English
+    "not working", "not activated", "not received", "didn't receive", "not loaded",
+    "not come", "deducted", "charged but", "not showing", "expired immediately",
+    "failed", "not showing up",
+    # Shona — full & short forms
+    "haishandisike", "haisina kushanda", "haina kuita basa", "hapana data",
+    "hapana bundle", "hapana sms", "hapana voice", "hapana whatsapp",
+    "hapana facebook", "yabviswa", "yakabviswa", "haina kusvika", "haisika",
+    "haina kupinda", "haisina kupinda", "hapana yapinda",
+    # Ndebele
+    "ayisebenzi", "ayifikanga", "ayiqalanga", "ikhutshwe", "angitholanga",
+]
+
+
+def _detect_bundle_type(text: str) -> str:
+    """Return the bundle type key (whatsapp/facebook/sms/voice/data)."""
+    text_lower = (text or "").lower()
+    # Check in priority order (most specific first)
+    for bundle_key in ("whatsapp", "facebook", "sms", "voice", "data"):
+        for kw in _BUNDLE_TYPES[bundle_key]["keywords"]:
+            if kw in text_lower:
+                return bundle_key
+    return "data"  # default
+
+
+def _is_bundle_dispute_message(text: str) -> bool:
+    """
+    Detect messages where the customer PURCHASED a bundle (data/SMS/voice/
+    WhatsApp/Facebook) but did NOT receive it or it is not working.
+
+    Requires BOTH a bundle keyword AND a non-receipt/deduction indicator.
+    Pure "data not working" (no purchase signal) is handled by network_connectivity.
+    """
+    text_lower = (text or "").lower()
+
+    # Must have an explicit purchase / deduction signal
+    purchase_signals = [
+        "bought", "purchased", "paid", "deducted", "charged",
+        "ndatenga", "ndakatenga", "ndibhadharira", "yabviswa", "yakabviswa",
+        "ngithenge", "ngakhokhela", "ikhutshwe",
+    ]
+    has_purchase = any(sig in text_lower for sig in purchase_signals)
+    if not has_purchase:
+        return False
+
+    # Check for any bundle type keyword
+    all_bundle_kws: List[str] = []
+    for bt in _BUNDLE_TYPES.values():
+        all_bundle_kws.extend(bt["keywords"])
+    has_bundle_type = any(kw in text_lower for kw in all_bundle_kws)
+    if not has_bundle_type:
+        return False
+
+    # Check for non-receipt / not-working signal
+    has_non_receipt = any(kw in text_lower for kw in _BUNDLE_DISPUTE_NON_RECEIPT_KEYWORDS)
+    return has_non_receipt
+
+
+def _bundle_dispute_followup_prompt(language: str, bundle_key: str) -> str:
+    """Return a type-specific prompt asking for the details we need."""
+    info = _BUNDLE_TYPES.get(bundle_key, _BUNDLE_TYPES["data"])
+    bundle_name = info.get(language, info["en"])
+
+    # Per-type extra hint shown in the example line
+    type_hint = {
+        "whatsapp": {"en": "Daily WhatsApp", "sn": "Daily WhatsApp", "nd": "Daily WhatsApp"},
+        "facebook":  {"en": "Daily Facebook", "sn": "Daily Facebook", "nd": "Daily Facebook"},
+        "sms":       {"en": "50 SMS daily",   "sn": "50 SMS daily",   "nd": "50 SMS daily"},
+        "voice":     {"en": "30min daily",    "sn": "30min daily",    "nd": "30min daily"},
+        "data":      {"en": "1GB weekly",     "sn": "1GB weekly",     "nd": "1GB weekly"},
+    }
+    hint = type_hint.get(bundle_key, type_hint["data"]).get(language, "1GB weekly")
+
+    prompts = {
+        "en": (
+            f"I understand — you purchased a {bundle_name} but it wasn't activated.\n\n"
+            "To open a dispute ticket I need a few details:\n"
+            f"1\ufe0f\u20e3 **Bundle type / description** (e.g. {hint})\n"
+            "2\ufe0f\u20e3 **Amount deducted** (e.g. $2)\n"
+            "3\ufe0f\u20e3 **Date & approximate time** (e.g. 17 May, 2pm)\n\n"
+            f"Example: *{hint}, $2, 17 May 2pm*"
+        ),
+        "sn": (
+            f"Ndinzwisisa — wakatenga {bundle_name} asi haina kushanda.\n\n"
+            "Kuti ndivhure ticket yekupikisa, ndinoda ruzivo rwushomanana:\n"
+            f"1\ufe0f\u20e3 **Mhando yebundle** (somuenzaniso {hint})\n"
+            "2\ufe0f\u20e3 **Mari yakabviswa** (somuenzaniso $2)\n"
+            "3\ufe0f\u20e3 **Zuva nenguva** zvakaitika (somuenzaniso: Chivabvu 17, nguva ye2pm)\n\n"
+            f"Muenzaniso: *{hint}, $2, Chivabvu 17 nguva ye2pm*"
+        ),
+        "nd": (
+            f"Ngiyakuzwa — uthenga i-{bundle_name} kodwa ayiqalanga ukusebenza.\n\n"
+            "Ukuvula i-ticket yokuxabana, ngidinga imininingwane embalwa:\n"
+            f"1\ufe0f\u20e3 **Uhlobo lwe-bundle** (isib. {hint})\n"
+            "2\ufe0f\u20e3 **Inani elikhutshwe** (isib. $2)\n"
+            "3\ufe0f\u20e3 **Usuku lesikhathi** (isib. May 17, cishe ngo-2pm)\n\n"
+            f"Isibonelo: *{hint}, $2, May 17 ngo-2pm*"
+        ),
+    }
+    return prompts.get(language, prompts["en"])
+
+
+def _bundle_dispute_ticket_created_message(language: str, ticket_id: str, bundle_key: str) -> str:
+    info = _BUNDLE_TYPES.get(bundle_key, _BUNDLE_TYPES["data"])
+    bundle_name = info.get(language, info["en"])
+    messages = {
+        "en": (
+            f"Thank you. I have created dispute ticket **{ticket_id}** for your {bundle_name}.\n\n"
+            "Our technical team will:\n"
+            "\u2022 Verify the purchase on our system\n"
+            "\u2022 Activate the bundle or reverse the charge\n"
+            "\u2022 Update you within **24-48 hours**"
+        ),
+        "sn": (
+            f"Maita basa. Ndavhura ticket yekupikisa **{ticket_id}** ye{bundle_name} yako.\n\n"
+            "Boka redu rezvitekinoroji richaita:\n"
+            "\u2022 Kusimbisa kutenga pane system yedu\n"
+            "\u2022 Kusimudza bundle kana kudzosera mari\n"
+            "\u2022 Kukuudza mukati meawa **24-48**"
+        ),
+        "nd": (
+            f"Ngiyabonga. Ngiqale i-ticket yokuxabana **{ticket_id}** ye{bundle_name} yakho.\n\n"
+            "Ithimu yethu yezobuchwepheshe izakwenza:\n"
+            "\u2022 Qinisekisa ukuthenga kuneqoqo lethu\n"
+            "\u2022 Vula i-bundle noma ubuyisele imali\n"
+            "\u2022 Kukwazisa ngaphakathi kwe **amahora angu-24-48**"
+        ),
+    }
+    return messages.get(language, messages["en"])
+
+
+def _looks_like_bundle_dispute_details(text: str) -> bool:
+    """A bundle dispute reply is sufficient if it contains at least an amount."""
+    return bool(re.search(r"\$?\d+(?:\.\d{1,2})?", text or ""))
+
+
+# ── End bundle dispute helpers ─────────────────────────────────────────────────
+
+
+def _is_outgoing_money_dispute_message(text: str) -> bool:
+    """
+    Detect messages where the customer is the SENDER — they sent money but it
+    never arrived at the recipient. This is the sender-side dispute flow.
+    """
+    text_lower = (text or "").lower()
+
+    outgoing_keywords = [
+        # English
+        "i sent", "i transfer", "i transferred", "i sent money", "sent money",
+        "transfer money", "transferred money", "money didn't", "money didnt",
+        # Shona — "I sent" / "I transferred" (active voice)
+        "ndatumira", "ndakатumira", "ndakitumira", "ndichitumira", "ndinoda kutumira",
+        "kutumira kwandiri", "tumira", "nditumira",
+        # Ndebele — "I sent" / "I transferred"
+        "ngithumela", "nginithunyelela", "ngilwandle", "ngakuthenga",
+    ]
+
+    non_arrival_keywords = [
+        # English
+        "didn't arrive", "did not arrive", "not received", "not arrived",
+        "haven't received", "hasn't arrived", "never arrived", "not in wallet",
+        "not in account", "missing", "not received yet", "failed",
+        # Shona
+        "haina kusvika", "haina kupinda", "handina kuwana", "haisina kusvika",
+        "haina kuonekwa", "hairatidzi", "haina kuenda", "haisika", "yabviswa",
+        "yakabviswa", "haiyakuwana", "hayakusvika",
+        # Ndebele
+        "ayifikanga", "angikatholi", "ayiqalanga", "ayibonakali", "ikhutshwe",
+    ]
+
+    has_outgoing = any(kw in text_lower for kw in outgoing_keywords)
+    has_non_arrival = any(kw in text_lower for kw in non_arrival_keywords)
+    return has_outgoing and has_non_arrival
+
+
+def _is_incoming_money_dispute_message(text: str) -> bool:
+    """
+    Detect messages where the customer is the RECIPIENT — money was sent TO them
+    but never arrived in their wallet.  This is a different flow from the sender
+    dispute because the customer will not have a transaction reference.
+    """
+    text_lower = (text or "").lower()
+
+    incoming_keywords = [
+        # English
+        "sent me", "send me", "was sent", "sending me", "were sent", "been sent",
+        "i was sent", "someone sent", "they sent", "he sent", "she sent",
+        "transfer to me", "transferred to me", "money to me",
+        # Shona — "I was sent" / "they sent me"
+        "ndatumirwa", "vakanditumira", "vakatumira", "wanditumira",
+        "ndaitumirwa", "ndakatumirwa", "kuya kwandiri", "kutumira kwandiri",
+        "ndanga ndichitumirwa", "vakandisendea", "vatumira kwandiri",
+        # Ndebele
+        "ngithunyelelwa", "bathumele", "wangithumela", "bangithumele",
+        "bathumele imali", "ngithumele", "beze nayo",
+    ]
+
+    non_arrival_keywords = [
+        # English
+        "didn't arrive", "did not arrive", "not received", "not arrived",
+        "haven't received", "hasn't arrived", "never arrived", "not in my wallet",
+        "not in my account", "missing", "not showing", "not reflect", "didn't reflect",
+        # Shona
+        "haina kusvika", "haina kupinda", "handina kuwana", "haisina kusvika",
+        "haina kuonekwa", "hairatidzi", "haina kuenda", "haisika",
+        # Ndebele
+        "ayifikanga", "angikatholi", "angitholanga", "ayifikanga", "ayibonakali",
+    ]
+
+    has_incoming = any(kw in text_lower for kw in incoming_keywords)
+    has_non_arrival = any(kw in text_lower for kw in non_arrival_keywords)
+    return has_incoming and has_non_arrival
+
+
+def _detect_transfer_currency(text: str) -> Optional[str]:
+    """
+    Extract currency from a transfer message.
+    Returns 'USD', 'ZiG', 'RTGS', or None (unknown — caller should ask).
+
+    Priority:
+      1. Explicit currency keyword (usd, zig, zwg, rtgs)
+      2. '$' prefix on amount → USD
+      3. None → caller must ask
+    """
+    t = (text or "").lower()
+    if re.search(r"\busd\b", t):
+        return "USD"
+    if re.search(r"\b(?:zig|zwg|zimbabwe\s*gold|zimbabwe gold)\b", t):
+        return "ZiG"
+    if re.search(r"\brtgs\b", t):
+        return "RTGS"
+    if re.search(r"\$\d", text):          # $ before digits → USD
+        return "USD"
+    return None   # unknown — must ask
+
+
+
+def _outgoing_dispute_followup_prompt(language: str) -> str:
+    """Ask for the details specific to a sender-side dispute."""
+    prompts = {
+        "en": (
+            "I understand — you sent money but it hasn't arrived at the recipient's wallet. "
+            "To open a dispute ticket I need a few details:\n\n"
+            "1️⃣ **Recipient's phone number** (who you sent the money to)\n"
+            "2️⃣ **Amount sent** (e.g. $10)\n"
+            "3️⃣ **Date & approximate time** it was sent (e.g. 17 May, around 2pm)\n\n"
+            "Example: *0771234567, $10, 17 May 2pm*"
+        ),
+        "sn": (
+            "Ndinzwisisa — wakatumira mari asi haina kusvika kumunhu. "
+            "Kuti ndivhure ticket yekupikisa, ndinoda ruzivo rwushomanana:\n\n"
+            "1️⃣ **Nhamba yefoni yemunhu** (wandakautumira mari)\n"
+            "2️⃣ **Mari yatumirwa** (somuenzaniso $10)\n"
+            "3️⃣ **Zuva nenguva** zvayakatumirwa (somuenzaniso: Chivabvu 17, nguva ye2pm)\n\n"
+            "Muenzaniso: *0771234567, $10, Chivabvu 17 nguva ye2pm*"
+        ),
+        "nd": (
+            "Ngiyakuzwa — uthumela imali kodwa ayifikanga kumamukeli. "
+            "Ukuvula i-ticket yokuxabana, ngidinga imininingwane embalwa:\n\n"
+            "1️⃣ **Inombolo yocingo yomamukeli** (umuntu okuthumele imali)\n"
+            "2️⃣ **Inani elithunyelelwe** (isib. $10)\n"
+            "3️⃣ **Usuku lesikhathi** okuthumela (isib. May 17, cishe ngo-2pm)\n\n"
+            "Isibonelo: *0771234567, $10, May 17 ngo-2pm*"
+        ),
+    }
+    return prompts.get(language, prompts["en"])
+
+
+def _incoming_dispute_followup_prompt(language: str) -> str:
+    """Ask for the details specific to a recipient-side dispute."""
+    prompts = {
+        "en": (
+            "I understand — you were expecting to receive money but it hasn't arrived. "
+            "To open a dispute ticket I need a few details:\n\n"
+            "1️⃣ **Sender's phone number** (the person who sent you money)\n"
+            "2️⃣ **Amount expected** (e.g. $10)\n"
+            "3️⃣ **Date & approximate time** it was sent (e.g. 17 May, around 2pm)\n\n"
+            "Example: *0771234567, $10, 17 May 2pm*"
+        ),
+        "sn": (
+            "Ndinzwisisa — wakanga uchitarisira mari asi haina kusvika. "
+            "Kuti ndivhure ticket yekupikisa, ndinoda ruzivo rwushomanana:\n\n"
+            "1️⃣ **Nhamba yefoni yemutumiri** (munhu wakakutumira mari)\n"
+            "2️⃣ **Mari yakatarisiwa** (somuenzaniso $10)\n"
+            "3️⃣ **Zuva nenguva** zvayakange ichatumirwa (somuenzaniso: Chivabvu 17, nguva ye2pm)\n\n"
+            "Muenzaniso: *0771234567, $10, Chivabvu 17 nguva ye2pm*"
+        ),
+        "nd": (
+            "Ngiyakuzwa — ulindele ukwamukela imali kodwa ayifikanga. "
+            "Ukuvula i-ticket yokuxabana, ngidinga imininingwane embalwa:\n\n"
+            "1️⃣ **Inombolo yocingo yomthumeli** (umuntu okuthumele imali)\n"
+            "2️⃣ **Inani elilindelekile** (isib. $10)\n"
+            "3️⃣ **Usuku lesikhathi** okuseyo ukuthumela (isib. May 17, cishe ngo-2pm)\n\n"
+            "Isibonelo: *0771234567, $10, May 17 ngo-2pm*"
+        ),
+    }
+    return prompts.get(language, prompts["en"])
+
+
+def _incoming_dispute_ticket_created_message(language: str, ticket_id: str) -> str:
+    messages = {
+        "en": (
+            f"Thank you. I have created dispute ticket **{ticket_id}** for you.\n\n"
+            "Our team will:\n"
+            "• Contact the sender's wallet to verify the transaction\n"
+            "• Trace the payment on our network\n"
+            "• Update you within **24-48 hours**\n\n"
+            "If the money was sent, it will be credited to your account."
+        ),
+        "sn": (
+            f"Maita basa. Ndavhura ticket yekupikisa **{ticket_id}** kwauri.\n\n"
+            "Boka redu richaita:\n"
+            "• Kubata wallet yemutumiri kuona kana mari yakabuda\n"
+            "• Kutsvaga nzira yemari munetweki yedu\n"
+            "• Kukuudza mukati meawa **24-48**\n\n"
+            "Kana mari yakange yatumirwa, ichaiswa muaccount yako."
+        ),
+        "nd": (
+            f"Ngiyabonga. Ngiqale i-ticket yokuxabana **{ticket_id}** ngokumelene lawe.\n\n"
+            "Ithimu yethu izakwenza:\n"
+            "• Xhumana ne-wallet yomthumeli ukuqinisekisa umsebenzi\n"
+            "• Landela inzuzo kunetwethi yethu\n"
+            "• Kukwazisa ngaphakathi kwe **amahora angu-24-48**\n\n"
+            "Uma imali ithunyelwe, izafakwa ku-akhawunti yakho."
+        ),
+    }
+    return messages.get(language, messages["en"])
+
+
+def _looks_like_incoming_dispute_details(text: str) -> bool:
+    """
+    Check whether a reply to the incoming-dispute prompt contains enough information:
+    sender phone + amount.  Date is optional but helpful.
+    """
+    text_value = text or ""
+    has_phone = bool(re.search(r"\b(?:0|263|\+263)?(?:7[1-9])\d{7}\b", text_value))
+    has_amount = bool(re.search(r"\$?\d+(?:\.\d{1,2})?", text_value))
+    return has_phone and has_amount
 
 
 def _extract_amounts(text: str) -> List[str]:
@@ -84,7 +487,14 @@ def _looks_like_transaction_dispute_details(text: str) -> bool:
     text_value = text or ""
     lower_text = text_value.lower()
 
-    has_reference = bool(re.search(r"\b(?:tc|tq|trx|ref|mp|ci)[a-z0-9]{6,}\b", lower_text))
+    # Match known prefixes (tc, tq, trx, ref, mp, ci) OR a single letter followed by
+    # 6+ alphanumeric chars — covers real EcoCash refs like t234444444, c9812345, etc.
+    # Also matches 2-4 letter prefixes like QA2333444, ECA12345 (common EcoCash formats).
+    has_reference = bool(
+        re.search(r"\b(?:tc|tq|trx|ref|mp|ci)[a-z0-9]{6,}\b", lower_text)
+        or re.search(r"\b[a-z]\d{6,}\b", lower_text)
+        or re.search(r"\b[a-zA-Z]{2,4}\d{5,}\b", text_value)  # QA2333444, ECA12345
+    )
     has_amount = bool(re.search(r"\$?\d+(?:\.\d{1,2})?", text_value))
     has_phone = bool(re.search(r"\b(?:0|263|\+263)?(?:7[1-9])\d{7}\b", text_value))
 
@@ -214,6 +624,29 @@ def _align_response_to_provider(response_text: str, provider_name: Optional[str]
     return f"[{provider_name}]\n{response}"
 
 
+def _provider_code_for_name(provider_name: Optional[str]) -> Optional[str]:
+    if not provider_name:
+        return None
+    normalized = provider_name.strip().lower()
+    provider_map = {
+        "ecocash": "ECOCASH",
+        "onemoney": "ONEMONEY",
+        "one money": "ONEMONEY",
+        "innbucks": "INNBUCKS",
+        "telecash": "TELECASH",
+        "cbz": "CBZ",
+        "steward": "STEWARD",
+        "steward bank": "STEWARD",
+        "stanbic": "STANBIC",
+        "nmb": "NMB",
+        "fbc": "FBC",
+        "zb": "ZB",
+        "zb bank": "ZB",
+        "cabs": "CABS",
+    }
+    return provider_map.get(normalized)
+
+
 def _format_location_reply(language: str, location_type: str, lookup_result: dict) -> str:
     area = lookup_result.get("resolved_location") or "your requested area"
     results = lookup_result.get("results") or []
@@ -309,6 +742,7 @@ class MessageCreate(BaseModel):
     language: Optional[str] = None
     provider_name: Optional[str] = None
     provider_type: Optional[str] = None
+    provider_account_identifier: Optional[str] = None
 
 
 class RatingCreate(BaseModel):
@@ -643,13 +1077,263 @@ async def send_message(
             "timestamp": ai_message.timestamp.isoformat()
         }
 
-    # Continue airtime dispute flow FIRST (before new-dispute detection)
-    # so that replies like "Airtime $2, deducted $2" are not re-detected
-    # as a brand-new dispute and stuck in an infinite prompt loop.
-    # Only enter airtime flow when explicitly pending airtime details.
+    # ── Bundle dispute continuation ───────────────────────────────────────────
+    # session_intent is encoded as "transaction_dispute_bundle_pending:{bundle_key}"
+    if (
+        chat_session.last_intent
+        and chat_session.last_intent.startswith("transaction_dispute_bundle_pending:")
+    ):
+        stored_bundle_key = chat_session.last_intent.split(":", 1)[1]
+        if _looks_like_bundle_dispute_details(message_data.content):
+            bundle_ticket_id = f"TICKET{uuid.uuid4().hex[:8].upper()}"
+            bundle_agent = await _find_least_loaded_agent(db, category=TicketCategory.TRANSACTION_DISPUTE)
+            bundle_type_info = _BUNDLE_TYPES.get(stored_bundle_key, _BUNDLE_TYPES["data"])
+            bundle_ticket = Ticket(
+                ticket_id=bundle_ticket_id,
+                customer_id=current_user.id,
+                session_id=chat_session.id,
+                assigned_agent_id=bundle_agent.id if bundle_agent else None,
+                subject=f"{bundle_type_info['en'].title()} not received after purchase",
+                description=(
+                    f"Customer purchased a {bundle_type_info['en']} but it was not activated. "
+                    f"Customer-provided details: {message_data.content}"
+                ),
+                category=TicketCategory.TRANSACTION_DISPUTE,
+                priority=TicketPriority.HIGH,
+                status=TicketStatus.ASSIGNED if bundle_agent else TicketStatus.NEW,
+                tags=f"dispute,bundle,{stored_bundle_key},auto-created",
+            )
+            db.add(bundle_ticket)
+            await db.flush()
+
+            bundle_created_payload = build_ai_message_payload(
+                content=_bundle_dispute_ticket_created_message(
+                    selected_language, bundle_ticket_id, stored_bundle_key
+                ),
+                intent="transaction_dispute",
+                confidence=0.99,
+                response_language=selected_language,
+                needs_escalation=True,
+                session_intent="transaction_dispute_ticket_created",
+            )
+            return await persist_ai_response(bundle_created_payload)
+        else:
+            # Missing amount — ask again
+            bundle_type_info = _BUNDLE_TYPES.get(stored_bundle_key, _BUNDLE_TYPES["data"])
+            retry_msgs = {
+                "en": (
+                    f"I still need the amount that was deducted for the "
+                    f"{bundle_type_info['en']} to raise a ticket. "
+                    "Please share the amount (e.g. $2) and the bundle type."
+                ),
+                "sn": (
+                    f"Ndinoda mari yakabviswa ye{bundle_type_info['sn']} "
+                    "kuti ndivhure ticket. Ndapota tipa mari (somuenzaniso $2) nemhando yebundle."
+                ),
+                "nd": (
+                    f"Ngisadinga inani elikhutshwe le{bundle_type_info['nd']} "
+                    "ukuvula i-ticket. Sicela unikeze inani (isib. $2) kanye nohlobo lwe-bundle."
+                ),
+            }
+            bundle_retry_payload = build_ai_message_payload(
+                content=retry_msgs.get(selected_language, retry_msgs["en"]),
+                intent="transaction_dispute",
+                confidence=0.98,
+                response_language=selected_language,
+                needs_escalation=False,
+                session_intent=f"transaction_dispute_bundle_pending:{stored_bundle_key}",
+            )
+            return await persist_ai_response(bundle_retry_payload)
+
+    # ── Outgoing money dispute continuation ─────────────────────────────────
+    # When we're waiting for: recipient phone + amount + date.
+    if chat_session.last_intent == "transaction_dispute_outgoing_pending":
+        if _looks_like_incoming_dispute_details(message_data.content):
+            # Sufficient details — create the ticket
+            outgoing_ticket_id = f"TICKET{uuid.uuid4().hex[:8].upper()}"
+            outgoing_agent = await _find_least_loaded_agent(db, category=TicketCategory.TRANSACTION_DISPUTE)
+            outgoing_ticket = Ticket(
+                ticket_id=outgoing_ticket_id,
+                customer_id=current_user.id,
+                session_id=chat_session.id,
+                assigned_agent_id=outgoing_agent.id if outgoing_agent else None,
+                subject="Outgoing money transfer — recipient did not receive",
+                description=(
+                    f"Customer reports sending money to recipient but it did not arrive in recipient's wallet. "
+                    f"Customer-provided details: {message_data.content}"
+                ),
+                category=TicketCategory.TRANSACTION_DISPUTE,
+                priority=TicketPriority.HIGH,
+                status=TicketStatus.ASSIGNED if outgoing_agent else TicketStatus.NEW,
+                tags="dispute,outgoing,transfer-failed,auto-created",
+            )
+            db.add(outgoing_ticket)
+            await db.flush()
+
+            outgoing_created_payload = build_ai_message_payload(
+                content=_incoming_dispute_ticket_created_message(selected_language, outgoing_ticket_id),
+                intent="transaction_dispute",
+                confidence=0.99,
+                response_language=selected_language,
+                needs_escalation=True,
+                session_intent="transaction_dispute_ticket_created",
+            )
+            return await persist_ai_response(outgoing_created_payload)
+        else:
+            # Still missing recipient phone or amount — ask again
+            retry_msgs = {
+                "en": (
+                    "I still need a bit more to raise the ticket. Please share:\n"
+                    "• **Recipient's phone number** (e.g. 0771234567)\n"
+                    "• **Amount sent** (e.g. $10)"
+                ),
+                "sn": (
+                    "Ndinoda zvishomashoma zvakawanda kuti ndivhure ticket. Ndapota tipa:\n"
+                    "• **Nhamba yefoni yemunhu** (somuenzaniso 0771234567)\n"
+                    "• **Mari yatumirwa** (somuenzaniso $10)"
+                ),
+                "nd": (
+                    "Ngisadinga okwengeziweyo ukuvula i-ticket. Sicela unikeze:\n"
+                    "• **Inombolo yocingo yomamukeli** (isib. 0771234567)\n"
+                    "• **Inani elithunyelelwe** (isib. $10)"
+                ),
+            }
+            retry_payload = build_ai_message_payload(
+                content=retry_msgs.get(selected_language, retry_msgs["en"]),
+                intent="transaction_dispute",
+                confidence=0.98,
+                response_language=selected_language,
+                needs_escalation=False,
+                session_intent="transaction_dispute_outgoing_pending",
+            )
+            return await persist_ai_response(retry_payload)
+
+    # ── Incoming money dispute continuation ─────────────────────────────────
+    # When we're waiting for: sender phone + amount + date.
+    if chat_session.last_intent == "transaction_dispute_incoming_pending":
+        if _looks_like_incoming_dispute_details(message_data.content):
+            # Sufficient details — create the ticket
+            incoming_ticket_id = f"TICKET{uuid.uuid4().hex[:8].upper()}"
+            incoming_agent = await _find_least_loaded_agent(db, category=TicketCategory.TRANSACTION_DISPUTE)
+            incoming_ticket = Ticket(
+                ticket_id=incoming_ticket_id,
+                customer_id=current_user.id,
+                session_id=chat_session.id,
+                assigned_agent_id=incoming_agent.id if incoming_agent else None,
+                subject="Incoming money not received — recipient dispute",
+                description=(
+                    f"Customer reports money was sent TO them but did not arrive in their wallet. "
+                    f"Customer-provided details: {message_data.content}"
+                ),
+                category=TicketCategory.TRANSACTION_DISPUTE,
+                priority=TicketPriority.HIGH,
+                status=TicketStatus.ASSIGNED if incoming_agent else TicketStatus.NEW,
+                tags="dispute,incoming,no-reference,auto-created",
+            )
+            db.add(incoming_ticket)
+            await db.flush()
+
+            incoming_created_payload = build_ai_message_payload(
+                content=_incoming_dispute_ticket_created_message(selected_language, incoming_ticket_id),
+                intent="transaction_dispute",
+                confidence=0.99,
+                response_language=selected_language,
+                needs_escalation=True,
+                session_intent="transaction_dispute_ticket_created",
+            )
+            return await persist_ai_response(incoming_created_payload)
+        else:
+            # Still missing sender phone or amount — ask again once
+            retry_msgs = {
+                "en": (
+                    "I still need a bit more to raise the ticket. Please share:\n"
+                    "• **Sender's phone number** (e.g. 0771234567)\n"
+                    "• **Amount expected** (e.g. $10)"
+                ),
+                "sn": (
+                    "Ndinoda zvishomashoma zvakawanda kuti ndivhure ticket. Ndapota tipa:\n"
+                    "• **Nhamba yefoni yemutumiri** (somuenzaniso 0771234567)\n"
+                    "• **Mari yakatarisiwa** (somuenzaniso $10)"
+                ),
+                "nd": (
+                    "Ngisadinga okwengeziweyo ukuvula i-ticket. Sicela unikeze:\n"
+                    "• **Inombolo yocingo yomthumeli** (isib. 0771234567)\n"
+                    "• **Inani elilindelekile** (isib. $10)"
+                ),
+            }
+            retry_payload = build_ai_message_payload(
+                content=retry_msgs.get(selected_language, retry_msgs["en"]),
+                intent="transaction_dispute",
+                confidence=0.98,
+                response_language=selected_language,
+                needs_escalation=False,
+                session_intent="transaction_dispute_incoming_pending",
+            )
+            return await persist_ai_response(retry_payload)
+
+    # ── Airtime dispute continuation ─────────────────────────────────────────
+    # IMPORTANT: this block must return in BOTH branches.
+    # If we fall through when amounts >= 2, the reply (which contains "airtime"
+    # + "yakabviswa") re-triggers _is_airtime_dispute_message() below and loops.
     if chat_session.last_intent == "transaction_dispute_airtime_pending":
         amounts = _extract_amounts(message_data.content)
-        if len(amounts) < 2:
+        if len(amounts) >= 2:
+            # Enough info — create the ticket now
+            airtime_ticket_id = f"TICKET{uuid.uuid4().hex[:8].upper()}"
+            airtime_agent = await _find_least_loaded_agent(db, category=TicketCategory.TRANSACTION_DISPUTE)
+            airtime_ticket = Ticket(
+                ticket_id=airtime_ticket_id,
+                customer_id=current_user.id,
+                session_id=chat_session.id,
+                assigned_agent_id=airtime_agent.id if airtime_agent else None,
+                subject="Airtime deducted but not received",
+                description=(
+                    f"Customer reported airtime purchase issue. "
+                    f"Airtime amount: {amounts[0]}, deducted amount: {amounts[1]}. "
+                    f"Original message: {message_data.content}"
+                ),
+                category=TicketCategory.TRANSACTION_DISPUTE,
+                priority=TicketPriority.HIGH,
+                status=TicketStatus.ASSIGNED if airtime_agent else TicketStatus.NEW,
+                tags="airtime,dispute,auto-created",
+            )
+            db.add(airtime_ticket)
+            await db.flush()
+
+            airtime_created_msgs = {
+                "en": (
+                    f"We are sorry about this. Your issue has been passed to our team. "
+                    f"We assure you it will be resolved in the shortest possible time.\n\n"
+                    f"🎫 Ticket Reference: **{airtime_ticket_id}**\n"
+                    f"📋 Details: Airtime {amounts[0]}, Deducted {amounts[1]}\n"
+                    f"⏱️ Expected resolution: 24-48 hours"
+                ),
+                "sn": (
+                    f"Tine urombo nyaya yenyu taipa kuteam yedu. "
+                    f"Tinokuvimbisai kuti zvinogadzirisika muchikamu chipfupi chinotevera.\n\n"
+                    f"🎫 Nhamba yeTicket: **{airtime_ticket_id}**\n"
+                    f"📋 Ruzivo: Airtime {amounts[0]}, Yakabviswa {amounts[1]}\n"
+                    f"⏱️ Nguva yekugadziriswa: Maawa 24-48"
+                ),
+                "nd": (
+                    f"Siyaxolisa ngalokhu. Inkinga yenu inikelwe ithimba lethu. "
+                    f"Siqinisekisa ukuthi izaxazululwa ngesikhathi esifishane.\n\n"
+                    f"🎫 Inombolo ye-Ticket: **{airtime_ticket_id}**\n"
+                    f"📋 Imininingwane: I-Airtime {amounts[0]}, Elikhutshwe {amounts[1]}\n"
+                    f"⏱️ Isikhathi esilindelwe: Amahora angu-24-48"
+                ),
+            }
+            airtime_created_payload = build_ai_message_payload(
+                content=airtime_created_msgs.get(selected_language, airtime_created_msgs["en"]),
+                intent="transaction_dispute",
+                confidence=0.99,
+                response_language=selected_language,
+                needs_escalation=True,
+                session_intent="transaction_dispute_ticket_created",
+            )
+            return await persist_ai_response(airtime_created_payload)
+        else:
+            # Still missing one of the amounts — ask again
             missing_details_payload = build_ai_message_payload(
                 content=_airtime_dispute_followup_prompt(selected_language),
                 intent="transaction_dispute",
@@ -662,12 +1346,80 @@ async def send_message(
 
     # General transaction dispute follow-up: user was asked for details and provided them.
     if chat_session.last_intent == "transaction_dispute":
+        # --- Explicit "I don't have a reference" detection ---
+        # Catches Shona, Ndebele, and English phrases so we don't rely on the
+        # word "referensi" accidentally matching the reference regex.
+        _no_ref_phrases = [
+            # Shona
+            "handina referensi", "handina ref", "handina nhamba", "handina transaction",
+            "ndanga ndichitumirwa", "ndaitumirwa", "wanditumira", "vakatumira",
+            "ndakatumirwa", "vakanditumira",
+            # Ndebele
+            "anginayo i-reference", "anginayo ireferensi", "anginalutho", "ngithunyelelwa",
+            # English
+            "no reference", "don't have reference", "don't have a reference",
+            "i was sent", "was sent money", "didn't send", "receiving money",
+            "someone sent me", "they sent me",
+        ]
+        _content_lower = message_data.content.lower()
+        if any(phrase in _content_lower for phrase in _no_ref_phrases):
+            no_ref_ticket_id = f"TICKET{uuid.uuid4().hex[:8].upper()}"
+            no_ref_agent = await _find_least_loaded_agent(db, category=TicketCategory.TRANSACTION_DISPUTE)
+            no_ref_ticket = Ticket(
+                ticket_id=no_ref_ticket_id,
+                customer_id=current_user.id,
+                session_id=chat_session.id,
+                assigned_agent_id=no_ref_agent.id if no_ref_agent else None,
+                subject="Transaction dispute — customer has no reference number",
+                description=(
+                    f"Customer reported money was sent to them but did not arrive. "
+                    f"Customer stated they do not have a transaction reference. "
+                    f"Customer message: {message_data.content}"
+                ),
+                category=TicketCategory.TRANSACTION_DISPUTE,
+                priority=TicketPriority.HIGH,
+                status=TicketStatus.ASSIGNED if no_ref_agent else TicketStatus.NEW,
+                tags="dispute,no-reference,auto-created",
+            )
+            db.add(no_ref_ticket)
+            await db.flush()
+
+            no_ref_msgs = {
+                "en": (
+                    f"No problem — I have created dispute ticket **{no_ref_ticket_id}** for you. "
+                    "Our support team will contact the sender's side to investigate. "
+                    "You will be updated as soon as there is progress."
+                ),
+                "sn": (
+                    f"Hapana dambudziko — Ndavhura ticket yekupikisa **{no_ref_ticket_id}** kwauri. "
+                    "Boka redu richaongorora kurutivi rwakatumira. "
+                    "Uchaziviswa pakava nemashoko matsva."
+                ),
+                "nd": (
+                    f"Akukho inkinga — Ngiqale i-ticket yokuxabana **{no_ref_ticket_id}** ngokumelene lawe. "
+                    "Ithimu yethu izaphenyisisa ohlangothini oluthunyelayo. "
+                    "Uzaziswa uma sekukhona okuthile okusha."
+                ),
+            }
+            no_ref_payload = build_ai_message_payload(
+                content=no_ref_msgs.get(selected_language, no_ref_msgs["en"]),
+                intent="transaction_dispute",
+                confidence=0.99,
+                response_language=selected_language,
+                needs_escalation=True,
+                session_intent="transaction_dispute_ticket_created",
+            )
+            return await persist_ai_response(no_ref_payload)
+        # --- End "no reference" detection ---
+
         if _looks_like_transaction_dispute_details(message_data.content):
             pass  # Fall through to the ticket-creation block below
         else:
             # User provided partial details — try to create a ticket with what we have
             has_any_detail = (
                 bool(re.search(r'\b(?:tc|tq|trx|ref|mp|ci)[a-z0-9]{6,}\b', message_data.content.lower()))
+                or bool(re.search(r'\b[a-z]\d{6,}\b', message_data.content.lower()))
+                or bool(re.search(r'\b[a-zA-Z]{2,4}\d{5,}\b', message_data.content))  # QA2333444
                 or bool(re.search(r'\$?\d+(?:\.\d{1,2})?', message_data.content))
                 or bool(re.search(r'\b(?:0|263|\+263)?(?:7[1-9])\d{7}\b', message_data.content))
             )
@@ -843,11 +1595,357 @@ async def send_message(
         )
         return await persist_ai_response(followup_payload)
 
+    # New outgoing-money dispute detection — fires when customer says they sent money
+    # but it didn't arrive. Ask for recipient phone + amount + date.
+    if _is_outgoing_money_dispute_message(message_data.content):
+        outgoing_prompt_payload = build_ai_message_payload(
+            content=_outgoing_dispute_followup_prompt(selected_language),
+            intent="transaction_dispute",
+            confidence=0.99,
+            response_language=selected_language,
+            needs_escalation=False,
+            session_intent="transaction_dispute_outgoing_pending",
+        )
+        return await persist_ai_response(outgoing_prompt_payload)
+
+    # New incoming-money dispute detection — fires when customer says money was sent
+    # TO them but never arrived.  Ask for sender number + amount, NOT a ref number
+    # (which the recipient would not have).
+    if _is_incoming_money_dispute_message(message_data.content):
+        incoming_prompt_payload = build_ai_message_payload(
+            content=_incoming_dispute_followup_prompt(selected_language),
+            intent="transaction_dispute",
+            confidence=0.99,
+            response_language=selected_language,
+            needs_escalation=False,
+            session_intent="transaction_dispute_incoming_pending",
+        )
+        return await persist_ai_response(incoming_prompt_payload)
+
+    # New bundle dispute detection (data / SMS / voice / WhatsApp / Facebook)
+    # Fires when customer bought a bundle but it wasn't activated.
+    # Must NOT re-trigger when already in a bundle pending state (handled above).
+    if _is_bundle_dispute_message(message_data.content):
+        detected_bundle_key = _detect_bundle_type(message_data.content)
+        bundle_prompt_payload = build_ai_message_payload(
+            content=_bundle_dispute_followup_prompt(selected_language, detected_bundle_key),
+            intent="transaction_dispute",
+            confidence=0.99,
+            response_language=selected_language,
+            needs_escalation=False,
+            session_intent=f"transaction_dispute_bundle_pending:{detected_bundle_key}",
+        )
+        return await persist_ai_response(bundle_prompt_payload)
+
+    # ── Direct "Tumira $50 kuna Mai" detection ──────────────────────────────
+    # When user gives amount + name (no phone), ask for the recipient's number
+    # and jump straight into ecocash_transfer_pending.
+    _direct_send_verbs = [
+        "tumira", "kutumira", "ndirikuda kutumira", "ndinoda kutumira",
+        "thumela", "ukuthumela", "ngifuna ukuthumela", "send", "transfer",
+    ]
+    _has_direct_verb = any(v in message_data.content.lower() for v in _direct_send_verbs)
+    _has_dollar_amount = bool(re.search(r"\$\d+", message_data.content))
+    _has_phone = bool(re.search(r"\b(?:0|263|\+263)?(?:7[1-9])\d{7}\b", message_data.content))
+    _transfer_pending_states = {
+        "transfer_money_ecocash_transfer_pending",
+        "transfer_money_internal_transfer_pending",
+        "transfer_money_zipit_transfer_pending",
+        "transfer_money_rtgs_transfer_pending",
+        "transfer_money_completed",
+    }
+    if _has_direct_verb and _has_dollar_amount and not _has_phone and chat_session.last_intent not in _transfer_pending_states:
+        _amounts_found = re.findall(r"\$\d+(?:\.\d{1,2})?", message_data.content)
+        _pre_amount = _amounts_found[0] if _amounts_found else ""
+        _direct_send_msgs = {
+            "en": (
+                f"I can send {_pre_amount} for you right away! \U0001f4b8\n\n"
+                "Please provide the **recipient's phone number** to complete the transfer.\n"
+                "Example: *0771234567*"
+            ),
+            "sn": (
+                f"Ndinogona kutumira {_pre_amount} pakarepo! \U0001f4b8\n\n"
+                "Ndapota tipa **nhamba yefoni yemunhu** kuti tipedzise kutumira.\n"
+                "Muenzaniso: *0771234567*"
+            ),
+            "nd": (
+                f"Ngingakuthumelela {_pre_amount} masinyane! \U0001f4b8\n\n"
+                "Sicela unikeze **inombolo yocingo yomamukeli** ukuze siqede ukuthumela.\n"
+                "Isibonelo: *0771234567*"
+            ),
+        }
+        direct_send_payload = build_ai_message_payload(
+            content=_direct_send_msgs.get(selected_language, _direct_send_msgs["en"]),
+            intent="transfer_money",
+            confidence=0.98,
+            response_language=selected_language,
+            needs_escalation=False,
+            session_intent="transfer_money_ecocash_transfer_pending",
+        )
+        return await persist_ai_response(direct_send_payload)
+
+    # ── Transfer currency continuation ──────────────────────────────────────
+    # Fires when session_intent encodes pending transfer details after asking
+    # for currency: "transfer_money_ecocash_transfer_pending|recipient=X|amount=Y"
+    _last = chat_session.last_intent or ""
+    if "|recipient=" in _last and "_pending" in _last:
+        _parts = dict(p.split("=", 1) for p in _last.split("|")[1:] if "=" in p)
+        _base_state = _last.split("|")[0]
+        _stored_recipient = _parts.get("recipient", "(unknown)")
+        _stored_amount = _parts.get("amount", "(unknown)")
+        _replied_currency = _detect_transfer_currency(message_data.content)
+
+        # If still can't detect (user typed something else), ask again
+        if _replied_currency is None:
+            _ask_again = {
+                "en": "Sorry, I didn't catch that. Please reply with **USD** or **ZiG**.",
+                "sn": "Ndinzwisisa. Ndapota pindura ne **USD** kana **ZiG**.",
+                "nd": "Ngiyaxolisa, angizwanga. Sicela uphendule nge **USD** noma **ZiG**.",
+            }
+            return await persist_ai_response(build_ai_message_payload(
+                content=_ask_again.get(selected_language, _ask_again["en"]),
+                intent="transfer_money",
+                confidence=0.98,
+                response_language=selected_language,
+                needs_escalation=False,
+                session_intent=_last,  # keep same state
+            ))
+
+        _sender_number = getattr(current_user, "phone_number", None) or "your account"
+        _tx_ref = f"TXN{uuid.uuid4().hex[:8].upper()}"
+        _curr = _replied_currency
+
+        _final_msgs = {
+            "en": (
+                f"\u23f3 **Your transaction is being processed**\n\n"
+                f"\U0001f4b8 Sending **{_curr} {_stored_amount}** to **{_stored_recipient}**\n"
+                f"\U0001f4f1 From: {_sender_number}\n"
+                f"\U0001f3ab Reference: **{_tx_ref}**\n"
+                f"\U0001f4b1 Currency: **{_curr}**\n\n"
+                "You will receive a **confirmation message** within the next few seconds. "
+                "If money does not arrive within 5 minutes, reply **\"dispute\"** and I will open a case immediately."
+            ),
+            "sn": (
+                f"\u23f3 **Kutumira kwako kuri kuitwa**\n\n"
+                f"\U0001f4b8 Kutumira **{_curr} {_stored_amount}** kuna **{_stored_recipient}**\n"
+                f"\U0001f4f1 Kubva: {_sender_number}\n"
+                f"\U0001f3ab Nhamba: **{_tx_ref}**\n"
+                f"\U0001f4b1 Mhando yemari: **{_curr}**\n\n"
+                "Uchagamuchira **confirmation message** mumasekendi mashoma anotevera. "
+                "Kana mari isina kusvika muminitsi 5, pindura **\"dispute\"** uye ndichavhura kesi pakarepo."
+            ),
+            "nd": (
+                f"\u23f3 **Ukuthumela kwakho kuyaqhubeka**\n\n"
+                f"\U0001f4b8 Ukuthumela **{_curr} {_stored_amount}** ku **{_stored_recipient}**\n"
+                f"\U0001f4f1 Kusuka: {_sender_number}\n"
+                f"\U0001f3ab Inombolo: **{_tx_ref}**\n"
+                f"\U0001f4b1 Uhlobo lwemali: **{_curr}**\n\n"
+                "Uzothola i-**confirmation message** emizuzwini embalwa ezilandelayo. "
+                "Uma imali ingafiki emizuzwini emi-5, phendula **\"dispute\"** ngizovula icala masinyane."
+            ),
+        }
+        return await persist_ai_response(build_ai_message_payload(
+            content=_final_msgs.get(selected_language, _final_msgs["en"]),
+            intent="transfer_money",
+            confidence=0.99,
+            response_language=selected_language,
+            needs_escalation=False,
+            session_intent="transfer_money_completed",
+        ))
+
+    # ── Transfer money pending continuation ─────────────────────────────────
+
+    # Fired when session_intent is e.g. "transfer_money_ecocash_transfer_pending"
+    # after the user picked option 2 (EcoCash) from the transfer menu.
+    _TRANSFER_PENDING_PREFIXES = (
+        "transfer_money_ecocash_transfer_pending",
+        "transfer_money_internal_transfer_pending",
+        "transfer_money_zipit_transfer_pending",
+        "transfer_money_rtgs_transfer_pending",
+    )
+    if chat_session.last_intent in _TRANSFER_PENDING_PREFIXES:
+        transfer_type = chat_session.last_intent.replace("transfer_money_", "").replace("_pending", "")
+        raw_content = message_data.content
+
+        # ── Smart token classifier ───────────────────────────────────────────
+        # Walk each comma-separated token and bin it into:
+        #   currency_token  → "USD" / "ZiG" / "RTGS"
+        #   amount_token    → first pure-numeric token  (e.g. "500", "$50")
+        #   account_tokens  → everything else            (e.g. "ACC001", "CBZ", phone)
+        _CURRENCY_MAP = {"usd": "USD", "zig": "ZiG", "zwg": "ZiG", "rtgs": "RTGS"}
+        _raw_tokens = [t.strip() for t in raw_content.replace("$", "").split(",") if t.strip()]
+
+        _currency_token: Optional[str] = None
+        _amount_token: Optional[str] = None
+        _account_tokens: list = []
+
+        for tok in _raw_tokens:
+            tok_lower = tok.lower()
+            if tok_lower in _CURRENCY_MAP:
+                _currency_token = _CURRENCY_MAP[tok_lower]
+            elif re.match(r"^\d+(?:\.\d{1,2})?$", tok):   # pure number = amount
+                if _amount_token is None:                   # take first numeric as amount
+                    _amount_token = tok
+                else:
+                    _account_tokens.append(tok)             # second numeric = account number
+            else:
+                _account_tokens.append(tok)
+
+        # For EcoCash, identifiers MUST be Zimbabwe mobile numbers
+        if transfer_type == "ecocash_transfer":
+            identifiers = re.findall(r"\b(?:0|263|\+263)?(?:7[1-9])\d{7}\b", raw_content)
+            # If a plain numeric token looks like a phone number, accept it too
+            if not identifiers:
+                identifiers = [t for t in _account_tokens if re.match(r"^0?7[1-9]\d{7}$", t)]
+        else:
+            # For Internal/ZIPIT/RTGS: use account_tokens (alphanumeric account refs, bank names)
+            identifiers = _account_tokens if _account_tokens else []
+
+        # Amount: prefer classifier result, fall back to regex
+        if _amount_token:
+            amounts = [_amount_token]
+        else:
+            amounts = re.findall(r"\$?\d+(?:\.\d{1,2})?", raw_content)
+
+        # Currency from classifier (already applied _detect_transfer_currency later if None)
+        if _currency_token:
+            # Pre-seed so the currency check below won't ask again
+            raw_content = raw_content  # keep original for _detect_transfer_currency
+
+        if not identifiers or not amounts:
+            # Still missing details — tell them what we need per transfer type
+            _needs = {
+                "ecocash_transfer": {
+                    "en": "Please provide the **recipient's phone number** and the **amount** to send.\nExample: *0771234567, $10*",
+                    "sn": "Ndapota tipa **nhamba yefoni yemunhu** uye **mari** yaunoda kutumira.\nMuenzaniso: *0771234567, $10*",
+                    "nd": "Sicela unikeze **inombolo yocingo yomamukeli** kanye **nenani** ofuna ukulithumela.\nIsibonelo: *0771234567, $10*",
+                },
+                "internal_transfer": {
+                    "en": "Please provide your **source account**, **destination account**, **amount**, and **currency** (USD or ZiG).\nExample: *ACC001, ACC002, 500, USD*",
+                    "sn": "Ndapota tipa **account yekubva**, **yekuenda**, **mari**, uye **mhando yemari** (USD kana ZiG).\nMuenzaniso: *ACC001, ACC002, 500, USD*",
+                    "nd": "Sicela unikeze **i-account esuka kuyo**, **eya kuyo**, **inani**, kanye **nohlobo lwemali** (USD noma ZiG).\nIsibonelo: *ACC001, ACC002, 500, USD*",
+                },
+                "zipit_transfer": {
+                    "en": "Please provide the **recipient bank name**, **account number**, **amount**, and **currency** (USD or ZiG).\nExample: *CBZ, 12345678, 100, USD*",
+                    "sn": "Ndapota tipa **zita rebhangi**, **nhamba yeaccount**, **mari**, uye **mhando yemari** (USD kana ZiG).\nMuenzaniso: *CBZ, 12345678, 100, USD*",
+                    "nd": "Sicela unikeze **ibhange lomamukeli**, **inombolo ye-account**, **inani**, kanye **nohlobo lwemali** (USD noma ZiG).\nIsibonelo: *CBZ, 12345678, 100, USD*",
+                },
+                "rtgs_transfer": {
+                    "en": "Please provide the **recipient bank**, **account number**, **amount**, **currency** (USD or ZiG), and **reason**.\nExample: *Stanbic, 987654321, 5000, USD, school fees*",
+                    "sn": "Ndapota tipa **bhangi remugamuchiri**, **nhamba yeaccount**, **mari**, **mhando yemari** (USD kana ZiG), uye **chikonzero**.\nMuenzaniso: *Stanbic, 987654321, 5000, USD, mafees echikoro*",
+                    "nd": "Sicela unikeze **ibhange lomamukeli**, **inombolo ye-account**, **inani**, **uhlobo lwemali** (USD noma ZiG), kanye **nesizathu**.\nIsibonelo: *Stanbic, 987654321, 5000, USD, imali yesikole*",
+                },
+            }
+            need_msg = _needs.get(transfer_type, _needs["ecocash_transfer"])
+            retry_payload = build_ai_message_payload(
+                content=need_msg.get(selected_language, need_msg["en"]),
+                intent="transfer_money",
+                confidence=0.98,
+                response_language=selected_language,
+                needs_escalation=False,
+                session_intent=chat_session.last_intent,  # keep same pending state
+            )
+            return await persist_ai_response(retry_payload)
+
+        # We have enough details — detect currency, then build the confirmation
+        recipient = identifiers[-1] if identifiers else "(unknown)"  # last identifier = destination
+        source = identifiers[0] if len(identifiers) >= 2 else "your account"
+        sender_number = getattr(current_user, "phone_number", None) or source
+        # Amount: prefer ≤7-digit tokens (not account numbers)
+        _short_amounts = [a for a in amounts if len(a.replace("$", "")) <= 7]
+        amount = _short_amounts[-1] if _short_amounts else amounts[-1] if amounts else "(unknown)"
+
+        # Currency detection — ask if not specified
+        currency = _detect_transfer_currency(raw_content)
+        if currency is None:
+            _ask_currency_msgs = {
+                "en": (
+                    f"Almost done! What currency would you like to send **{amount}** in?\n\n"
+                    "Reply with:\n"
+                    "• **USD** — US Dollar\n"
+                    "• **ZiG** — Zimbabwe Gold"
+                ),
+                "sn": (
+                    f"Tava pedyo! Unoda kutumira **{amount}** mumari ipi?\n\n"
+                    "Pindura ne:\n"
+                    "• **USD** — US Dollar\n"
+                    "• **ZiG** — Zimbabwe Gold"
+                ),
+                "nd": (
+                    f"Seseduze! Ufuna ukuthumela **{amount}** ngohlobo lwemali luni?\n\n"
+                    "Phendula nge:\n"
+                    "• **USD** — US Dollar\n"
+                    "• **ZiG** — Zimbabwe Gold"
+                ),
+            }
+            # Store transfer details in session_intent so they survive the extra round-trip
+            _currency_state = f"{chat_session.last_intent}|recipient={recipient}|amount={amount}"
+            ask_currency_payload = build_ai_message_payload(
+                content=_ask_currency_msgs.get(selected_language, _ask_currency_msgs["en"]),
+                intent="transfer_money",
+                confidence=0.98,
+                response_language=selected_language,
+                needs_escalation=False,
+                session_intent=_currency_state,
+            )
+            return await persist_ai_response(ask_currency_payload)
+
+        _tx_ref = f"TXN{uuid.uuid4().hex[:8].upper()}"
+
+        _processing_msgs = {
+            "en": (
+                f"\u23f3 **Your transaction is being processed**\n\n"
+                f"💸 Sending **{currency} {amount}** to **{recipient}**\n"
+                f"📱 From: {sender_number}\n"
+                f"🎫 Reference: **{_tx_ref}**\n"
+                f"💱 Currency: **{currency}**\n\n"
+                "You will receive a **confirmation message** within the next few seconds. "
+                "If money does not arrive within 5 minutes, reply **\"dispute\"** and I will open a case immediately."
+            ),
+            "sn": (
+                f"\u23f3 **Kutumira kwako kuri kuitwa**\n\n"
+                f"💸 Kutumira **{currency} {amount}** kuna **{recipient}**\n"
+                f"📱 Kubva: {sender_number}\n"
+                f"🎫 Nhamba: **{_tx_ref}**\n"
+                f"💱 Mhando yemari: **{currency}**\n\n"
+                "Uchagamuchira **confirmation message** mumasekendi mashoma anotevera. "
+                "Kana mari isina kusvika muminitsi 5, pindura **\"dispute\"** uye ndichavhura kesi pakarepo."
+            ),
+            "nd": (
+                f"\u23f3 **Ukuthumela kwakho kuyaqhubeka**\n\n"
+                f"💸 Ukuthumela **{currency} {amount}** ku **{recipient}**\n"
+                f"📱 Kusuka: {sender_number}\n"
+                f"🎫 Inombolo: **{_tx_ref}**\n"
+                f"💱 Uhlobo lwemali: **{currency}**\n\n"
+                "Uzothola i-**confirmation message** emizuzwini embalwa ezilandelayo. "
+                "Uma imali ingafiki emizuzwini emi-5, phendula **\"dispute\"** ngizovula icala masinyane."
+            ),
+        }
+
+        transfer_done_payload = build_ai_message_payload(
+            content=_processing_msgs.get(selected_language, _processing_msgs["en"]),
+            intent="transfer_money",
+            confidence=0.99,
+            response_language=selected_language,
+            needs_escalation=False,
+            session_intent="transfer_money_completed",
+        )
+        return await persist_ai_response(transfer_done_payload)
+
     # Continue location lookup when user provides area after being prompted
     if chat_session.last_intent and chat_session.last_intent.startswith("location_awaiting_area:"):
         stored_location_type = chat_session.last_intent.split(":", 1)[1]
-        area_text = message_data.content.strip()
-        if area_text:
+        raw_area_text = message_data.content.strip()
+
+        # If the user sent a completely new location request (e.g. "WHERE is my nearest branch"),
+        # exit this handler and let the main location block below handle it fresh,
+        # otherwise we would geocode the full sentence and get wrong/overseas results.
+        if raw_area_text and not _is_location_request(raw_area_text):
+            # Strip location keywords the user may have included in their reply
+            # (e.g. "'nearest ATM in Borrowdale" → "Borrowdale")
+            extracted_area = location_service._extract_area_from_query(raw_area_text)
+            area_text = extracted_area if extracted_area else raw_area_text.lstrip("'\"").strip()
+
             location_result = await location_service.find_nearest_locations(
                 query=f"nearest {stored_location_type.replace('_', ' ')} in {area_text}",
                 location_type=stored_location_type,
@@ -943,11 +2041,59 @@ async def send_message(
         "balance": "currently unavailable",
         "count": 0,
         "transactions": "No verified transactions loaded yet.",
+        "last_transaction": "No recent transaction available",
         "ticket_id": "pending",
+        # Populate all template variables to prevent raw {placeholders} leaking in chat
+        "credits": "N/A",
+        "debits": "N/A",
+        "frequent_type": "Transfer",
+        "loan_eligibility": "a loan based on your account activity. Please visit any branch or dial *151*3# to apply.",
         "previous_intent": chat_session.last_intent,
         "provider_name": message_data.provider_name,
         "provider_type": message_data.provider_type,
     }
+
+    account_identifier = (message_data.provider_account_identifier or "").strip()
+    if account_identifier:
+        provider_code = _provider_code_for_name(message_data.provider_name)
+        try:
+            async with banking_session_maker() as banking_db:
+                account_query = (
+                    select(BankingAccount, BankingProvider)
+                    .join(BankingProvider, BankingAccount.provider_id == BankingProvider.id)
+                    .where(BankingAccount.phone_number == account_identifier)
+                    .where(BankingAccount.is_active == True)
+                )
+                if provider_code:
+                    account_query = account_query.where(BankingProvider.code == provider_code)
+
+                account_rows = (await banking_db.execute(account_query)).all()
+                if account_rows:
+                    account, provider = account_rows[0]
+                    context_data["balance"] = f"{account.currency.value} {account.balance:.2f}"
+                    context_data["count"] = len(account_rows)
+
+                    txn_result = await banking_db.execute(
+                        select(BankingTransaction)
+                        .where(BankingTransaction.account_id == account.id)
+                        .order_by(desc(BankingTransaction.timestamp))
+                        .limit(1)
+                    )
+                    latest_txn = txn_result.scalar_one_or_none()
+                    if latest_txn:
+                        context_data["last_transaction"] = (
+                            f"{latest_txn.transaction_type.value} "
+                            f"{latest_txn.currency.value} {latest_txn.amount:.2f} "
+                            f"on {latest_txn.timestamp.strftime('%Y-%m-%d %H:%M')}"
+                        )
+                        context_data["transactions"] = context_data["last_transaction"]
+                    else:
+                        context_data["transactions"] = (
+                            f"No transactions found for {provider.name} yet."
+                        )
+        except Exception:
+            # Keep fallback values if mock banking DB lookup fails.
+            pass
     
     nlp_response = nlp_service.process_message(
         message=message_data.content,
@@ -992,7 +2138,8 @@ async def send_message(
         "network_connectivity",
         "security_pin",
         "transaction_dispute",
-        "bill_payment",
+        # bill_payment intentionally excluded: the confirm step (YES/NO) looks like a
+        # repeat but is a valid continuation of the structured payment flow.
         "password_reset",
     }
 
@@ -1056,6 +2203,8 @@ async def send_message(
         confidence=float(nlp_response["confidence"]),
         response_language=nlp_response["language"],
         needs_escalation=nlp_response.get("needs_escalation", False),
+        # Forward session_intent from structured option flows (e.g. transfer sub-states)
+        session_intent=nlp_response.get("session_intent"),
     )
 
     payload["response"] = _align_response_to_provider(
